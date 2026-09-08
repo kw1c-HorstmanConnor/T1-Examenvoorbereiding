@@ -1150,106 +1150,11 @@ select {
 }
 
 .activity-icon {
-    position: relative;
     display: block;
-    width: 25px;
-    height: 24px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     color: #2f3931;
-}
-
-.activity-icon::before,
-.activity-icon::after {
-    position: absolute;
-    content: "";
-}
-
-.activity-icon--hiking::before {
-    top: 0;
-    left: 10px;
-    width: 5px;
-    height: 5px;
-    border: 1.4px solid currentColor;
-    border-radius: 50%;
-}
-
-.activity-icon--hiking::after {
-    top: 8px;
-    left: 12px;
-    width: 1px;
-    height: 15px;
-    background: currentColor;
-    box-shadow: -6px 6px 0 -0.2px currentColor, 6px 6px 0 -0.2px currentColor;
-    transform: rotate(-20deg);
-}
-
-.activity-icon--canoeing::before,
-.activity-icon--kayaking::before,
-.activity-icon--boat::before {
-    right: 2px;
-    bottom: 2px;
-    left: 2px;
-    height: 8px;
-    border-right: 1.5px solid currentColor;
-    border-bottom: 1.5px solid currentColor;
-    border-left: 1.5px solid currentColor;
-    border-bottom-right-radius: 12px;
-    border-bottom-left-radius: 12px;
-}
-
-.activity-icon--canoeing::after,
-.activity-icon--kayaking::after,
-.activity-icon--boat::after {
-    top: 4px;
-    left: 12px;
-    width: 1px;
-    height: 14px;
-    background: currentColor;
-    transform: rotate(62deg);
-}
-
-.activity-icon--kayaking::after {
-    transform: rotate(-62deg);
-}
-
-.activity-icon--fishing::before {
-    top: 8px;
-    left: 3px;
-    width: 17px;
-    height: 9px;
-    border: 1.5px solid currentColor;
-    border-radius: 50% 40% 40% 50%;
-}
-
-.activity-icon--fishing::after {
-    top: 11px;
-    right: 1px;
-    width: 7px;
-    height: 7px;
-    border-top: 1.5px solid currentColor;
-    border-right: 1.5px solid currentColor;
-    transform: rotate(45deg);
-}
-
-.activity-icon--campfire::before {
-    top: 2px;
-    left: 8px;
-    width: 10px;
-    height: 14px;
-    border: 1.5px solid currentColor;
-    border-bottom: 0;
-    border-radius: 9px 9px 5px 5px;
-    transform: rotate(23deg);
-}
-
-.activity-icon--campfire::after {
-    right: 3px;
-    bottom: 3px;
-    left: 3px;
-    height: 1.5px;
-    background: currentColor;
-    box-shadow: 0 -4px 0 currentColor;
-    transform: rotate(24deg);
+    font-size: 26px;
+    line-height: 1;
 }
 
 .activity-card h3 {

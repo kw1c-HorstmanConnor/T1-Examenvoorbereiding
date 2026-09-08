@@ -194,32 +194,32 @@ $currentPage = 'home';
 
                         <div class="activity-grid">
                             <article class="activity-card">
-                                <span class="activity-icon activity-icon--hiking" aria-hidden="true"></span>
+                                <i class="activity-icon fa-solid fa-person-hiking" aria-hidden="true"></i>
                                 <h3>Hiking</h3>
                                 <p>Ontdek de mooiste<br>wandelroutes</p>
                             </article>
                             <article class="activity-card">
-                                <span class="activity-icon activity-icon--canoeing" aria-hidden="true"></span>
+                                <i class="activity-icon fa-solid fa-water" aria-hidden="true"></i>
                                 <h3>Canoeing</h3>
                                 <p>Peddel over kristalheldere<br>meren</p>
                             </article>
                             <article class="activity-card">
-                                <span class="activity-icon activity-icon--kayaking" aria-hidden="true"></span>
+                                <i class="activity-icon fa-solid fa-person-swimming" aria-hidden="true"></i>
                                 <h3>Kayaking</h3>
                                 <p>Avontuur voor elk<br>niveau</p>
                             </article>
                             <article class="activity-card">
-                                <span class="activity-icon activity-icon--fishing" aria-hidden="true"></span>
+                                <i class="activity-icon fa-solid fa-fish" aria-hidden="true"></i>
                                 <h3>Fishing</h3>
                                 <p>Vissen in de beste<br>spots</p>
                             </article>
                             <article class="activity-card">
-                                <span class="activity-icon activity-icon--boat" aria-hidden="true"></span>
+                                <i class="activity-icon fa-solid fa-ship" aria-hidden="true"></i>
                                 <h3>Boat Tours</h3>
                                 <p>Verken de omgeving<br>vanaf het water</p>
                             </article>
                             <article class="activity-card">
-                                <span class="activity-icon activity-icon--campfire" aria-hidden="true"></span>
+                                <i class="activity-icon fa-solid fa-fire" aria-hidden="true"></i>
                                 <h3>Campfires</h3>
                                 <p>Avonden vol sfeer<br>en verhalen</p>
                             </article>

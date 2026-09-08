@@ -24,6 +24,10 @@ $navItems = [
     'omgeving' => ['label' => 'Omgeving', 'href' => $basePath . 'Pages/Omgeving.php', 'dropdown' => false],
 ];
 ?>
+<?php if (empty($fontAwesomeLoaded)): ?>
+    <?php $fontAwesomeLoaded = true; ?>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v7.3.1/css/all.css">
+<?php endif; ?>
 <header class="site-header page-container" aria-label="Hoofdnavigatie">
     <a class="site-logo" href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>" aria-label="Maple Camp home">
         <span class="site-logo__mark" aria-hidden="true">
