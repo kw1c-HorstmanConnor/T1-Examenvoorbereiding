@@ -1,4 +1,5 @@
 <?php
+include("Includes/DataBase.php");
 $scriptDir = trim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
 $rootPrefix = basename($scriptDir) === 'Pages' ? '../' : '';
 $basePath = $basePath ?? $rootPrefix;
