@@ -278,7 +278,9 @@ select {
 .splash-book:focus-visible,
 .site-nav__link:focus-visible,
 .language-select:focus-visible,
+.header-login:focus-visible,
 .header-booking:focus-visible,
+.auth-password-toggle:focus-visible,
 .outline-button:focus-visible,
 .card-button:focus-visible,
 .booking-panel__submit:focus-visible,
@@ -340,6 +342,10 @@ select {
     gap: 22px;
     align-items: start;
     padding-top: 17px;
+}
+
+.site-header--auth {
+    grid-template-columns: auto 1fr;
 }
 
 .site-logo {
@@ -472,7 +478,13 @@ select {
     padding-top: 14px;
 }
 
+.site-header--auth .site-header__actions {
+    justify-self: end;
+}
+
 .language-select,
+.header-login,
+.header-account,
 .header-booking {
     display: inline-flex;
     align-items: center;
@@ -485,6 +497,32 @@ select {
     text-decoration: none;
 }
 
+.header-login,
+.header-account {
+    min-width: 62px;
+    padding: 0 12px;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.header-login {
+    transition: background 240ms ease-out, border-color 240ms ease-out;
+}
+
+.header-login:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.34);
+}
+
+.header-account {
+    max-width: 112px;
+    overflow: hidden;
+    color: var(--color-cream);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .language-select {
     gap: 8px;
     min-width: 45px;
@@ -492,6 +530,16 @@ select {
     cursor: pointer;
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.language-select--auth {
+    gap: 8px;
+    min-width: 112px;
+}
+
+.language-select--auth i {
+    font-size: 10px;
+    line-height: 1;
 }
 
 .header-booking {
@@ -1601,6 +1649,7 @@ select {
     min-height: 100vh;
     color: var(--color-white);
     background: var(--color-forest);
+    font-family: "Inter", sans-serif;
 }
 
 .login-hero {
@@ -1620,7 +1669,7 @@ select {
     z-index: -1;
     content: "";
     background:
-        linear-gradient(90deg, rgba(9, 15, 14, 0.78), rgba(9, 15, 14, 0.42)),
+        linear-gradient(90deg, rgba(9, 15, 14, 0.68), rgba(9, 15, 14, 0.84)),
         linear-gradient(180deg, rgba(9, 15, 14, 0.28), rgba(9, 15, 14, 0.82));
 }
 
@@ -1628,6 +1677,11 @@ select {
     display: flex;
     justify-content: flex-end;
     padding: clamp(54px, 11vh, 110px) 0 70px;
+}
+
+.register-main {
+    padding-top: clamp(24px, 5vh, 54px);
+    padding-bottom: 46px;
 }
 
 .login-card {
@@ -1639,10 +1693,16 @@ select {
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
 
+.register-card {
+    width: min(100%, 500px);
+    padding-top: 30px;
+    padding-bottom: 32px;
+}
+
 .login-card h1 {
     margin: 0;
     color: var(--color-warm-white);
-    font-family: var(--font-heading);
+    font-family: "Cormorant Garamond", serif;
     font-size: clamp(2.4rem, 4vw, 3.3rem);
     font-weight: 500;
     line-height: 1;
@@ -1665,37 +1725,134 @@ select {
     font-size: 12px;
 }
 
+.login-error p {
+    margin: 0;
+}
+
+.login-error p + p {
+    margin-top: 6px;
+}
+
+.login-notice {
+    margin: 0 0 18px;
+    padding: 11px 13px;
+    color: #e9ffe8;
+    background: rgba(38, 98, 56, 0.36);
+    border: 1px solid rgba(161, 220, 146, 0.34);
+    border-radius: 4px;
+    font-size: 12px;
+}
+
 .login-field {
     display: grid;
     gap: 7px;
     margin-bottom: 15px;
 }
 
-.login-field span {
+.login-field > span {
     color: rgba(255, 255, 255, 0.82);
     font-size: 11px;
     font-weight: 600;
 }
 
-.login-field input {
+.auth-input-wrap {
+    position: relative;
+    display: block;
+}
+
+.auth-input-wrap > i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    color: #c49a5a;
+    font-size: 14px;
+    line-height: 1;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.login-field input,
+.login-field select {
     width: 100%;
     height: 42px;
-    padding: 0 13px;
+    padding: 0 13px 0 40px;
     color: var(--color-white);
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.18);
     border-radius: 4px;
     outline: 0;
+    font-size: 13px;
 }
 
-.login-field input:focus {
+.login-field select {
+    cursor: pointer;
+}
+
+.login-field select option {
+    color: #121411;
+}
+
+.auth-input-wrap--password input {
+    padding-right: 43px;
+}
+
+.login-field input::placeholder {
+    color: rgba(255, 255, 255, 0.48);
+}
+
+.login-field input:focus,
+.login-field select:focus {
     border-color: rgba(244, 234, 211, 0.72);
+}
+
+.auth-phone-wrap {
+    display: grid;
+    grid-template-columns: minmax(134px, 0.42fr) minmax(0, 1fr);
+}
+
+.auth-phone-wrap > i {
+    z-index: 1;
+}
+
+.auth-phone-wrap select {
+    min-width: 0;
+    border-right: 0;
+    border-radius: 4px 0 0 4px;
+}
+
+.auth-phone-wrap input {
+    min-width: 0;
+    padding-left: 13px;
+    border-radius: 0 4px 4px 0;
+}
+
+.auth-password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    color: rgba(255, 255, 255, 0.72);
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    transform: translateY(-50%);
+    transition: color 200ms ease-out;
+}
+
+.auth-password-toggle:hover {
+    color: var(--color-cream);
 }
 
 .login-submit {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 10px;
     width: 100%;
     height: 43px;
     margin-top: 9px;
@@ -1704,13 +1861,28 @@ select {
     background: var(--green-button);
     border: 0;
     border-radius: 4px;
+    font-size: 12px;
     font-weight: 700;
-    transition: background 240ms ease-out;
+    transition: background 250ms ease-out;
 }
 
 .login-submit:hover,
 .login-submit:focus-visible {
     background: var(--green-button-light);
+}
+
+.login-submit i {
+    font-size: 12px;
+    transition: transform 250ms ease-out;
+}
+
+.login-submit:hover i,
+.login-submit:focus-visible i {
+    transform: translateX(6px);
+}
+
+.register-login-link {
+    margin-top: 20px;
 }
 
 .login-or-divider {
@@ -1841,6 +2013,8 @@ select {
 
     .site-nav__link,
     .language-select,
+    .header-login,
+    .header-account,
     .header-booking {
         font-size: 10px;
     }
@@ -2044,6 +2218,12 @@ select {
 
     .site-header__actions {
         gap: 6px;
+    }
+
+    .header-login,
+    .header-account {
+        min-width: 54px;
+        padding-inline: 9px;
     }
 
     .header-booking {
