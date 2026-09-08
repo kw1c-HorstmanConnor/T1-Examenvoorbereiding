@@ -1820,6 +1820,159 @@ select {
     font-weight: 500;
 }
 
+/* Admin */
+.admin-view {
+    min-height: 100vh;
+    color: var(--dark);
+    background: var(--ivory);
+}
+
+.admin-page {
+    min-height: 100vh;
+    background: var(--ivory);
+}
+
+.admin-top {
+    position: relative;
+    isolation: isolate;
+    min-height: 300px;
+    overflow: hidden;
+    color: #fff;
+    background-image: url("../Images/background.png");
+    background-repeat: no-repeat;
+    background-position: center 42%;
+    background-size: cover;
+}
+
+.admin-top::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    content: "";
+    background:
+        linear-gradient(90deg, rgba(9, 15, 14, 0.82), rgba(9, 15, 14, 0.48) 52%, rgba(9, 15, 14, 0.72)),
+        linear-gradient(180deg, rgba(9, 15, 14, 0.32), rgba(9, 15, 14, 0.72));
+}
+
+.admin-top__content {
+    position: relative;
+    z-index: 1;
+    padding: 54px 0 64px;
+}
+
+.admin-top h1 {
+    margin: 0;
+    color: var(--soft-white);
+    font-family: var(--font-heading);
+    font-size: clamp(2.7rem, 4.4vw, 4.6rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: 0;
+}
+
+.admin-top__content p:not(.section-label) {
+    margin: 16px 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.admin-main {
+    padding: 34px 0 64px;
+}
+
+.admin-status {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-bottom: 34px;
+}
+
+.admin-stat,
+.admin-section {
+    min-width: 0;
+    background: #fff;
+    border: 1px solid rgba(222, 218, 209, 0.9);
+    border-radius: 5px;
+    box-shadow: 0 6px 20px rgba(42, 36, 27, 0.045);
+}
+
+.admin-stat {
+    display: grid;
+    gap: 8px;
+    min-height: 92px;
+    padding: 18px;
+}
+
+.admin-stat span,
+.admin-section span {
+    color: #4f574f;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-transform: uppercase;
+}
+
+.admin-stat strong {
+    overflow-wrap: anywhere;
+    color: #151914;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.15;
+}
+
+.admin-workspace {
+    padding-top: 4px;
+}
+
+.admin-workspace__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 22px;
+}
+
+.admin-workspace h2 {
+    margin: 0;
+    color: #121411;
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 2.6vw, 2.8rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: 0;
+}
+
+.admin-section-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.admin-section {
+    display: grid;
+    gap: 16px;
+    min-height: 118px;
+    padding: 18px;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 240ms ease-out, box-shadow 240ms ease-out;
+}
+
+.admin-section strong {
+    color: #151914;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.admin-section:hover,
+.admin-section:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: 0 9px 24px rgba(42, 36, 27, 0.08);
+}
+
 /* Responsive */
 @media (max-width: 980px) {
     .site-header {
@@ -1860,6 +2013,10 @@ select {
     .site-footer__grid {
         grid-template-columns: 1.35fr 0.82fr 1.08fr 1.15fr 1.45fr;
         gap: 22px;
+    }
+
+    .admin-section-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -1949,6 +2106,15 @@ select {
     .footer-newsletter {
         grid-column: 1 / -1;
     }
+
+    .admin-status {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .admin-workspace__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 640px) {
@@ -2014,6 +2180,19 @@ select {
     .home-hero {
         min-height: 570px;
         background-position: 49% 42%;
+    }
+
+    .admin-top {
+        min-height: 330px;
+    }
+
+    .admin-top__content {
+        padding: 42px 0 54px;
+    }
+
+    .admin-status,
+    .admin-section-grid {
+        grid-template-columns: 1fr;
     }
 
     .site-header {
