@@ -17,30 +17,30 @@ $assetBase = $assetBase ?? $rootPrefix;
                 <span class="site-logo__sub">CANADIAN WILDERNESS</span>
                 <img class="site-logo__leaf" src="<?= htmlspecialchars($assetBase . 'Images/herfst.webp', ENT_QUOTES, 'UTF-8'); ?>" alt="">
             </a>
-            <p>Een unieke 20+ campingervaring in het hart van de Canadese natuur. Kom tot rust, beleef avontuur en maak herinneringen voor het leven.</p>
-            <div class="social-links" aria-label="Sociale media">
+            <p>A unique 20+ camping experience in the heart of the Canadian wilderness. Unwind, seek adventure and make memories that last a lifetime.</p>
+            <div class="social-links" aria-label="Social media">
                 <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>" aria-label="Facebook">f</a>
                 <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>" aria-label="Instagram"><span class="social-icon social-icon--instagram" aria-hidden="true"></span></a>
                 <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>" aria-label="YouTube"><span class="social-icon social-icon--youtube" aria-hidden="true"></span></a>
             </div>
         </div>
 
-        <nav class="footer-column" aria-label="Snel naar">
-            <h2>Snel naar</h2>
-            <a href="<?= htmlspecialchars($basePath . 'Pages/Accomodatie.php', ENT_QUOTES, 'UTF-8'); ?>">Accommodaties</a>
-            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home#faciliteiten', ENT_QUOTES, 'UTF-8'); ?>">Faciliteiten</a>
-            <a href="<?= htmlspecialchars($basePath . 'Pages/Activiteiten.php', ENT_QUOTES, 'UTF-8'); ?>">Activiteiten</a>
+        <nav class="footer-column" aria-label="Quick links">
+            <h2>Quick links</h2>
+            <a href="<?= htmlspecialchars($basePath . 'Pages/Accomodatie.php', ENT_QUOTES, 'UTF-8'); ?>">Cottages</a>
+            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home#faciliteiten', ENT_QUOTES, 'UTF-8'); ?>">Facilities</a>
+            <a href="<?= htmlspecialchars($basePath . 'Pages/Activiteiten.php', ENT_QUOTES, 'UTF-8'); ?>">Activities</a>
             <a href="<?= htmlspecialchars($basePath . 'Pages/Evenementen.php', ENT_QUOTES, 'UTF-8'); ?>">Events</a>
-            <a href="<?= htmlspecialchars($basePath . 'Pages/Omgeving.php', ENT_QUOTES, 'UTF-8'); ?>">Omgeving</a>
+            <a href="<?= htmlspecialchars($basePath . 'Pages/Omgeving.php', ENT_QUOTES, 'UTF-8'); ?>">Surroundings</a>
         </nav>
 
-        <nav class="footer-column" aria-label="Informatie">
-            <h2>Informatie</h2>
-            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Veelgestelde vragen</a>
-            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Huisregels</a>
-            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Annuleringsvoorwaarden</a>
-            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Privacybeleid</a>
-            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Algemene voorwaarden</a>
+        <nav class="footer-column" aria-label="Information">
+            <h2>Information</h2>
+            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Frequently asked questions</a>
+            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Park rules</a>
+            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Cancellation policy</a>
+            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Privacy policy</a>
+            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>">Terms and conditions</a>
         </nav>
 
         <address class="footer-column footer-contact">
@@ -52,13 +52,13 @@ $assetBase = $assetBase ?? $rootPrefix;
         </address>
 
         <div class="footer-newsletter">
-            <h2>Schrijf je in voor onze nieuwsbrief</h2>
-            <p>Blijf op de hoogte van nieuws, events en exclusieve aanbiedingen.</p>
+            <h2>Sign up for our newsletter</h2>
+            <p>Stay up to date with news, events and exclusive offers.</p>
             <form class="newsletter-form" action="<?= htmlspecialchars($basePath . 'Index.php', ENT_QUOTES, 'UTF-8'); ?>" method="get">
                 <input type="hidden" name="view" value="home">
-                <label class="sr-only" for="newsletter-email">Jouw e-mailadres</label>
-                <input id="newsletter-email" type="email" name="email" placeholder="Jouw e-mailadres">
-                <button type="submit" aria-label="Inschrijven"><span aria-hidden="true">&rarr;</span></button>
+                <label class="sr-only" for="newsletter-email">Your email address</label>
+                <input id="newsletter-email" type="email" name="email" placeholder="Your email address">
+                <button type="submit" aria-label="Subscribe"><span aria-hidden="true">&rarr;</span></button>
             </form>
         </div>
     </div>
