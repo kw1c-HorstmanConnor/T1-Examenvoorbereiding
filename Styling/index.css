@@ -1,4 +1,10 @@
 /* Global */
+@font-face {
+    font-family: 'BioRhymeRegular';
+    src: url('../Fonts/BioRhyme-Regular.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+}
 :root {
     --color-ivory: #f7f4ee;
     --color-ivory-soft: #fbfaf6;
@@ -50,7 +56,7 @@ body {
     overflow-x: hidden;
     color: var(--dark);
     background: var(--ivory);
-    font-family: var(--font-body);
+    font-family: 'BioRhymeRegular';
 }
 
 img {
@@ -154,7 +160,7 @@ select {
 .splash-page__title {
     margin: 0;
     color: var(--soft-white);
-    font-family: var(--font-heading);
+    font-family: 'BioRhymeRegular';
     font-size: clamp(4rem, 11vw, 10.2rem);
     font-weight: 400;
     line-height: 0.9;
@@ -187,7 +193,7 @@ select {
 .splash-page__tagline {
     margin: clamp(1.1rem, 2vh, 1.7rem) 0 0;
     color: var(--cream);
-    font-family: var(--font-heading);
+    font-family: 'BioRhymeRegular';
     font-size: clamp(1.45rem, 2.35vw, 2.35rem);
     font-style: italic;
     font-weight: 400;
@@ -220,7 +226,7 @@ select {
 }
 
 .splash-book__text {
-    font-family: var(--font-heading);
+    font-family: 'BioRhymeRegular';
     font-size: clamp(1.8rem, 2.55vw, 2.45rem);
     font-style: italic;
     line-height: 1;
@@ -387,7 +393,7 @@ select {
 }
 
 .site-logo__name {
-    font-family: var(--font-heading);
+    font-family: 'BioRhymeRegular';
     font-size: 18px;
     font-weight: 500;
     line-height: 1;
@@ -517,7 +523,7 @@ select {
 .home-hero__title {
     margin: 0;
     color: var(--soft-white);
-    font-family: var(--font-heading);
+    font-family: 'BioRhymeRegular';
     font-size: clamp(3.4rem, 5vw, 5.5rem);
     font-weight: 500;
     line-height: 0.94;
@@ -723,7 +729,7 @@ select {
 .section-title {
     margin: 0;
     color: #121411;
-    font-family: var(--font-heading);
+    font-family: 'BioRhymeRegular';
     font-size: clamp(2rem, 2.6vw, 2.8rem);
     font-weight: 500;
     line-height: 1.05;
@@ -871,7 +877,7 @@ select {
 .accommodation-card h3 {
     margin: 0 0 13px;
     color: #141914;
-    font-family: var(--font-heading);
+    font-family: 'BioRhymeRegular';
     font-size: 21px;
     font-weight: 600;
     line-height: 1.1;
@@ -1302,7 +1308,7 @@ select {
 .adventure-cta__title {
     margin: 0;
     color: var(--soft-white);
-    font-family: var(--font-heading);
+    font-family: 'BioRhymeRegular';
     font-size: clamp(2rem, 3.2vw, 2.72rem);
     font-weight: 500;
     line-height: 1.12;
