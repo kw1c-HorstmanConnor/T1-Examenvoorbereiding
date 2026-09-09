@@ -1,47 +1,25 @@
 <?php
-require_once __DIR__ . '/../Includes/Login.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/../Functions/Auth/Login.php';
 
 $basePath = '../';
 $assetBase = '../';
 $currentPage = 'login';
 $loginError = '';
-$loginNotice = '';
+$loginNotice = maple_login_notice($_GET);
 $username = '';
 $email = '';
 $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
-if (empty($_SESSION['login_csrf'])) {
-    $_SESSION['login_csrf'] = bin2hex(random_bytes(32));
-}
-
-if (!empty($_SESSION['login_notice'])) {
-    $loginNotice = (string) $_SESSION['login_notice'];
-    unset($_SESSION['login_notice']);
-} elseif (($_GET['registered'] ?? '') === '1') {
-    $loginNotice = 'Account created successfully. You can now log in.';
-}
-
 if ($requestMethod === 'POST') {
-    $username = trim((string) ($_POST['username'] ?? ''));
-    $email = trim((string) ($_POST['email'] ?? ''));
-    $password = (string) ($_POST['password'] ?? '');
-    $csrf = (string) ($_POST['csrf'] ?? '');
-
-    if (!hash_equals($_SESSION['login_csrf'], $csrf)) {
-        $loginError = 'De sessie is verlopen. Probeer opnieuw.';
-    } elseif (maple_authenticate_user($email, $password, $username !== '' ? $username : null)) {
-        require_once __DIR__ . '/../Includes/Admin.php';
-
-        if (maple_user_is_admin()) {
-            header('Location: Admin.php');
-        } else {
-            header('Location: ../Index.php?view=home');
-        }
-        exit;
-    } else {
-        $loginError = 'Controleer je naam, e-mailadres en wachtwoord.';
-    }
+    $loginResult = maple_handle_login($_POST, 'Admin.php', '../Index.php?view=home');
+    $loginError = $loginResult['error'];
+    $username = $loginResult['values']['username'];
+    $email = $loginResult['values']['email'];
 }
+
+$csrfToken = maple_login_csrf_token();
 ?>
 <!doctype html>
 <html lang="en">
@@ -53,7 +31,8 @@ if ($requestMethod === 'POST') {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../Styling/index.css">
-    <script src="../Functions/auth.js" defer></script>
+    <link rel="stylesheet" href="../Styling/login.css">
+    <script src="../Scripts/Auth.js" defer></script>
 </head>
 <body class="login-view">
     <section class="login-hero">
@@ -61,7 +40,7 @@ if ($requestMethod === 'POST') {
 
         <main class="login-main page-container">
             <form class="login-card" method="post" action="Login.php">
-                <input type="hidden" name="csrf" value="<?= htmlspecialchars($_SESSION['login_csrf'], ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
 
                 <p class="section-label section-label--light">LOGIN</p>
                 <h1>Welcome back</h1>

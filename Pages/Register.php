@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '/../Includes/Register.php';
+declare(strict_types=1);
+
+require_once __DIR__ . '/../Functions/Auth/Register.php';
 
 $basePath = '../';
 $assetBase = '../';
@@ -32,7 +34,8 @@ $csrfToken = maple_register_csrf_token();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../Styling/index.css">
-    <script src="../Functions/auth.js" defer></script>
+    <link rel="stylesheet" href="../Styling/login.css">
+    <script src="../Scripts/Auth.js" defer></script>
 </head>
 <body class="login-view register-view">
     <section class="login-hero">

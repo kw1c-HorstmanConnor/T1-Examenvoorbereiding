@@ -1,19 +1,20 @@
 <?php
-if (session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
-    session_start();
-}
+require_once __DIR__ . '/../Functions/Helpers/Session.php';
 
 $scriptDir = trim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
 $rootPrefix = basename($scriptDir) === 'Pages' ? '../' : '';
 $basePath = $basePath ?? $rootPrefix;
 $assetBase = $assetBase ?? $rootPrefix;
-$loggedInVoornaam = trim((string) ($_SESSION['voornaam'] ?? ''));
+$loggedInUser = maple_current_user();
+$loggedInVoornaam = trim((string) ($loggedInUser['voornaam'] ?? ''));
+$loggedInRoleName = strtolower(trim((string) ($loggedInUser['role_name'] ?? '')));
 if (!isset($currentPage)) {
     $scriptName = basename($_SERVER['SCRIPT_NAME'] ?? 'Index.php');
     $pageMap = [
         'Index.php' => 'home',
         'Accomodatie.php' => 'accommodaties',
         'Activiteiten.php' => 'activiteiten',
+        'Admin.php' => 'admin',
         'Evenementen.php' => 'events',
         'Omgeving.php' => 'omgeving',
     ];
@@ -70,6 +71,10 @@ $isAuthPage = in_array($currentPage, ['login', 'register'], true);
             <button class="language-select" type="button">NL <span class="chevron" aria-hidden="true"></span></button>
             <?php if ($loggedInVoornaam !== ''): ?>
                 <span class="header-account"><?= htmlspecialchars($loggedInVoornaam, ENT_QUOTES, 'UTF-8'); ?></span>
+                <?php if ($loggedInRoleName === 'admin'): ?>
+                    <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/Admin.php', ENT_QUOTES, 'UTF-8'); ?>">Admin</a>
+                <?php endif; ?>
+                <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/Logout.php', ENT_QUOTES, 'UTF-8'); ?>">Logout</a>
             <?php else: ?>
                 <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/Login.php', ENT_QUOTES, 'UTF-8'); ?>">Login</a>
             <?php endif; ?>

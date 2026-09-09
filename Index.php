@@ -1,4 +1,8 @@
 <?php
+declare(strict_types=1);
+
+require_once __DIR__ . '/Functions/Booking/Availability.php';
+require_once __DIR__ . '/Functions/Helpers/Session.php';
 
 $view = $_GET['view'] ?? 'splash';
 $isHomeView = $view === 'home';
@@ -8,131 +12,9 @@ $basePath = '';
 $assetBase = '';
 $currentPage = 'home';
 
-function maple_e($value): string
-{
-    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
-}
-
-function maple_home_date_label(string $date): string
-{
-    if ($date === '') {
-        return 'Selecteer datum';
-    }
-
-    $dateObject = DateTimeImmutable::createFromFormat('!Y-m-d', $date);
-
-    if (!$dateObject || $dateObject->format('Y-m-d') !== $date) {
-        return 'Selecteer datum';
-    }
-
-    return $dateObject->format('d-m-Y');
-}
-
-function maple_home_event_date(string $dateTime): string
-{
-    try {
-        $date = new DateTimeImmutable($dateTime);
-    } catch (Throwable $exception) {
-        return $dateTime;
-    }
-
-    $months = [
-        1 => 'januari',
-        2 => 'februari',
-        3 => 'maart',
-        4 => 'april',
-        5 => 'mei',
-        6 => 'juni',
-        7 => 'juli',
-        8 => 'augustus',
-        9 => 'september',
-        10 => 'oktober',
-        11 => 'november',
-        12 => 'december',
-    ];
-
-    return $date->format('j') . ' ' . $months[(int) $date->format('n')] . ' ' . $date->format('Y') . ' • ' . $date->format('H:i');
-}
-
-function maple_home_event_datetime_attr(string $dateTime): string
-{
-    try {
-        return (new DateTimeImmutable($dateTime))->format('Y-m-d\TH:i');
-    } catch (Throwable $exception) {
-        return '';
-    }
-}
-
-function maple_home_price($price): string
-{
-    $number = (float) $price;
-
-    if (abs($number - round($number)) < 0.01) {
-        return number_format($number, 0, ',', '.');
-    }
-
-    return number_format($number, 2, ',', '.');
-}
-
-function maple_feature_value(string $voorzieningen, string $pattern, string $fallback): string
-{
-    if (preg_match($pattern, $voorzieningen, $matches)) {
-        return $matches[1];
-    }
-
-    return $fallback;
-}
-
-function maple_home_accomodation_cards(array $dbRows, array $fallbackCards): array
-{
-    $cards = [];
-    $imageClasses = ['comfort', 'luxe', 'premium'];
-
-    for ($index = 0; $index < 3; $index++) {
-        $fallback = $fallbackCards[$index];
-        $row = $dbRows[$index] ?? [];
-        $voorzieningen = (string) ($row['Voorzieningen'] ?? '');
-
-        $cards[] = [
-            'huis_id' => $row['Huis_id'] ?? null,
-            'title' => $row['Huis_naam'] ?? $fallback['title'],
-            'guests' => isset($row['Max']) ? (int) $row['Max'] : $fallback['guests'],
-            'bedrooms' => maple_feature_value($voorzieningen, '/(\d+)\s*slaapkamers?/i', (string) $fallback['bedrooms']),
-            'area' => maple_feature_value($voorzieningen, '/(\d+)\s*(?:m2|m\^2|m²|vierkante meter)/i', (string) $fallback['area']),
-            'description' => $row['Omschr'] ?? $fallback['description'],
-            'price' => $row['PPN'] ?? $fallback['price'],
-            'image_class' => $imageClasses[$index],
-            'badge' => $index === 0 ? 'Populair' : '',
-        ];
-    }
-
-    return $cards;
-}
-
-function maple_home_event_cards(array $dbRows, array $fallbackEvents): array
-{
-    $events = [];
-    $imageClasses = ['campfire', 'rockies', 'canoe'];
-
-    for ($index = 0; $index < 3; $index++) {
-        $fallback = $fallbackEvents[$index];
-        $row = $dbRows[$index] ?? [];
-
-        $events[] = [
-            'title' => $row['Titel'] ?? $fallback['title'],
-            'datetime' => $row['Start_time'] ?? $fallback['datetime'],
-            'description' => $row['Omschrijving'] ?? $fallback['description'],
-            'location' => $row['Locatie'] ?? '',
-            'image_class' => $imageClasses[$index],
-        ];
-    }
-
-    return $events;
-}
-
 $requestedArrival = trim((string) ($_GET['aankomst'] ?? ''));
 $requestedDeparture = trim((string) ($_GET['vertrek'] ?? ''));
-$requestedGuests = max(1, min(12, (int) ($_GET['gasten'] ?? 2)));
+$requestedGuests = maple_home_guest_count($_GET['gasten'] ?? 2);
 $arrivalLabel = maple_home_date_label($requestedArrival);
 $departureLabel = maple_home_date_label($requestedDeparture);
 

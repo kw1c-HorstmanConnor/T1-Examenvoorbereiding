@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/Login.php';
-require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/../Helpers/Session.php';
+require_once __DIR__ . '/../Helpers/Database.php';
 
 function maple_admin_is_pdo_connection($connection): bool
 {
@@ -16,6 +16,8 @@ function maple_admin_is_mysqli_connection($connection): bool
 
 function maple_admin_database_connection()
 {
+    maple_load_database_connection();
+
     $connectionNames = ['pdo', 'conn', 'con', 'connection', 'db', 'mysqli', 'database', 'dbConnection', 'databaseConnection'];
 
     foreach ($connectionNames as $connectionName) {
@@ -118,15 +120,21 @@ function maple_current_user_role_name(): ?string
     return $sessionRoleName !== '' ? $sessionRoleName : null;
 }
 
+function maple_user_is_logged_in(): bool
+{
+    return maple_current_user() !== null;
+}
+
+function maple_user_has_role(string $roleName): bool
+{
+    $currentRoleName = maple_current_user_role_name();
+
+    return $currentRoleName !== null && strtolower(trim($currentRoleName)) === strtolower(trim($roleName));
+}
+
 function maple_user_is_admin(): bool
 {
-    $roleName = maple_current_user_role_name();
-
-    if ($roleName === null) {
-        return false;
-    }
-
-    return strtolower(trim($roleName)) === 'admin';
+    return maple_user_has_role('admin');
 }
 
 function maple_admin_login_path(): string
@@ -136,12 +144,19 @@ function maple_admin_login_path(): string
     return basename($scriptDir) === 'Pages' ? 'Login.php' : 'Pages/Login.php';
 }
 
+function maple_require_login(?string $loginPath = null): void
+{
+    if (maple_current_user() !== null) {
+        return;
+    }
+
+    header('Location: ' . ($loginPath ?? maple_admin_login_path()));
+    exit;
+}
+
 function maple_require_admin(?string $loginPath = null): void
 {
-    if (maple_current_user() === null) {
-        header('Location: ' . ($loginPath ?? maple_admin_login_path()));
-        exit;
-    }
+    maple_require_login($loginPath);
 
     if (maple_user_is_admin()) {
         return;
