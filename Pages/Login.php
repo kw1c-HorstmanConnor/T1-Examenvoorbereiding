@@ -30,7 +30,13 @@ if ($requestMethod === 'POST') {
     if (!hash_equals($_SESSION['login_csrf'], $csrf)) {
         $loginError = 'De sessie is verlopen. Probeer opnieuw.';
     } elseif (maple_authenticate_user($email, $password, $username !== '' ? $username : null)) {
-        header('Location: ../Index.php?view=home');
+        require_once __DIR__ . '/../Includes/Admin.php';
+
+        if (maple_user_is_admin()) {
+            header('Location: Admin.php');
+        } else {
+            header('Location: ../Index.php?view=home');
+        }
         exit;
     } else {
         $loginError = 'Controleer je naam, e-mailadres en wachtwoord.';
