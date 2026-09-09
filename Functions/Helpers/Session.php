@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-function maple_start_session(): void
+function maple_start_session()
 {
     if (session_status() !== PHP_SESSION_ACTIVE && !headers_sent()) {
         session_start();
     }
 }
 
-function maple_current_user(): ?array
+function maple_current_user()
 {
     maple_start_session();
 

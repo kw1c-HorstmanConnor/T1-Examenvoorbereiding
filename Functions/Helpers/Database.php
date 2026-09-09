@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-function maple_load_database_connection(): void
+function maple_load_database_connection()
 {
     global $conn;
 

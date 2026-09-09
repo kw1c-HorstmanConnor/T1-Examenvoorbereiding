@@ -41,7 +41,7 @@ function maple_admin_database_connection()
     return null;
 }
 
-function maple_current_user_role_name(): ?string
+function maple_current_user_role_name()
 {
     $user = maple_current_user();
 
@@ -144,7 +144,7 @@ function maple_admin_login_path(): string
     return basename($scriptDir) === 'Pages' ? 'Login.php' : 'Pages/Login.php';
 }
 
-function maple_require_login(?string $loginPath = null): void
+function maple_require_login($loginPath = null)
 {
     if (maple_current_user() !== null) {
         return;
@@ -154,7 +154,7 @@ function maple_require_login(?string $loginPath = null): void
     exit;
 }
 
-function maple_require_admin(?string $loginPath = null): void
+function maple_require_admin($loginPath = null)
 {
     maple_require_login($loginPath);
 

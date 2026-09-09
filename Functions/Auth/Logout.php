@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Helpers/Session.php';
 
-function maple_logout(): void
+function maple_logout()
 {
     maple_start_session();
     $_SESSION = [];
@@ -35,7 +35,7 @@ function maple_safe_local_redirect(string $redirectPath, string $fallbackPath): 
     return $redirectPath;
 }
 
-function maple_handle_logout(string $redirectPath): void
+function maple_handle_logout(string $redirectPath)
 {
     maple_logout();
     header('Location: ' . maple_safe_local_redirect($redirectPath, '../Index.php?view=home'));

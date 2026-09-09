@@ -33,7 +33,7 @@ function maple_login_notice(array $query): string
     return '';
 }
 
-function maple_authenticate_user(string $email, string $password, ?string $voornaam = null): bool
+function maple_authenticate_user(string $email, string $password, $voornaam = null): bool
 {
     $email = trim($email);
     $voornaam = $voornaam !== null ? trim($voornaam) : null;
