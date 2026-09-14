@@ -14,14 +14,15 @@ $currentPage = 'accommodaties';
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../Styling/index.css">
+    <link rel="stylesheet" href="../Styling/accomodatie.css">
+    <script src="../Javascripts/Accomodaties.js" defer></script>
 </head>
 <body class="accommodations-page">
     <section class="accommodations-hero" aria-labelledby="accommodations-heading">
         <?php include __DIR__ . '/../Includes/Header.php'; ?>
         <div class="accommodations-hero__content page-container">
-            <p class="section-label section-label--light">COTTAGES</p>
-            <h1 id="accommodations-heading">Your place in the<br>heart of nature</h1>
-            <p>From welcoming bungalows to extra-luxurious stays:<br>find the cottage that feels right for you.</p>
+            <h1 id="accommodations-heading">Accommodations</h1>
+            <p>Unique stays in the Canadian wilderness</p>
         </div>
     </section>
 
@@ -37,18 +38,24 @@ $currentPage = 'accommodaties';
                     <a class="outline-button" href="../Index.php?view=home#booking">Check availability <span class="button-arrow" aria-hidden="true"></span></a>
                 </div>
 
-                <form class="cottage-search" action="../Index.php?view=home#booking" method="get" aria-label="Search cottages">
-                    <label><span>Guests</span><select name="guests"><option>2 guests</option><option>4 guests</option><option>6 guests</option></select></label>
-                    <label><span>Arrival</span><input type="date" name="arrival" aria-label="Arrival date"></label>
-                    <label><span>Departure</span><input type="date" name="departure" aria-label="Departure date"></label>
+                <form class="cottage-search" id="cottage-search" action="#overview-heading" method="get" aria-label="Search cottages">
+                    <label><span>Guests</span><select id="guests" name="guests"><option value="">Any number</option><option value="2">2 guests</option><option value="4">4 guests</option><option value="6">6 guests</option></select></label>
+                    <label><span>Arrival</span><input id="arrival" type="date" name="arrival" aria-label="Arrival date"></label>
+                    <label><span>Departure</span><input id="departure" type="date" name="departure" aria-label="Departure date"></label>
                     <button type="submit">Search cottages</button>
                 </form>
+                <nav class="cottage-tabs" aria-label="Accommodation categories">
+                    <a class="cottage-tabs__item cottage-tabs__item--active" data-type="all" href="#overview-heading">All accommodations</a>
+                    <a class="cottage-tabs__item" data-type="bungalow" href="#overview-heading">Bungalows</a>
+                    <a class="cottage-tabs__item" data-type="electric" href="#overview-heading">Camping with electricity</a>
+                    <a class="cottage-tabs__item" data-type="wild" href="#overview-heading">Wild camping</a>
+                </nav>
                 <div class="cottage-toolbar" aria-label="Cottage overview controls">
                     <p><strong>3 cottages available</strong><span>Choose the comfort level that suits your stay.</span></p>
                     <div class="cottage-filter-row"><label>Sort by <select aria-label="Sort cottages"><option>Recommended</option><option>Price: low to high</option><option>Most spacious</option></select></label><button type="button">Filters</button><button type="button">Bedrooms</button><button type="button">Facilities</button></div>
                 </div>
                 <div class="accommodations-list">
-                    <article class="accommodation-card accommodation-card--listing">
+                    <article class="accommodation-card accommodation-card--listing" data-type="bungalow" data-guests="4" data-available-from="2026-01-01" data-available-to="2026-12-31">
                         <div class="accommodation-card__image accommodation-card__image--comfort"><span class="popular-badge">Popular</span></div>
                         <div class="accommodation-card__body">
                             <h3>Bungalow Comfort</h3>
@@ -59,7 +66,7 @@ $currentPage = 'accommodaties';
                             <div class="listing-actions"><a class="listing-more" href="#overview-heading">View details</a><a class="card-button" href="../Index.php?view=home#booking">Select cottage</a></div>
                         </div>
                     </article>
-                    <article class="accommodation-card accommodation-card--listing">
+                    <article class="accommodation-card accommodation-card--listing" data-type="bungalow" data-guests="4" data-available-from="2026-03-01" data-available-to="2026-12-31">
                         <div class="accommodation-card__image accommodation-card__image--luxe"></div>
                         <div class="accommodation-card__body">
                             <h3>Luxury Bungalow</h3>
@@ -70,7 +77,7 @@ $currentPage = 'accommodaties';
                             <div class="listing-actions"><a class="listing-more" href="#overview-heading">View details</a><a class="card-button" href="../Index.php?view=home#booking">Select cottage</a></div>
                         </div>
                     </article>
-                    <article class="accommodation-card accommodation-card--listing">
+                    <article class="accommodation-card accommodation-card--listing" data-type="bungalow" data-guests="6" data-available-from="2026-05-01" data-available-to="2026-12-31">
                         <div class="accommodation-card__image accommodation-card__image--premium"></div>
                         <div class="accommodation-card__body">
                             <h3>Bungalow Premium</h3>
@@ -81,7 +88,20 @@ $currentPage = 'accommodaties';
                             <div class="listing-actions"><a class="listing-more" href="#overview-heading">View details</a><a class="card-button" href="../Index.php?view=home#booking">Select cottage</a></div>
                         </div>
                     </article>
+                    <article class="accommodation-card accommodation-card--listing" data-type="bungalow" data-guests="4" data-available-from="2026-03-01" data-available-to="2026-12-31">
+                        <div class="accommodation-card__image accommodation-card__image--luxe"></div>
+                        <div class="accommodation-card__body">
+                            <h3>Bungalow Panorama</h3>
+                            <div class="accommodation-meta" aria-label="Features"><span><i class="meta-icon meta-icon--guest" aria-hidden="true"></i>4 guests</span><span><i class="meta-icon meta-icon--bed" aria-hidden="true"></i>2 bedrooms</span><span><i class="meta-icon meta-icon--area" aria-hidden="true"></i>55 m&sup2;</span></div>
+                            <p>Wake up to the mountain landscape from this peaceful bungalow.</p>
+                            <ul class="accommodation-highlights"><li>Private terrace</li><li>Fully equipped kitchen</li><li>Complimentary Wi-Fi</li></ul>
+                            <div class="price-block"><span>From</span><strong>&euro; 148 <em>per night</em></strong></div>
+                            <div class="listing-actions"><a class="listing-more" href="#overview-heading">View details</a><a class="card-button" href="../Index.php?view=home#booking">Select cottage</a></div>
+                        </div>
+                    </article>
+                    <div class="cottage-options-divider" id="cottage-options-divider" hidden><span>Overige opties</span></div>
                 </div>
+                <p class="cottage-no-results" id="cottage-no-results" hidden>No exact matches. See the other options below.</p>
             </div>
         </section>
         <section class="accommodations-note">

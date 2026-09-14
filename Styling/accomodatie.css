@@ -1,1 +1,288 @@
-/*Bram*/
+/* Accommodation listing page */
+.accommodations-page {
+    background: #f8f7f3;
+}
+
+.accommodations-page .accommodations-hero {
+    min-height: clamp(220px, 26vw, 350px);
+    background-position: center 48%;
+}
+
+.accommodations-page .accommodations-hero::before {
+    background:
+        linear-gradient(90deg, rgba(8, 15, 12, .64), rgba(8, 15, 12, .18) 70%),
+        linear-gradient(0deg, rgba(7, 12, 9, .48), transparent 64%);
+}
+
+.accommodations-page .site-header {
+    grid-template-columns: 150px 1fr auto;
+}
+
+.accommodations-page .accommodations-hero__content {
+    padding-top: clamp(3rem, 7vw, 6.5rem);
+}
+
+.accommodations-page .accommodations-hero h1 {
+    margin: 0;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(3rem, 6vw, 5.6rem);
+    font-weight: 500;
+    line-height: .95;
+}
+
+.accommodations-page .accommodations-hero__content > p:last-child {
+    margin-top: .55rem;
+    color: #fff7e9;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(1.05rem, 1.7vw, 1.55rem);
+    font-style: italic;
+}
+
+.accommodations-page .accommodations-overview {
+    padding: clamp(1.2rem, 3vw, 3.25rem) 0 clamp(2.5rem, 5vw, 5rem);
+}
+
+.accommodations-page .accommodations-overview__header,
+.accommodations-page .cottage-toolbar,
+.accommodations-page .accommodations-note {
+    display: none;
+}
+
+.cottage-tabs {
+    display: flex;
+    gap: .65rem;
+    margin: 0 0 clamp(1.4rem, 3vw, 2.5rem);
+    overflow-x: auto;
+    padding: .15rem 0 .45rem;
+    scrollbar-width: none;
+}
+
+.cottage-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.cottage-tabs__item {
+    flex: 0 0 auto;
+    padding: .8rem 1.1rem;
+    color: #61645f;
+    font-size: .72rem;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    background: #fff;
+    border: 1px solid #ebe9e3;
+    border-radius: .3rem;
+    box-shadow: 0 2px 8px rgba(34, 40, 33, .04);
+    transition: color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.cottage-tabs__item:hover,
+.cottage-tabs__item:focus-visible {
+    color: #fff;
+    background: #294438;
+    transform: translateY(-1px);
+}
+
+.cottage-tabs__item--active {
+    color: #fff;
+    background: #294438;
+    box-shadow: 0 3px 9px rgba(20, 48, 34, .2);
+}
+
+.cottage-no-results {
+    margin: 1.5rem 0 0;
+    color: #61645f;
+    text-align: center;
+}
+
+.cottage-options-divider {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: 1rem;
+    margin: .45rem 0;
+    color: #777b74;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.cottage-options-divider::before,
+.cottage-options-divider::after {
+    flex: 1;
+    height: 1px;
+    content: "";
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(32, 39, 32, .12);
+}
+
+.accommodations-page .accommodations-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(.8rem, 2vw, 1.5rem);
+}
+
+.accommodations-page .accommodation-card--listing {
+    display: flex;
+    min-height: 0;
+    border: 1px solid #ece9e2;
+    border-radius: .35rem;
+    box-shadow: 0 5px 14px rgba(46, 44, 35, .07);
+}
+
+.accommodations-page .accommodation-card--listing .accommodation-card__image {
+    min-height: clamp(125px, 17vw, 230px);
+}
+
+.accommodations-page .accommodation-card--listing .accommodation-card__body {
+    display: block;
+    padding: clamp(.85rem, 1.8vw, 1.3rem);
+}
+
+.accommodations-page .accommodation-card--listing h3 {
+    margin: 0 0 .7rem;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(1.15rem, 2vw, 1.6rem);
+    font-weight: 600;
+    line-height: 1.05;
+}
+
+.accommodations-page .accommodation-card--listing .accommodation-meta {
+    gap: .55rem .8rem;
+    margin-bottom: .75rem;
+    font-size: .7rem;
+}
+
+.accommodations-page .accommodation-card--listing .accommodation-meta span:last-child,
+.accommodations-page .accommodation-card--listing .accommodation-card__body > p,
+.accommodations-page .accommodation-highlights,
+.accommodations-page .listing-more {
+    display: none;
+}
+
+.accommodations-page .accommodation-card--listing .price-block {
+    display: flex;
+    align-items: baseline;
+    gap: .25rem;
+    margin: 0;
+    padding: 0;
+    color: #bd554c;
+    text-align: left;
+}
+
+.accommodations-page .accommodation-card--listing .price-block span {
+    color: #bd554c;
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+.accommodations-page .accommodation-card--listing .price-block strong {
+    color: #bd554c;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(1.15rem, 2.2vw, 1.7rem);
+}
+
+.accommodations-page .accommodation-card--listing .price-block em {
+    display: none;
+}
+
+.accommodations-page .listing-actions {
+    position: absolute;
+    right: .8rem;
+    bottom: .75rem;
+    display: block;
+    margin: 0;
+}
+
+.accommodations-page .accommodation-card--listing {
+    position: relative;
+}
+
+.accommodations-page .listing-actions .card-button {
+    display: block;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: .3rem;
+    color: #4c514a;
+    font-size: 0;
+    background: transparent;
+    border: 0;
+}
+
+.accommodations-page .listing-actions .card-button::after {
+    content: "→";
+    font-size: 1.1rem;
+}
+
+@media (max-width: 640px) {
+    .accommodations-page .page-container {
+        width: min(calc(100% - 40px), var(--container));
+    }
+
+    .accommodations-page .accommodations-hero {
+        min-height: 205px;
+        background-position: 54% center;
+    }
+
+    .accommodations-page .site-header {
+        display: block;
+        padding-top: .65rem;
+    }
+
+    .accommodations-page .site-nav,
+    .accommodations-page .site-header__actions {
+        display: none;
+    }
+
+    .accommodations-page .site-logo {
+        width: 92px;
+        transform: scale(.62);
+        transform-origin: left top;
+    }
+
+    .accommodations-page .accommodations-hero__content {
+        padding-top: 1.6rem;
+    }
+
+    .accommodations-page .accommodations-hero h1 {
+        font-size: 2.65rem;
+    }
+
+    .accommodations-page .accommodations-hero__content > p:last-child {
+        font-size: 1rem;
+    }
+
+    .cottage-tabs {
+        gap: .45rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .cottage-tabs__item {
+        padding: .72rem .78rem;
+        font-size: .58rem;
+    }
+
+    .accommodations-page .accommodations-list {
+        gap: .85rem;
+    }
+
+    .accommodations-page .accommodation-card--listing .accommodation-card__image {
+        min-height: 98px;
+    }
+
+    .accommodations-page .accommodation-card--listing .accommodation-card__body {
+        min-height: 108px;
+        padding: .72rem;
+    }
+
+    .accommodations-page .accommodation-card--listing h3 {
+        font-size: 1rem;
+    }
+
+    .accommodations-page .accommodation-card--listing .accommodation-meta {
+        gap: .35rem;
+        font-size: .57rem;
+    }
+}
