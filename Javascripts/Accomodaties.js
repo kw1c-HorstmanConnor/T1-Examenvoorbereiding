@@ -68,3 +68,79 @@ tabs.forEach(function (tab) {
         showMatchingCottages();
     });
 });
+
+const accommodationModal = document.querySelector('#accommodation-modal');
+const modalDialog = document.querySelector('.accommodation-modal__dialog');
+const modalImage = document.querySelector('#accommodation-modal-image');
+const modalTitle = document.querySelector('#accommodation-modal-title');
+const modalLocation = document.querySelector('#accommodation-modal-location');
+const modalPrice = document.querySelector('#accommodation-modal-price');
+const modalMax = document.querySelector('#accommodation-modal-max');
+const modalFacilities = document.querySelector('#accommodation-modal-facilities');
+const modalDescription = document.querySelector('#accommodation-modal-description');
+let previouslyFocusedElement = null;
+
+function openAccommodationModal(card) {
+    const image = card.querySelector('.accommodation-card__image');
+
+    previouslyFocusedElement = document.activeElement;
+    modalTitle.textContent = card.dataset.huisName;
+    modalLocation.textContent = card.dataset.location;
+    modalPrice.textContent = '€' + card.dataset.price;
+    modalMax.textContent = card.dataset.max + ' guests';
+    modalFacilities.textContent = card.dataset.facilities;
+    modalDescription.textContent = card.dataset.description;
+
+    modalImage.className = 'accommodation-modal__image';
+    if (image) {
+        modalImage.className += ' ' + image.className;
+    }
+
+    accommodationModal.hidden = false;
+    accommodationModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('accommodation-modal-open');
+    modalDialog.focus();
+}
+
+function closeAccommodationModal() {
+    if (accommodationModal.hidden) {
+        return;
+    }
+
+    accommodationModal.hidden = true;
+    accommodationModal.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('accommodation-modal-open');
+
+    if (previouslyFocusedElement) {
+        previouslyFocusedElement.focus();
+    }
+}
+
+cottages.forEach(function (card) {
+    card.addEventListener('click', function (event) {
+        if (event.target.closest('a, button, input, select, textarea')) {
+            return;
+        }
+
+        openAccommodationModal(card);
+    });
+
+    card.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            openAccommodationModal(card);
+        }
+    });
+});
+
+accommodationModal.addEventListener('click', function (event) {
+    if (event.target.closest('[data-modal-close="true"]')) {
+        closeAccommodationModal();
+    }
+});
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape' && !accommodationModal.hidden) {
+        closeAccommodationModal();
+    }
+});

@@ -130,6 +130,7 @@
 .accommodations-page .accommodation-card--listing {
     display: flex;
     min-height: 0;
+    cursor: pointer;
     border: 1px solid #ece9e2;
     border-radius: .35rem;
     box-shadow: 0 5px 14px rgba(46, 44, 35, .07);
@@ -201,6 +202,120 @@
 
 .accommodations-page .accommodation-card--listing {
     position: relative;
+}
+
+.accommodations-page .accommodation-card--listing:focus-visible {
+    outline: 3px solid #bd554c;
+    outline-offset: 3px;
+}
+
+.accommodation-modal[hidden] {
+    display: none;
+}
+
+.accommodation-modal {
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+}
+
+.accommodation-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 15, 12, .72);
+}
+
+.accommodation-modal__dialog {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(210px, .8fr) minmax(0, 1fr);
+    width: min(100%, 800px);
+    max-height: min(760px, calc(100vh - 3rem));
+    overflow: auto;
+    background: #f8f7f3;
+    border-radius: .35rem;
+    box-shadow: 0 18px 52px rgba(0, 0, 0, .35);
+}
+
+.accommodation-modal__image {
+    min-height: 100%;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.accommodation-modal__content {
+    padding: clamp(1.5rem, 4vw, 2.75rem);
+}
+
+.accommodation-modal__content h2 {
+    margin: .25rem 2rem 1.5rem 0;
+    color: #294438;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 600;
+    line-height: 1;
+}
+
+.accommodation-modal__details {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+}
+
+.accommodation-modal__details div {
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2dfd7;
+}
+
+.accommodation-modal__details div:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.accommodation-modal__details dt {
+    margin-bottom: .25rem;
+    color: #61645f;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.accommodation-modal__details dd {
+    margin: 0;
+    color: #30352f;
+    line-height: 1.55;
+}
+
+.accommodation-modal__close {
+    position: absolute;
+    z-index: 2;
+    top: .7rem;
+    right: .7rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    color: #294438;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    background: #f8f7f3;
+    border: 1px solid #dedbd3;
+    border-radius: 50%;
+}
+
+.accommodation-modal__close:hover,
+.accommodation-modal__close:focus-visible {
+    color: #fff;
+    background: #294438;
+}
+
+body.accommodation-modal-open {
+    overflow: hidden;
 }
 
 .accommodations-page .listing-actions .card-button {
@@ -288,5 +403,18 @@
     .accommodations-page .accommodation-card--listing .accommodation-meta {
         gap: .35rem;
         font-size: .57rem;
+    }
+
+    .accommodation-modal {
+        padding: 1rem;
+    }
+
+    .accommodation-modal__dialog {
+        grid-template-columns: 1fr;
+        max-height: calc(100vh - 2rem);
+    }
+
+    .accommodation-modal__image {
+        min-height: 175px;
     }
 }
