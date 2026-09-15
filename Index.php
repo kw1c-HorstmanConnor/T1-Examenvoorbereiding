@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Functions/Booking/Availability.php';
+require_once __DIR__ . '/Functions/Helpers/Database.php';
 require_once __DIR__ . '/Functions/Helpers/Session.php';
 
 $view = $_GET['view'] ?? 'splash';
@@ -63,8 +64,28 @@ $fallbackEvents = [
     ],
 ];
 
+$dbEvents = [];
+
+try {
+    $database = maple_db();
+    $result = $database->query('
+        SELECT `Titel`, `Start_time`, `Omschrijving`, `Locatie`
+        FROM `evenementen`
+        WHERE `Start_time` >= NOW()
+        ORDER BY `Start_time` ASC
+        LIMIT 3
+    ');
+
+    if ($result instanceof mysqli_result) {
+        $dbEvents = $result->fetch_all(MYSQLI_ASSOC);
+        $result->free();
+    }
+} catch (Throwable $exception) {
+    // Keep showing the fallback events when the database is unavailable.
+}
+
 $homeAccomodations = maple_home_accomodation_cards([], $fallbackAccomodations);
-$homeEvents = maple_home_event_cards([], $fallbackEvents);
+$homeEvents = maple_home_event_cards($dbEvents, $fallbackEvents);
 ?>
 <!doctype html>
 <html lang="nl">
