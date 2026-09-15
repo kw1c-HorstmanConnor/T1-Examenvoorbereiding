@@ -32,6 +32,7 @@ $csrfToken = maple_login_csrf_token();
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../Styling/index.css">
     <link rel="stylesheet" href="../Styling/login.css">
+    <?php include __DIR__ . '/../Includes/LanguagesScripts.php'; ?>
     <script src="../Scripts/Auth.js" defer></script>
 </head>
 <body class="login-view">

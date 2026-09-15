@@ -76,6 +76,7 @@ $homeEvents = maple_home_event_cards([], $fallbackEvents);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Styling/index.css">
+    <?php include __DIR__ . '/Includes/LanguagesScripts.php'; ?>
 </head>
 <body class="<?= htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8'); ?>">
 <?php if ($isHomeView): ?>
