@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/DatabaseConfig.php';
+
 function maple_load_database_connection()
 {
     global $conn;
@@ -19,6 +21,35 @@ function maple_db(): mysqli
     }
 
     return $conn;
+}
+
+function maple_pdo()
+{
+    static $pdo = null;
+
+    if (!class_exists('PDO')) {
+        throw new RuntimeException('PDO is not available.');
+    }
+
+    if ($pdo instanceof PDO) {
+        return $pdo;
+    }
+
+    $config = maple_database_config();
+    $dsn = sprintf(
+        'mysql:host=%s;dbname=%s;charset=%s',
+        $config['host'],
+        $config['database'],
+        $config['charset']
+    );
+
+    $pdo = new PDO($dsn, $config['username'], $config['password'], [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES => false,
+    ]);
+
+    return $pdo;
 }
 
 function maple_table_has_column(string $table, string $column): bool

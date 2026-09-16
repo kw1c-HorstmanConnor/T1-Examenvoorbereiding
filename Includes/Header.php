@@ -8,6 +8,7 @@ $assetBase = $assetBase ?? $rootPrefix;
 $loggedInUser = maple_current_user();
 $loggedInVoornaam = trim((string) ($loggedInUser['voornaam'] ?? ''));
 $loggedInRoleName = strtolower(trim((string) ($loggedInUser['role_name'] ?? '')));
+$languageControlsEnabled = !empty($languageControlsEnabled);
 if (!isset($currentPage)) {
     $scriptName = basename($_SERVER['SCRIPT_NAME'] ?? 'Index.php');
     $pageMap = [
@@ -49,11 +50,20 @@ $isAuthPage = in_array($currentPage, ['login', 'register'], true);
 
     <?php if ($isAuthPage): ?>
         <div class="site-header__actions site-header__actions--auth">
-            <button class="language-select language-select--auth" type="button">
-                <i class="fa-solid fa-globe" aria-hidden="true"></i>
-                <span>ENGLISH</span>
-                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
-            </button>
+            <?php if ($languageControlsEnabled): ?>
+                <select class="language-select language-select--auth" data-language-select data-no-translate aria-label="Language">
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                    <option value="fr">Français</option>
+                    <option value="es">Español</option>
+                </select>
+            <?php else: ?>
+                <button class="language-select language-select--auth" type="button">
+                    <i class="fa-solid fa-globe" aria-hidden="true"></i>
+                    <span>ENGLISH</span>
+                    <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                </button>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <nav class="site-nav" aria-label="Primaire navigatie">
@@ -68,7 +78,16 @@ $isAuthPage = in_array($currentPage, ['login', 'register'], true);
         </nav>
 
         <div class="site-header__actions">
-            <button class="language-select" type="button">NL <span class="chevron" aria-hidden="true"></span></button>
+            <?php if ($languageControlsEnabled): ?>
+                <select class="language-select" data-language-select data-no-translate aria-label="Language">
+                    <option value="en">EN</option>
+                    <option value="de">DE</option>
+                    <option value="fr">FR</option>
+                    <option value="es">ES</option>
+                </select>
+            <?php else: ?>
+                <button class="language-select" type="button">NL <span class="chevron" aria-hidden="true"></span></button>
+            <?php endif; ?>
             <?php if ($loggedInVoornaam !== ''): ?>
                 <span class="header-account"><?= htmlspecialchars($loggedInVoornaam, ENT_QUOTES, 'UTF-8'); ?></span>
                 <?php if ($loggedInRoleName === 'admin'): ?>

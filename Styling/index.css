@@ -531,10 +531,20 @@ select {
 .language-select {
     gap: 8px;
     min-width: 45px;
+    padding: 0 8px;
     color: #fff;
     cursor: pointer;
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+select.language-select {
+    appearance: auto;
+}
+
+.language-select option {
+    color: #151914;
+    background: #fff;
 }
 
 .language-select--auth {
