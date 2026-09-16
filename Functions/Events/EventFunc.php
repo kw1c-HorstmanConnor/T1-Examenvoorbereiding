@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../Functions/Helpers/Database.php';
+require_once __DIR__ . '/../Helpers/Database.php';
 
 // -------------------------------------------------------------------------
 // Calendar month

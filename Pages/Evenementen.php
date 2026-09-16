@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Functions/Helpers/Session.php';
-require_once __DIR__ . '/../Includes/Functions.php';
+require_once __DIR__ . '/../Functions/Events/EventFunc.php';
 
 $calendar = maple_events_calendar_data($_GET['month'] ?? null);
 $month = $calendar['month'];
