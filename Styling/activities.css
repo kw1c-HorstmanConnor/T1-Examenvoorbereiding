@@ -1,0 +1,501 @@
+.activities-view {
+    background: var(--ivory);
+}
+
+.activities-view.is-modal-open {
+    overflow: hidden;
+}
+
+.activities-hero {
+    position: relative;
+    isolation: isolate;
+    min-height: 520px;
+    overflow: hidden;
+    color: #fff;
+    background-image: url("../Images/background.png");
+    background-repeat: no-repeat;
+    background-position: center 46%;
+    background-size: cover;
+}
+
+.activities-hero::before,
+.activities-hero::after {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    content: "";
+    pointer-events: none;
+}
+
+.activities-hero::before {
+    background:
+        linear-gradient(90deg, rgba(10, 16, 14, 0.82), rgba(10, 16, 14, 0.42) 48%, rgba(10, 16, 14, 0.52)),
+        linear-gradient(180deg, rgba(5, 8, 7, 0.36), rgba(5, 8, 7, 0.82));
+}
+
+.activities-hero::after {
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.28), transparent 42%);
+}
+
+.activities-hero__content {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    padding-top: clamp(5.8rem, 12vw, 8.5rem);
+}
+
+.activities-hero__title {
+    margin: 0;
+    color: var(--soft-white);
+    font-family: 'BioRhymeRegular';
+    font-size: clamp(4rem, 8vw, 7.4rem);
+    font-weight: 500;
+    line-height: 0.92;
+    letter-spacing: 0;
+}
+
+.activities-hero__subtitle {
+    max-width: 520px;
+    margin: 20px 0 0;
+    color: rgba(255, 255, 255, 0.88);
+    font-size: clamp(1rem, 1.45vw, 1.28rem);
+    font-weight: 600;
+    line-height: 1.6;
+}
+
+.activities-section {
+    padding: 52px 0 58px;
+    background: var(--ivory);
+}
+
+.activities-section__header {
+    margin-bottom: 26px;
+}
+
+.activities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.activities-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    cursor: pointer;
+    background: #fff;
+    border: 1px solid rgba(222, 218, 209, 0.94);
+    border-radius: 6px;
+    box-shadow: 0 8px 24px rgba(42, 36, 27, 0.06);
+    transition:
+        border-color 220ms ease-out,
+        box-shadow 220ms ease-out,
+        transform 220ms ease-out;
+}
+
+.activities-card:hover,
+.activities-card:focus-visible {
+    border-color: rgba(185, 154, 100, 0.58);
+    box-shadow: 0 14px 34px rgba(42, 36, 27, 0.12);
+    transform: translateY(-2px);
+}
+
+.activities-card:focus-visible {
+    outline: 2px solid rgba(29, 48, 38, 0.75);
+    outline-offset: 4px;
+}
+
+.activities-card__image {
+    position: relative;
+    min-height: 210px;
+    overflow: hidden;
+    background: #26382d;
+}
+
+.activities-card__image::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background: linear-gradient(180deg, transparent 56%, rgba(0, 0, 0, 0.22));
+}
+
+.activities-card__image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 210px;
+    object-fit: cover;
+    transition: transform 420ms ease-out;
+}
+
+.activities-card:hover .activities-card__image img,
+.activities-card:focus-visible .activities-card__image img {
+    transform: scale(1.045);
+}
+
+.activities-card--hiking .activities-card__image img,
+.activity-modal--hiking .activity-modal__media img {
+    object-position: 38% 36%;
+}
+
+.activities-card--canoeing .activities-card__image img,
+.activity-modal--canoeing .activity-modal__media img {
+    object-position: 62% 58%;
+}
+
+.activities-card--kayaking .activities-card__image img,
+.activity-modal--kayaking .activity-modal__media img {
+    object-position: 72% 42%;
+}
+
+.activities-card--fishing .activities-card__image img,
+.activity-modal--fishing .activity-modal__media img {
+    object-position: 18% 78%;
+}
+
+.activities-card--boat-tours .activities-card__image img,
+.activity-modal--boat-tours .activity-modal__media img {
+    object-position: 55% 50%;
+}
+
+.activities-card--campfires .activities-card__image img,
+.activity-modal--campfires .activity-modal__media img {
+    object-position: 12% 88%;
+}
+
+.activities-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    padding: 18px 18px 17px;
+}
+
+.activities-card__body h3 {
+    margin: 0 0 9px;
+    color: #151914;
+    font-size: 1.03rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.activities-card__body p {
+    margin: 0;
+    color: #394039;
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.65;
+}
+
+.activities-card__action {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+    padding-top: 18px;
+    color: #172019;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.activities-card:hover .button-arrow,
+.activities-card:focus-visible .button-arrow,
+.activities-cta .cta-button:hover .button-arrow,
+.activities-cta .cta-button:focus-visible .button-arrow {
+    transform: translateX(4px);
+}
+
+.activities-cta {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    min-height: 210px;
+    color: #fff;
+    background-image: url("../Images/background.png");
+    background-repeat: no-repeat;
+    background-position: center 58%;
+    background-size: cover;
+}
+
+.activities-cta::before {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    content: "";
+    background:
+        linear-gradient(90deg, rgba(8, 12, 11, 0.86), rgba(8, 12, 11, 0.48) 55%, rgba(8, 12, 11, 0.72)),
+        linear-gradient(180deg, rgba(8, 12, 11, 0.22), rgba(8, 12, 11, 0.58));
+}
+
+.activities-cta__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.activities-cta__title {
+    margin: 0;
+    color: var(--soft-white);
+    font-family: 'BioRhymeRegular';
+    font-size: clamp(2.4rem, 4vw, 4rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: 0;
+}
+
+.activities-cta .button-arrow {
+    background: currentColor;
+}
+
+.activity-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+
+.activity-modal[hidden] {
+    display: none;
+}
+
+.activity-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(7, 10, 9, 0.68);
+    opacity: 0;
+    transition: opacity 180ms ease-out;
+}
+
+.activity-modal__panel {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(260px, 0.92fr) minmax(0, 1.08fr);
+    width: min(930px, 100%);
+    max-height: min(86vh, 720px);
+    overflow: hidden;
+    background: var(--ivory-soft);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 7px;
+    box-shadow: 0 28px 80px rgba(0, 0, 0, 0.34);
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+    transition:
+        opacity 200ms ease-out,
+        transform 200ms ease-out;
+}
+
+.activity-modal.is-open .activity-modal__overlay {
+    opacity: 1;
+}
+
+.activity-modal.is-open .activity-modal__panel {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.activity-modal.is-closing .activity-modal__overlay {
+    opacity: 0;
+}
+
+.activity-modal.is-closing .activity-modal__panel {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+}
+
+.activity-modal__close {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    color: #172019;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.86);
+    border: 1px solid rgba(29, 48, 38, 0.18);
+    border-radius: 50%;
+    font-size: 1.4rem;
+    line-height: 1;
+    transition:
+        background 180ms ease-out,
+        transform 180ms ease-out;
+}
+
+.activity-modal__close:hover,
+.activity-modal__close:focus-visible {
+    background: #fff;
+    transform: rotate(6deg);
+}
+
+.activity-modal__close:focus-visible {
+    outline: 2px solid rgba(29, 48, 38, 0.72);
+    outline-offset: 3px;
+}
+
+.activity-modal__media {
+    min-height: 460px;
+    background: #26382d;
+}
+
+.activity-modal__media img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.activity-modal__content {
+    min-width: 0;
+    overflow: auto;
+    padding: clamp(28px, 4vw, 46px);
+}
+
+.activity-modal__content h2 {
+    margin: 0;
+    color: #151914;
+    font-family: 'BioRhymeRegular';
+    font-size: clamp(2.2rem, 4vw, 3.6rem);
+    font-weight: 500;
+    line-height: 0.98;
+}
+
+.activity-modal__description {
+    margin: 18px 0 0;
+    color: #2f352f;
+    font-size: 0.92rem;
+    font-weight: 500;
+    line-height: 1.75;
+}
+
+.activity-modal__details {
+    display: grid;
+    gap: 10px;
+    margin: 24px 0 0;
+}
+
+.activity-modal__detail {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr);
+    gap: 16px;
+    padding: 12px 0;
+    border-top: 1px solid rgba(29, 48, 38, 0.12);
+}
+
+.activity-modal__detail dt {
+    color: #5e655d;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1.25;
+    text-transform: uppercase;
+}
+
+.activity-modal__detail dd {
+    margin: 0;
+    color: #151914;
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.activity-modal__extra {
+    margin-top: 24px;
+    padding: 18px;
+    background: #fff;
+    border: 1px solid rgba(222, 218, 209, 0.9);
+    border-radius: 6px;
+}
+
+.activity-modal__extra[hidden],
+.activity-modal__detail[hidden] {
+    display: none;
+}
+
+.activity-modal__extra h3 {
+    margin: 0 0 9px;
+    color: #151914;
+    font-size: 0.92rem;
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.activity-modal__extra p {
+    margin: 0;
+    color: #384038;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.65;
+}
+
+@media (max-width: 900px) {
+    .activities-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .activity-modal__panel {
+        grid-template-columns: 1fr;
+        overflow: auto;
+    }
+
+    .activity-modal__media {
+        min-height: 280px;
+        max-height: 36vh;
+    }
+}
+
+@media (max-width: 700px) {
+    .activities-hero {
+        min-height: 560px;
+    }
+
+    .activities-hero__content {
+        padding-top: 4.8rem;
+    }
+
+    .activities-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .activities-card__image,
+    .activities-card__image img {
+        min-height: 230px;
+    }
+
+    .activities-cta {
+        min-height: 240px;
+    }
+
+    .activities-cta__inner {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .activity-modal {
+        align-items: end;
+        padding: 12px;
+    }
+
+    .activity-modal__panel {
+        width: 100%;
+        max-height: 92vh;
+    }
+
+    .activity-modal__content {
+        padding: 26px 20px 24px;
+    }
+
+    .activity-modal__detail {
+        grid-template-columns: 1fr;
+        gap: 5px;
+    }
+}
