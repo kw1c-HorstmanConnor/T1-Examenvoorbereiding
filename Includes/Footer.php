@@ -8,14 +8,7 @@ $assetBase = $assetBase ?? $rootPrefix;
     <div class="page-container site-footer__grid">
         <div class="site-footer__brand">
             <a class="site-logo site-logo--footer" href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>" aria-label="Maple Camp home">
-                <span class="site-logo__mark" aria-hidden="true">
-                    <span class="site-logo__peak site-logo__peak--one"></span>
-                    <span class="site-logo__peak site-logo__peak--two"></span>
-                    <span class="site-logo__peak site-logo__peak--three"></span>
-                </span>
-                <span class="site-logo__name">MAPLE CAMP</span>
-                <span class="site-logo__sub">CANADIAN WILDERNESS</span>
-                <img class="site-logo__leaf" src="<?= htmlspecialchars($assetBase . 'Images/herfst.webp', ENT_QUOTES, 'UTF-8'); ?>" alt="">
+                <img class="site-logo__image" src="<?= htmlspecialchars($assetBase . 'Images/maple_logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="">
             </a>
             <p>Een unieke 20+ campingervaring in het hart van de Canadese natuur. Kom tot rust, beleef avontuur en maak herinneringen voor het leven.</p>
             <div class="social-links" aria-label="Sociale media">

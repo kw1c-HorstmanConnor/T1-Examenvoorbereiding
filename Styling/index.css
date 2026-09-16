@@ -354,69 +354,15 @@ select {
 }
 
 .site-logo {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
+    display: inline-block;
     width: 142px;
-    color: #fff;
     text-decoration: none;
 }
 
-.site-logo__mark {
-    position: relative;
-    width: 70px;
-    height: 33px;
-    margin-bottom: 6px;
-    color: currentColor;
-}
-
-.site-logo__peak {
-    position: absolute;
-    bottom: 2px;
+.site-logo__image {
     display: block;
-    border-top: 2px solid currentColor;
-    border-left: 2px solid currentColor;
-    transform: rotate(45deg);
-}
-
-.site-logo__peak--one {
-    left: 3px;
-    width: 22px;
-    height: 22px;
-}
-
-.site-logo__peak--two {
-    left: 23px;
-    width: 31px;
-    height: 31px;
-}
-
-.site-logo__peak--three {
-    right: 4px;
-    width: 19px;
-    height: 19px;
-}
-
-.site-logo__name {
-    font-family: 'BioRhymeRegular';
-    font-size: 18px;
-    font-weight: 500;
-    line-height: 1;
-    letter-spacing: 0.2em;
-}
-
-.site-logo__sub {
-    margin-top: 8px;
-    font-size: 7px;
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: 0.35em;
-}
-
-.site-logo__leaf {
-    width: 11px;
-    height: 11px;
-    margin-top: 9px;
+    width: 100%;
+    height: auto;
     object-fit: contain;
 }
 
@@ -640,9 +586,10 @@ select.language-select {
     z-index: 2;
     width: calc(100% + 32px);
     height: calc(100% + 39px);
-    color: transparent;
+    color: black;
     cursor: pointer;
     opacity: 0;
+    background-color: transparent;
 }
 
 .booking-field__value {
@@ -1423,23 +1370,8 @@ select.language-select {
 }
 
 .site-logo--footer {
-    align-items: flex-start;
     width: 150px;
     margin-bottom: 18px;
-}
-
-.site-logo--footer .site-logo__mark {
-    margin-left: 9px;
-    transform: scale(0.86);
-    transform-origin: left bottom;
-}
-
-.site-logo--footer .site-logo__name {
-    font-size: 18px;
-}
-
-.site-logo--footer .site-logo__leaf {
-    margin-left: 47px;
 }
 
 .site-footer__brand p,
@@ -1685,10 +1617,6 @@ select.language-select {
         width: 128px;
     }
 
-    .site-logo__name {
-        font-size: 16px;
-    }
-
     .site-nav {
         gap: 14px;
     }
@@ -1883,25 +1811,7 @@ select.language-select {
     }
 
     .site-logo {
-        align-items: flex-start;
-    }
-
-    .site-logo__mark {
-        margin-left: 17px;
-        transform: scale(0.82);
-        transform-origin: left bottom;
-    }
-
-    .site-logo__name {
-        font-size: 15px;
-    }
-
-    .site-logo__sub {
-        font-size: 6px;
-    }
-
-    .site-logo__leaf {
-        margin-left: 47px;
+        width: 116px;
     }
 
     .site-header__actions {
@@ -1982,3 +1892,71 @@ select.language-select {
         min-height: 58px;
     }
 }
+.language-select {
+    min-width: 52px;
+    height: 29px;
+    padding: 0 28px 0 10px;
+    color: #f4ead3;
+    font: inherit;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    border: 1px solid rgba(244, 234, 211, 0.34);
+    border-radius: 4px;
+    background-color: rgba(18, 44, 31, 0.88);
+    background-image:
+            linear-gradient(45deg, transparent 50%, #f4ead3 50%),
+            linear-gradient(135deg, #f4ead3 50%, transparent 50%);
+    background-position:
+            calc(100% - 12px) 12px,
+            calc(100% - 8px) 12px;
+    background-repeat: no-repeat;
+    background-size: 4px 4px, 4px 4px;
+}
+
+.language-select:hover {
+    background-color: rgba(25, 61, 43, 0.96);
+    border-color: rgba(244, 234, 211, 0.5);
+}
+
+.language-select:focus,
+.language-select:focus-visible {
+    outline: 2px solid rgba(244, 234, 211, 0.9);
+    outline-offset: 2px;
+}
+
+.language-select option {
+    color: #f4ead3;
+    background: #183325;
+}
+
+.language-select--auth {
+    min-width: 118px;
+    padding-left: 30px;
+}
+
+.language-control {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+.language-control > i {
+    position: absolute;
+    left: 11px;
+    z-index: 1;
+    color: #f4ead3;
+    font-size: 10px;
+    pointer-events: none;
+}
+
+.language-select--splash {
+    min-width: 58px;
+    height: 34px;
+    background-color: rgba(18, 44, 31, 0.9);
+    backdrop-filter: blur(6px);
+}
+

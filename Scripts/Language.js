@@ -1,26 +1,25 @@
 (() => {
     const STORAGE_KEY = 'mapleCampLanguage';
     const DEFAULT_LANGUAGE = 'en';
-    const SUPPORTED_LANGUAGES = ['en', 'de', 'fr', 'es'];
+    const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'de'];
     const TRANSLATABLE_ATTRIBUTES = ['placeholder', 'aria-label', 'title'];
     const originalText = new WeakMap();
     const originalAttributes = new WeakMap();
     const originalTitle = document.title;
     let currentLanguage = DEFAULT_LANGUAGE;
+    let isApplyingLanguage = false;
+    let pendingLanguageApply = false;
+    let mutationObserver = null;
 
-    function dictionaries() {
-        return window.MapleLanguages || {};
+    function getDictionary(language) {
+        const languages = window.MapleLanguages || {};
+        return languages[language] || languages[DEFAULT_LANGUAGE] || {};
     }
 
-    function dictionary(language = currentLanguage) {
-        const allDictionaries = dictionaries();
-        return allDictionaries[language] || allDictionaries[DEFAULT_LANGUAGE] || {};
-    }
-
-    function storedLanguage() {
+    function getStoredLanguage() {
         try {
-            const language = localStorage.getItem(STORAGE_KEY);
-            return SUPPORTED_LANGUAGES.includes(language) ? language : DEFAULT_LANGUAGE;
+            const storedLanguage = localStorage.getItem(STORAGE_KEY);
+            return SUPPORTED_LANGUAGES.includes(storedLanguage) ? storedLanguage : DEFAULT_LANGUAGE;
         } catch {
             return DEFAULT_LANGUAGE;
         }
@@ -40,62 +39,99 @@
         return source.slice(0, start) + translated + trailing;
     }
 
-    function translateValue(value, activeDictionary = dictionary()) {
-        const trimmed = String(value || '').trim();
+    function translateDynamic(value, dictionary) {
+        const trimmed = value.trim();
+        const words = dictionary._words || {};
+
+        const guestMatch = trimmed.match(/^(\d+)\s+(gast|gasten)$/i);
+        if (guestMatch && words.guest && words.guests) {
+            const amount = Number(guestMatch[1]);
+            return `${amount} ${amount === 1 ? words.guest : words.guests}`;
+        }
+
+        const peopleMatch = trimmed.match(/^(\d+)\s+personen$/i);
+        if (peopleMatch && words.people) {
+            return `${peopleMatch[1]} ${words.people}`;
+        }
+
+        const bedroomMatch = trimmed.match(/^(\d+)\s+slaapkamers?$/i);
+        if (bedroomMatch && words.bedrooms) {
+            return `${bedroomMatch[1]} ${words.bedrooms}`;
+        }
+
+        const monthMatch = trimmed.match(/^(\d{1,2})\s+(januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december)\s+(\d{4})(.*)$/i);
+        if (monthMatch && words.months) {
+            const translatedMonth = words.months[monthMatch[2].toLowerCase()] || monthMatch[2];
+            return `${monthMatch[1]} ${translatedMonth} ${monthMatch[3]}${monthMatch[4]}`;
+        }
+
+        const starsMatch = trimmed.match(/^(\d+)\s+van\s+(\d+)\s+sterren$/i);
+        if (starsMatch && words.starsOf) {
+            return words.starsOf
+                .replace('{current}', starsMatch[1])
+                .replace('{total}', starsMatch[2]);
+        }
+
+        return null;
+    }
+
+    function translateValue(value, dictionary) {
+        const trimmed = value.trim();
 
         if (trimmed === '') {
             return value;
         }
 
-        return Object.prototype.hasOwnProperty.call(activeDictionary, trimmed)
-            ? replaceTrimmed(String(value), activeDictionary[trimmed])
-            : value;
+        if (Object.prototype.hasOwnProperty.call(dictionary, trimmed)) {
+            return replaceTrimmed(value, dictionary[trimmed]);
+        }
+
+        const dynamicTranslation = translateDynamic(value, dictionary);
+        if (dynamicTranslation !== null) {
+            return replaceTrimmed(value, dynamicTranslation);
+        }
+
+        return value;
+    }
+
+    function shouldSkipTextNode(node) {
+        const parent = node.parentElement;
+
+        if (!parent) {
+            return true;
+        }
+
+        return shouldSkipElement(parent);
     }
 
     function shouldSkipElement(element) {
         return Boolean(element.closest('script, style, noscript, code, [data-no-translate]'));
     }
 
-    function shouldSkipTextNode(node) {
-        const parent = node.parentElement;
-
-        return !parent || shouldSkipElement(parent) || Boolean(parent.closest('[data-i18n]'));
-    }
-
-    function translateKeyedElements(activeDictionary) {
-        document.querySelectorAll('[data-i18n]').forEach((element) => {
-            if (shouldSkipElement(element)) {
-                return;
-            }
-
-            const key = element.dataset.i18n || '';
-            element.textContent = activeDictionary[key] || key;
-        });
-
-        document.querySelectorAll('[data-i18n-attr]').forEach((element) => {
-            if (shouldSkipElement(element)) {
-                return;
-            }
-
-            const pairs = (element.dataset.i18nAttr || '').split(';');
-
-            pairs.forEach((pair) => {
-                const parts = pair.split(':');
-                const attribute = (parts[0] || '').trim();
-                const key = parts.slice(1).join(':').trim();
-
-                if (attribute && key) {
-                    element.setAttribute(attribute, activeDictionary[key] || key);
-                }
-            });
-        });
-    }
-
-    function translateTextNodes(activeDictionary) {
-        if (!document.body) {
-            return;
+    function rememberElementAttributes(element, onlyAttribute = null) {
+        if (!originalAttributes.has(element)) {
+            originalAttributes.set(element, {});
         }
 
+        const values = originalAttributes.get(element) || {};
+        const attributes = onlyAttribute ? [onlyAttribute] : TRANSLATABLE_ATTRIBUTES;
+
+        attributes.forEach((attribute) => {
+            if (!TRANSLATABLE_ATTRIBUTES.includes(attribute)) {
+                return;
+            }
+
+            if (element.hasAttribute(attribute)) {
+                values[attribute] = element.getAttribute(attribute) || '';
+            } else {
+                delete values[attribute];
+            }
+        });
+
+        originalAttributes.set(element, values);
+    }
+
+    function translateTextNodes(dictionary) {
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
         let node = walker.nextNode();
 
@@ -105,88 +141,160 @@
                     originalText.set(node, node.nodeValue || '');
                 }
 
-                node.nodeValue = translateValue(originalText.get(node), activeDictionary);
+                node.nodeValue = translateValue(originalText.get(node) || '', dictionary);
             }
 
             node = walker.nextNode();
         }
     }
 
-    function translateAttributes(activeDictionary) {
+    function translateAttributes(dictionary) {
         document.querySelectorAll('*').forEach((element) => {
-            if (shouldSkipElement(element) || element.hasAttribute('data-i18n-attr')) {
+            if (shouldSkipElement(element)) {
                 return;
             }
 
             if (!originalAttributes.has(element)) {
-                const values = {};
-
-                TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
-                    if (element.hasAttribute(attribute)) {
-                        values[attribute] = element.getAttribute(attribute) || '';
-                    }
-                });
-
-                originalAttributes.set(element, values);
+                rememberElementAttributes(element);
             }
 
-            Object.entries(originalAttributes.get(element) || {}).forEach(([attribute, source]) => {
-                element.setAttribute(attribute, translateValue(source, activeDictionary));
+            const values = originalAttributes.get(element) || {};
+
+            Object.entries(values).forEach(([attribute, source]) => {
+                element.setAttribute(attribute, translateValue(source, dictionary));
             });
         });
     }
 
-    function syncSelectors(language) {
+    function syncLanguageSelectors(language) {
         document.querySelectorAll('[data-language-select]').forEach((select) => {
             select.value = language;
+            select.dataset.currentLanguage = language;
         });
     }
 
     function applyLanguage(language, persist = true) {
         const selectedLanguage = SUPPORTED_LANGUAGES.includes(language) ? language : DEFAULT_LANGUAGE;
-        const activeDictionary = dictionary(selectedLanguage);
+        const dictionary = getDictionary(selectedLanguage);
+
+        if (Object.keys(dictionary).length === 0) {
+            return;
+        }
 
         currentLanguage = selectedLanguage;
-        document.documentElement.lang = selectedLanguage;
-        document.title = translateValue(originalTitle, activeDictionary);
-        translateKeyedElements(activeDictionary);
-        translateTextNodes(activeDictionary);
-        translateAttributes(activeDictionary);
-        syncSelectors(selectedLanguage);
+        isApplyingLanguage = true;
+        const shouldResumeObserver = Boolean(mutationObserver && document.body);
+
+        if (shouldResumeObserver) {
+            mutationObserver.disconnect();
+        }
+
+        try {
+            document.documentElement.lang = selectedLanguage;
+            document.title = translateValue(originalTitle, dictionary);
+            translateTextNodes(dictionary);
+            translateAttributes(dictionary);
+            syncLanguageSelectors(selectedLanguage);
+        } finally {
+            if (mutationObserver) {
+                mutationObserver.takeRecords();
+            }
+
+            if (shouldResumeObserver) {
+                observeLanguageMutations();
+            }
+
+            isApplyingLanguage = false;
+        }
 
         if (persist) {
             storeLanguage(selectedLanguage);
         }
-
-        window.dispatchEvent(new CustomEvent('maple:languagechange', {
-            detail: {
-                language: selectedLanguage,
-                dictionary: activeDictionary,
-            },
-        }));
     }
 
-    function bindSelectors() {
-        document.querySelectorAll('[data-language-select]').forEach((select) => {
-            select.addEventListener('change', () => applyLanguage(select.value));
+    function scheduleLanguageApply() {
+        if (pendingLanguageApply) {
+            return;
+        }
+
+        pendingLanguageApply = true;
+
+        window.requestAnimationFrame(() => {
+            pendingLanguageApply = false;
+            applyLanguage(currentLanguage, false);
         });
     }
 
-    function start() {
-        bindSelectors();
-        applyLanguage(storedLanguage(), false);
+    function watchLanguageChanges() {
+        if (mutationObserver || !document.body) {
+            return;
+        }
+
+        mutationObserver = new MutationObserver((mutations) => {
+            if (isApplyingLanguage) {
+                return;
+            }
+
+            let shouldApply = false;
+
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'characterData' && !shouldSkipTextNode(mutation.target)) {
+                    originalText.set(mutation.target, mutation.target.nodeValue || '');
+                    shouldApply = true;
+                    return;
+                }
+
+                if (mutation.type === 'attributes' && mutation.target instanceof Element && !shouldSkipElement(mutation.target)) {
+                    rememberElementAttributes(mutation.target, mutation.attributeName);
+                    shouldApply = true;
+                    return;
+                }
+
+                if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                    shouldApply = true;
+                }
+            });
+
+            if (shouldApply) {
+                scheduleLanguageApply();
+            }
+        });
+
+        observeLanguageMutations();
     }
 
-    window.MapleLanguage = {
-        applyLanguage,
-        getLanguage: () => currentLanguage,
-        translate: (key) => dictionary()[key] || key,
-        translateValue: (value) => translateValue(value, dictionary()),
-    };
+    function observeLanguageMutations() {
+        if (!mutationObserver || !document.body) {
+            return;
+        }
+
+        mutationObserver.observe(document.body, {
+            attributes: true,
+            attributeFilter: TRANSLATABLE_ATTRIBUTES,
+            characterData: true,
+            childList: true,
+            subtree: true,
+        });
+    }
+
+    function bindLanguageSelectors() {
+        document.querySelectorAll('[data-language-select]').forEach((select) => {
+            select.addEventListener('change', () => {
+                applyLanguage(select.value);
+            });
+        });
+    }
+
+    function startLanguageSystem() {
+        currentLanguage = getStoredLanguage();
+        bindLanguageSelectors();
+        applyLanguage(currentLanguage);
+        watchLanguageChanges();
+    }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', start, { once: true });
+        document.addEventListener('DOMContentLoaded', startLanguageSystem, { once: true });
     } else {
-        start();
+        startLanguageSystem();
     }
 })();

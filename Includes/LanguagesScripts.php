@@ -3,13 +3,20 @@ $scriptDirectory = trim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?
 $languageAssetBase = $assetBase ?? (basename($scriptDirectory) === 'Pages' ? '../' : '');
 
 $languageFiles = [
-    'Language/English.js',
-    'Language/German.js',
-    'Language/French.js',
-    'Language/Spanish.js',
-    'Scripts/Language.js',
+        'Language/English.js',
+        'Language/Spanish.js',
+        'Language/French.js',
+        'Language/German.js',
+        'Scripts/Language.js',
 ];
+
+$languageCss = 'Styling/Language.css';
+$cssPath = __DIR__ . '/../' . $languageCss;
+$cssVersion = is_file($cssPath) ? (string) filemtime($cssPath) : '1';
 ?>
+<?php if (is_file($cssPath)): ?>
+<link rel="stylesheet" href="<?= htmlspecialchars($languageAssetBase . $languageCss . '?v=' . $cssVersion, ENT_QUOTES, 'UTF-8'); ?>">
+<?php endif; ?>
 <?php foreach ($languageFiles as $languageFile): ?>
     <?php
     $absolutePath = __DIR__ . '/../' . $languageFile;
