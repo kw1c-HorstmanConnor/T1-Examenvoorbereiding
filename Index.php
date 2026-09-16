@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/Functions/Booking/Availability.php';
 require_once __DIR__ . '/Functions/Helpers/Database.php';
 require_once __DIR__ . '/Functions/Helpers/Session.php';
+require_once __DIR__ . '/Functions/Helpers/View.php';
 
 $view = $_GET['view'] ?? 'splash';
 $isHomeView = $view === 'home';
@@ -15,9 +15,9 @@ $currentPage = 'home';
 
 $requestedArrival = trim((string) ($_GET['aankomst'] ?? ''));
 $requestedDeparture = trim((string) ($_GET['vertrek'] ?? ''));
-$requestedGuests = maple_home_guest_count($_GET['gasten'] ?? 2);
-$arrivalLabel = maple_home_date_label($requestedArrival);
-$departureLabel = maple_home_date_label($requestedDeparture);
+$requestedGuests = filter_var($_GET['gasten'] ?? 2, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 6]]) ?: 2;
+$arrivalLabel = $requestedArrival !== '' ? $requestedArrival : 'Kies een datum';
+$departureLabel = $requestedDeparture !== '' ? $requestedDeparture : 'Kies een datum';
 
 $fallbackAccomodations = [
     [
@@ -84,8 +84,24 @@ try {
     // Keep showing the fallback events when the database is unavailable.
 }
 
-$homeAccomodations = maple_home_accomodation_cards([], $fallbackAccomodations);
-$homeEvents = maple_home_event_cards($dbEvents, $fallbackEvents);
+$accommodationImageClasses = ['comfort', 'luxe', 'premium'];
+$homeAccomodations = [];
+foreach ($fallbackAccomodations as $index => $accommodation) {
+    $accommodation['image_class'] = $accommodationImageClasses[$index % count($accommodationImageClasses)];
+    $accommodation['badge'] = $index === 0 ? 'Popular' : '';
+    $homeAccomodations[] = $accommodation;
+}
+
+$eventImageClasses = ['campfire', 'rockies', 'canoe'];
+$homeEvents = [];
+foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
+    $homeEvents[] = [
+        'title' => (string) ($event['Titel'] ?? $event['title'] ?? ''),
+        'datetime' => (string) ($event['Start_time'] ?? $event['datetime'] ?? ''),
+        'description' => (string) ($event['Omschrijving'] ?? $event['description'] ?? ''),
+        'image_class' => $eventImageClasses[$index % count($eventImageClasses)],
+    ];
+}
 ?>
 <!doctype html>
 <html lang="nl">
