@@ -1,0 +1,881 @@
+.surroundings-page {
+    --surroundings-forest: #16271f;
+    --surroundings-forest-soft: #20392e;
+    --surroundings-ivory: #f7f4ee;
+    --surroundings-paper: #fffaf0;
+    --surroundings-sand: #d6c09a;
+    --surroundings-wood: #8a5f35;
+    --surroundings-lake: #2f7884;
+    --surroundings-ink: #18231d;
+    overflow: hidden;
+    color: var(--surroundings-ink);
+    background: var(--surroundings-ivory);
+    font-family: 'Inter', Arial, sans-serif;
+}
+
+.surroundings-page h1,
+.surroundings-page h2,
+.surroundings-page h3 {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: 0;
+}
+
+.surroundings-section {
+    padding: clamp(4.5rem, 9vw, 8rem) 0;
+}
+
+.surroundings-hero {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    min-height: min(860px, 92svh);
+    color: #fff;
+    background-image: url("../Images/surroundings-hero.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+.surroundings-hero::before,
+.surroundings-hero::after,
+.hiking-banner::before,
+.surroundings-final-cta::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    content: "";
+    pointer-events: none;
+}
+
+.surroundings-hero::before {
+    background:
+        linear-gradient(90deg, rgba(9, 20, 16, 0.74), rgba(9, 20, 16, 0.33) 45%, rgba(9, 20, 16, 0.14)),
+        linear-gradient(180deg, rgba(6, 10, 9, 0.48), rgba(6, 10, 9, 0.12) 42%, rgba(6, 10, 9, 0.78));
+}
+
+.surroundings-hero::after {
+    background: linear-gradient(0deg, rgba(16, 39, 31, 0.38), transparent 42%);
+}
+
+.surroundings-hero .site-header {
+    z-index: 2;
+}
+
+.surroundings-hero__content {
+    position: relative;
+    z-index: 1;
+    width: min(calc(100% - 92px), 920px);
+    margin-top: auto;
+    margin-bottom: clamp(3.6rem, 8vh, 6.5rem);
+}
+
+.surroundings-hero__title {
+    max-width: 860px;
+    margin: 0.3rem 0 0;
+    color: #fffaf0;
+    font-size: clamp(4.1rem, 8.3vw, 8.5rem);
+    line-height: 0.88;
+    text-shadow: 0 12px 48px rgba(0, 0, 0, 0.46);
+}
+
+.surroundings-hero__copy {
+    max-width: 560px;
+    margin: 1.3rem 0 0;
+    color: rgba(255, 250, 240, 0.9);
+    font-size: clamp(1rem, 1.65vw, 1.32rem);
+    line-height: 1.65;
+}
+
+.surroundings-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    margin-top: 1.7rem;
+    padding: 0 1.35rem;
+    color: #fffaf0;
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+    text-transform: uppercase;
+    background: var(--surroundings-forest);
+    border: 1px solid rgba(255, 250, 240, 0.2);
+    border-radius: 4px;
+    transition:
+        background 220ms ease,
+        border-color 220ms ease,
+        color 220ms ease,
+        transform 220ms ease;
+}
+
+.surroundings-button:hover,
+.surroundings-button:focus-visible {
+    color: #fff;
+    background: var(--surroundings-lake);
+    border-color: rgba(255, 255, 255, 0.42);
+    transform: translateY(-2px);
+}
+
+.surroundings-button--ghost {
+    background: rgba(255, 250, 240, 0.08);
+    border-color: rgba(255, 250, 240, 0.38);
+    backdrop-filter: blur(10px);
+}
+
+.surroundings-button--light {
+    color: var(--surroundings-forest);
+    background: #fffaf0;
+    border-color: rgba(255, 250, 240, 0.75);
+}
+
+.surroundings-intro {
+    background: var(--surroundings-paper);
+}
+
+.surroundings-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(310px, 0.88fr);
+    gap: clamp(2rem, 6vw, 5.5rem);
+    align-items: center;
+}
+
+.surroundings-split__media {
+    position: relative;
+    min-height: 0;
+    margin: 0;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 24px 72px rgba(22, 39, 31, 0.18);
+}
+
+.surroundings-split__media img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1.24 / 1;
+    object-fit: cover;
+    transform: scale(1.06);
+    will-change: transform;
+}
+
+.surroundings-split__copy {
+    max-width: 540px;
+}
+
+.surroundings-split__copy h2,
+.surroundings-gallery__header h2,
+.lake-playground__intro h2,
+.surroundings-map__copy h2,
+.hiking-banner__content h2,
+.day-story__header h2,
+.surroundings-final-cta__content h2 {
+    margin: 0.25rem 0 0;
+    font-size: clamp(2.55rem, 5vw, 4.7rem);
+    line-height: 0.98;
+}
+
+.surroundings-split__copy p:not(.section-label),
+.lake-playground__intro p,
+.surroundings-map__copy > p,
+.hiking-banner__content p,
+.surroundings-final-cta__content p {
+    margin: 1.25rem 0 0;
+    color: #596459;
+    font-size: clamp(0.98rem, 1.25vw, 1.08rem);
+    line-height: 1.8;
+}
+
+.surroundings-gallery {
+    color: #fffaf0;
+    background:
+        linear-gradient(180deg, var(--surroundings-forest), #0d1b15);
+}
+
+.surroundings-gallery__header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 1.6rem;
+}
+
+.surroundings-gallery__header h2 {
+    max-width: 720px;
+    color: #fffaf0;
+}
+
+.surroundings-gallery__stage {
+    position: relative;
+    height: clamp(430px, 68vw, 760px);
+    overflow: hidden;
+    border: 1px solid rgba(255, 250, 240, 0.16);
+    border-radius: 8px;
+    box-shadow: 0 32px 100px rgba(0, 0, 0, 0.38);
+}
+
+.surroundings-slide {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    margin: 0;
+    opacity: 0;
+    transform: scale(1.025);
+    transition:
+        opacity 650ms ease,
+        transform 900ms ease;
+}
+
+.surroundings-slide.is-active {
+    z-index: 1;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.surroundings-slide::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background:
+        linear-gradient(180deg, transparent 35%, rgba(6, 10, 9, 0.72)),
+        linear-gradient(90deg, rgba(6, 10, 9, 0.36), transparent 45%);
+}
+
+.surroundings-slide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.surroundings-slide figcaption {
+    position: absolute;
+    right: clamp(1rem, 3vw, 2.4rem);
+    bottom: clamp(1rem, 3vw, 2.3rem);
+    z-index: 2;
+    max-width: min(420px, calc(100% - 2rem));
+    color: #fffaf0;
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(1.75rem, 3.5vw, 3.3rem);
+    line-height: 0.98;
+    text-shadow: 0 10px 32px rgba(0, 0, 0, 0.48);
+}
+
+.surroundings-gallery__arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 3;
+    display: inline-grid;
+    place-items: center;
+    width: clamp(42px, 5vw, 56px);
+    height: clamp(42px, 5vw, 56px);
+    color: #fffaf0;
+    cursor: pointer;
+    background: rgba(13, 27, 21, 0.46);
+    border: 1px solid rgba(255, 250, 240, 0.32);
+    border-radius: 50%;
+    font-size: 2rem;
+    line-height: 1;
+    transform: translateY(-50%);
+    backdrop-filter: blur(8px);
+    transition:
+        background 200ms ease,
+        border-color 200ms ease,
+        transform 200ms ease;
+}
+
+.surroundings-gallery__arrow:hover,
+.surroundings-gallery__arrow:focus-visible {
+    background: rgba(47, 120, 132, 0.7);
+    border-color: rgba(255, 250, 240, 0.6);
+    transform: translateY(-50%) scale(1.04);
+}
+
+.surroundings-gallery__arrow--prev {
+    left: clamp(0.9rem, 2vw, 1.4rem);
+}
+
+.surroundings-gallery__arrow--next {
+    right: clamp(0.9rem, 2vw, 1.4rem);
+}
+
+.surroundings-gallery__dots {
+    position: absolute;
+    bottom: clamp(1rem, 3vw, 2.2rem);
+    left: clamp(1rem, 3vw, 2.4rem);
+    z-index: 3;
+    display: flex;
+    gap: 0.55rem;
+}
+
+.surroundings-gallery__dot {
+    width: 2.15rem;
+    height: 0.22rem;
+    padding: 0;
+    cursor: pointer;
+    background: rgba(255, 250, 240, 0.4);
+    border: 0;
+    border-radius: 999px;
+    transition: background 200ms ease, width 200ms ease;
+}
+
+.surroundings-gallery__dot.is-active {
+    width: 3.3rem;
+    background: #fffaf0;
+}
+
+.lake-playground {
+    position: relative;
+    color: #fffaf0;
+    background: #101f18;
+}
+
+.lake-playground__image {
+    position: relative;
+    height: clamp(340px, 58vw, 720px);
+    overflow: hidden;
+}
+
+.lake-playground__image::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background:
+        linear-gradient(180deg, rgba(16, 31, 24, 0.04), rgba(16, 31, 24, 0.92)),
+        linear-gradient(90deg, rgba(16, 31, 24, 0.4), transparent 55%);
+}
+
+.lake-playground__image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lake-playground__content {
+    position: relative;
+    z-index: 1;
+    padding: 0 0 clamp(4rem, 8vw, 7rem);
+}
+
+.lake-playground__intro {
+    max-width: 760px;
+    margin-top: clamp(-8.2rem, -10vw, -4.5rem);
+}
+
+.lake-playground__intro h2,
+.hiking-banner__content h2,
+.surroundings-final-cta__content h2 {
+    color: #fffaf0;
+}
+
+.lake-playground__intro p,
+.hiking-banner__content p,
+.surroundings-final-cta__content p {
+    color: rgba(255, 250, 240, 0.82);
+}
+
+.lake-activities {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    margin-top: clamp(2rem, 5vw, 3.8rem);
+}
+
+.lake-activity {
+    position: relative;
+    min-height: 315px;
+    overflow: hidden;
+    color: #fffaf0;
+    border: 1px solid rgba(255, 250, 240, 0.16);
+    border-radius: 8px;
+    background: #142820;
+}
+
+.lake-activity img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 700ms ease;
+}
+
+.lake-activity::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background:
+        linear-gradient(180deg, transparent 18%, rgba(6, 10, 9, 0.84)),
+        linear-gradient(90deg, rgba(6, 10, 9, 0.38), transparent);
+}
+
+.lake-activity div {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    left: 1rem;
+    z-index: 1;
+}
+
+.lake-activity h3 {
+    margin: 0;
+    color: #fffaf0;
+    font-size: clamp(1.55rem, 2.2vw, 2.1rem);
+    line-height: 1;
+}
+
+.lake-activity p {
+    margin: 0.55rem 0 0;
+    color: rgba(255, 250, 240, 0.82);
+    font-size: 0.86rem;
+    line-height: 1.55;
+}
+
+.lake-activity:hover img {
+    transform: scale(1.06);
+}
+
+.surroundings-map {
+    background: var(--surroundings-paper);
+}
+
+.surroundings-map__grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1.28fr);
+    gap: clamp(2rem, 5vw, 4.8rem);
+    align-items: center;
+}
+
+.surroundings-map__copy {
+    max-width: 460px;
+}
+
+.map-travel-list {
+    display: grid;
+    gap: 0.95rem;
+    margin: 2rem 0 0;
+}
+
+.map-travel-list div {
+    padding: 0 0 0.95rem;
+    border-bottom: 1px solid rgba(22, 39, 31, 0.16);
+}
+
+.map-travel-list dt {
+    color: var(--surroundings-forest);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.map-travel-list dd {
+    margin: 0.35rem 0 0;
+    color: #657064;
+    line-height: 1.55;
+}
+
+.surroundings-map__frame {
+    position: relative;
+    min-height: clamp(430px, 56vw, 650px);
+    overflow: hidden;
+    border: 1px solid rgba(22, 39, 31, 0.16);
+    border-radius: 8px;
+    box-shadow: 0 24px 70px rgba(22, 39, 31, 0.14);
+}
+
+.surroundings-map__frame iframe {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    border: 0;
+    filter: saturate(0.92) contrast(0.98);
+}
+
+.maple-map-marker {
+    position: absolute;
+    top: 47%;
+    left: 53%;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.52rem 0.72rem;
+    color: #fffaf0;
+    background: rgba(22, 39, 31, 0.94);
+    border: 1px solid rgba(255, 250, 240, 0.28);
+    border-radius: 999px;
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.24);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+.maple-map-marker span {
+    width: 0.8rem;
+    height: 0.8rem;
+    background: #d6a74f;
+    border: 2px solid #fffaf0;
+    border-radius: 50%;
+}
+
+.maple-map-marker strong {
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.hiking-banner {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: end;
+    min-height: clamp(560px, 78svh, 760px);
+    padding: clamp(4.5rem, 8vw, 7rem) 0;
+    color: #fffaf0;
+    background-image: url("../Images/Hiking.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+.hiking-banner::before {
+    background:
+        linear-gradient(90deg, rgba(8, 15, 12, 0.72), rgba(8, 15, 12, 0.34) 55%, rgba(8, 15, 12, 0.12)),
+        linear-gradient(0deg, rgba(8, 15, 12, 0.78), transparent 58%);
+}
+
+.hiking-banner__content {
+    max-width: 660px;
+}
+
+.text-link--light {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-top: 1.4rem;
+    color: #fffaf0;
+    text-decoration: none;
+}
+
+.text-link--light .text-link__arrow {
+    color: currentColor;
+}
+
+.day-story {
+    background: var(--surroundings-ivory);
+}
+
+.day-story__header {
+    max-width: 760px;
+    margin-bottom: clamp(2rem, 5vw, 4rem);
+}
+
+.day-story__timeline {
+    position: relative;
+    display: grid;
+    gap: clamp(1rem, 3vw, 1.6rem);
+}
+
+.day-story__timeline::before {
+    position: absolute;
+    top: 2rem;
+    bottom: 2rem;
+    left: 50%;
+    width: 1px;
+    content: "";
+    background: linear-gradient(180deg, transparent, rgba(138, 95, 53, 0.42), transparent);
+}
+
+.day-moment {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+    gap: clamp(1rem, 3vw, 2rem);
+    align-items: center;
+    padding: clamp(0.7rem, 1.4vw, 1rem);
+    background: rgba(255, 250, 240, 0.78);
+    border: 1px solid rgba(22, 39, 31, 0.11);
+    border-radius: 8px;
+}
+
+.day-moment:nth-child(even) {
+    grid-template-columns: minmax(280px, 0.72fr) minmax(0, 1fr);
+}
+
+.day-moment:nth-child(even) img {
+    order: 2;
+}
+
+.day-moment img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1.95 / 1;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.day-moment div {
+    padding: clamp(1rem, 3vw, 2rem);
+}
+
+.day-moment time {
+    display: inline-block;
+    color: var(--surroundings-lake);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+.day-moment h3 {
+    margin: 0.45rem 0 0;
+    color: var(--surroundings-forest);
+    font-size: clamp(1.8rem, 3vw, 2.55rem);
+    line-height: 1;
+}
+
+.day-moment p {
+    margin: 0.75rem 0 0;
+    color: #667066;
+    line-height: 1.7;
+}
+
+.surroundings-final-cta {
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    place-items: center;
+    min-height: 100svh;
+    padding: clamp(5rem, 10vw, 8rem) 0;
+    color: #fffaf0;
+    text-align: center;
+    background-image: url("../Images/surroundings-canoe.jpg");
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+}
+
+.surroundings-final-cta::before {
+    background:
+        radial-gradient(circle at 50% 44%, rgba(47, 120, 132, 0.18), transparent 34%),
+        linear-gradient(180deg, rgba(8, 15, 12, 0.36), rgba(8, 15, 12, 0.78)),
+        linear-gradient(90deg, rgba(8, 15, 12, 0.38), transparent 34%, rgba(8, 15, 12, 0.38));
+}
+
+.surroundings-final-cta__content {
+    max-width: 900px;
+}
+
+.surroundings-final-cta__content h2 {
+    font-size: clamp(3.3rem, 8vw, 7.2rem);
+}
+
+.surroundings-final-cta__content p {
+    max-width: 640px;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.surroundings-final-cta__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.85rem;
+    margin-top: 0.6rem;
+}
+
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+        opacity 700ms ease,
+        transform 700ms ease,
+        clip-path 850ms ease;
+    transition-delay: var(--reveal-delay, 0ms);
+}
+
+.surroundings-split__media.reveal-on-scroll,
+.surroundings-gallery__stage.reveal-on-scroll,
+.lake-playground__image.reveal-on-scroll,
+.day-moment.reveal-on-scroll {
+    clip-path: inset(8% 0 0 0);
+}
+
+.reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+    clip-path: inset(0 0 0 0);
+}
+
+@media (max-width: 1050px) {
+    .surroundings-split,
+    .surroundings-map__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .surroundings-map__copy,
+    .surroundings-split__copy {
+        max-width: 720px;
+    }
+
+    .lake-activities {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .surroundings-hero {
+        min-height: 88svh;
+        background-position: center center;
+    }
+
+    .surroundings-hero__content {
+        width: min(calc(100% - 40px), 920px);
+        margin-bottom: 2.8rem;
+    }
+
+    .surroundings-hero__title {
+        font-size: clamp(3.1rem, 15vw, 4.8rem);
+    }
+
+    .surroundings-section {
+        padding: 3.7rem 0;
+    }
+
+    .surroundings-gallery__header {
+        display: block;
+    }
+
+    .surroundings-gallery__stage {
+        width: 100%;
+        height: min(560px, 108vw);
+        border-right: 0;
+        border-left: 0;
+        border-radius: 0;
+    }
+
+    .surroundings-gallery__arrow {
+        top: auto;
+        bottom: 4rem;
+        transform: none;
+    }
+
+    .surroundings-gallery__arrow:hover,
+    .surroundings-gallery__arrow:focus-visible {
+        transform: scale(1.04);
+    }
+
+    .surroundings-slide figcaption {
+        right: 1rem;
+        bottom: 1rem;
+        left: 1rem;
+        padding-bottom: 4rem;
+        font-size: clamp(2rem, 9vw, 3rem);
+    }
+
+    .surroundings-gallery__dots {
+        right: 1rem;
+        left: 1rem;
+        justify-content: center;
+    }
+
+    .lake-playground__image {
+        height: 430px;
+    }
+
+    .lake-playground__intro {
+        margin-top: -5rem;
+    }
+
+    .lake-activities {
+        grid-template-columns: 1fr;
+    }
+
+    .lake-activity {
+        min-height: 260px;
+    }
+
+    .surroundings-map__frame {
+        min-height: 430px;
+        margin-right: -20px;
+        margin-left: -20px;
+        border-right: 0;
+        border-left: 0;
+        border-radius: 0;
+    }
+
+    .maple-map-marker {
+        left: 55%;
+        max-width: calc(100% - 2rem);
+    }
+
+    .hiking-banner {
+        min-height: 620px;
+        background-position: 58% center;
+    }
+
+    .day-story__timeline::before {
+        display: none;
+    }
+
+    .day-moment,
+    .day-moment:nth-child(even) {
+        grid-template-columns: 1fr;
+    }
+
+    .day-moment:nth-child(even) img {
+        order: 0;
+    }
+
+    .day-moment div {
+        padding: 0.6rem 0.3rem 0.9rem;
+    }
+
+    .surroundings-final-cta {
+        min-height: 86svh;
+    }
+}
+
+@media (max-width: 480px) {
+    .surroundings-button {
+        width: 100%;
+        min-height: 44px;
+        margin-top: 1.15rem;
+    }
+
+    .surroundings-final-cta__actions {
+        display: grid;
+        width: 100%;
+    }
+
+    .surroundings-split__media img {
+        aspect-ratio: 0.92 / 1;
+    }
+
+    .surroundings-gallery__dot {
+        width: 1.35rem;
+    }
+
+    .surroundings-gallery__dot.is-active {
+        width: 2.15rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .reveal-on-scroll,
+    .surroundings-slide,
+    .lake-activity img,
+    .surroundings-button,
+    .surroundings-gallery__arrow,
+    .surroundings-gallery__dot {
+        transition: none;
+    }
+
+    .reveal-on-scroll {
+        opacity: 1;
+        transform: none;
+    }
+}
