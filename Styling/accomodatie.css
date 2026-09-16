@@ -314,6 +314,102 @@
     background: #294438;
 }
 
+.booking-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.8rem;
+    margin-top: 1.5rem;
+    padding: .8rem 1.2rem;
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    cursor: pointer;
+    background: #294438;
+    border: 1px solid #294438;
+    border-radius: .25rem;
+}
+
+.booking-button:hover,
+.booking-button:focus-visible {
+    color: #294438;
+    background: transparent;
+}
+
+.booking-error {
+    margin: 1.25rem 0 0;
+    padding: .85rem 1rem;
+    color: #8a2e28;
+    background: #fff0ed;
+    border-left: 3px solid #bd554c;
+}
+
+.booking-modal[hidden] {
+    display: none;
+}
+
+.booking-modal {
+    position: fixed;
+    z-index: 1010;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 1.5rem;
+}
+
+.booking-modal__overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(8, 15, 12, .78);
+}
+
+.booking-modal__dialog {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 480px);
+    max-height: calc(100vh - 3rem);
+    overflow: auto;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: #f8f7f3;
+    border-radius: .35rem;
+    box-shadow: 0 18px 52px rgba(0, 0, 0, .35);
+}
+
+.booking-modal__dialog h2 {
+    margin: .25rem 2rem 1rem 0;
+    color: #294438;
+    font-family: "Cormorant Garamond", Georgia, serif;
+    font-size: clamp(2rem, 4vw, 2.7rem);
+    line-height: 1;
+}
+
+.booking-modal__dialog form {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.4rem;
+}
+
+.booking-modal__dialog label {
+    display: grid;
+    gap: .4rem;
+    color: #61645f;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.booking-modal__dialog input {
+    width: 100%;
+    padding: .75rem;
+    color: #30352f;
+    font: inherit;
+    background: #fff;
+    border: 1px solid #dedbd3;
+    border-radius: .2rem;
+}
+
 body.accommodation-modal-open {
     overflow: hidden;
 }

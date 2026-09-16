@@ -49,11 +49,7 @@ function showMatchingCottages() {
     noResults.hidden = matchingCottages.length !== 0;
 }
 
-// Do not reload the page when the search button is pressed.
-searchForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    showMatchingCottages();
-});
+// Date availability is confirmed by the server; this form intentionally submits normally.
 
 // A category button chooses a type and then filters straight away.
 tabs.forEach(function (tab) {
@@ -78,7 +74,16 @@ const modalPrice = document.querySelector('#accommodation-modal-price');
 const modalMax = document.querySelector('#accommodation-modal-max');
 const modalFacilities = document.querySelector('#accommodation-modal-facilities');
 const modalDescription = document.querySelector('#accommodation-modal-description');
+const bookNowButton = document.querySelector('#book-now-button');
+const bookingModal = document.querySelector('#booking-modal');
+const bookingDialog = document.querySelector('.booking-modal__dialog');
+const bookingHuisId = document.querySelector('#booking-huis-id');
+const bookingAccommodationName = document.querySelector('#booking-accommodation-name');
+const bookingStartDate = document.querySelector('#booking-start-date');
+const bookingEndDate = document.querySelector('#booking-end-date');
+const bookingPeople = document.querySelector('#booking-people');
 let previouslyFocusedElement = null;
+let activeAccommodation = null;
 
 function openAccommodationModal(card) {
     const image = card.querySelector('.accommodation-card__image');
@@ -90,6 +95,11 @@ function openAccommodationModal(card) {
     modalMax.textContent = card.dataset.max + ' guests';
     modalFacilities.textContent = card.dataset.facilities;
     modalDescription.textContent = card.dataset.description;
+    activeAccommodation = {
+        huisId: card.dataset.huisId,
+        name: card.dataset.huisName,
+        max: card.dataset.max
+    };
 
     modalImage.className = 'accommodation-modal__image';
     if (image) {
@@ -100,6 +110,34 @@ function openAccommodationModal(card) {
     accommodationModal.setAttribute('aria-hidden', 'false');
     document.body.classList.add('accommodation-modal-open');
     modalDialog.focus();
+}
+
+function openBookingModal() {
+    if (!activeAccommodation) {
+        return;
+    }
+
+    bookingHuisId.value = activeAccommodation.huisId;
+    bookingAccommodationName.textContent = activeAccommodation.name;
+    bookingStartDate.value = document.querySelector('#arrival').value;
+    bookingEndDate.value = document.querySelector('#departure').value;
+    bookingPeople.value = document.querySelector('#guests').value;
+    bookingPeople.max = activeAccommodation.max;
+    bookingModal.hidden = false;
+    bookingModal.setAttribute('aria-hidden', 'false');
+    bookingDialog.focus();
+}
+
+function closeBookingModal() {
+    if (bookingModal.hidden) {
+        return;
+    }
+
+    bookingModal.hidden = true;
+    bookingModal.setAttribute('aria-hidden', 'true');
+    if (bookNowButton) {
+        bookNowButton.focus();
+    }
 }
 
 function closeAccommodationModal() {
@@ -139,8 +177,20 @@ accommodationModal.addEventListener('click', function (event) {
     }
 });
 
+bookNowButton.addEventListener('click', openBookingModal);
+
+bookingModal.addEventListener('click', function (event) {
+    if (event.target.closest('[data-booking-modal-close="true"]')) {
+        closeBookingModal();
+    }
+});
+
 document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !accommodationModal.hidden) {
-        closeAccommodationModal();
+    if (event.key === 'Escape') {
+        if (!bookingModal.hidden) {
+            closeBookingModal();
+        } else if (!accommodationModal.hidden) {
+            closeAccommodationModal();
+        }
     }
 });

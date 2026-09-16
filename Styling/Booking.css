@@ -1,0 +1,13 @@
+ .booking-page { min-height: 100vh; background: #f8f7f3; }
+.booking-page .site-header { color: #294438; }
+.booking-summary { max-width: 760px; padding-top: 5rem; padding-bottom: 5rem; }
+.booking-summary h1 { margin: .3rem 0 2rem; color: #294438; font-family: "Cormorant Garamond", Georgia, serif; font-size: clamp(2.6rem, 6vw, 4.5rem); font-weight: 600; }
+.booking-summary__details { margin: 0; background: #fff; border: 1px solid #e2dfd7; border-radius: .35rem; box-shadow: 0 5px 14px rgba(46,44,35,.07); }
+.booking-summary__details div { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid #e2dfd7; }
+.booking-summary__details div:last-child { border-bottom: 0; }
+.booking-summary__details dt { color: #61645f; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.booking-summary__details dd { margin: 0; color: #30352f; font-weight: 600; text-align: right; }
+.booking-summary__details .booking-summary__total { color: #294438; background: #f3f1eb; }
+.booking-summary__button { display: inline-flex; justify-content: center; min-width: 11rem; margin-top: 1.5rem; padding: .85rem 1.2rem; color: #fff; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-decoration: none; cursor: pointer; background: #294438; border: 1px solid #294438; border-radius: .25rem; }
+.booking-summary__button:hover, .booking-summary__button:focus-visible { color: #294438; background: transparent; }
+.booking-summary__error { padding: 1rem; color: #8a2e28; background: #fff0ed; border-left: 3px solid #bd554c; }

@@ -5,6 +5,67 @@ $assetBase = '../';
 $currentPage = 'accommodaties';
 
 require_once __DIR__ . '/../Includes/DataBase.php';
+require_once __DIR__ . '/../Functions/Helpers/Session.php';
+
+$bookingError = '';
+if (empty($_SESSION['booking_csrf'])) {
+    $_SESSION['booking_csrf'] = bin2hex(random_bytes(32));
+}
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['booking_action'] ?? '') === 'continue') {
+    $huisId = filter_var($_POST['huis_id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+    $startDate = trim((string) ($_POST['start_date'] ?? ''));
+    $endDate = trim((string) ($_POST['end_date'] ?? ''));
+    $people = filter_var($_POST['people'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+    if (!hash_equals((string) $_SESSION['booking_csrf'], (string) ($_POST['csrf'] ?? ''))) {
+        $bookingError = 'Your session has expired. Please try again.';
+    } elseif ($huisId === false || $huisId === null) {
+        $bookingError = 'Please select a valid accommodation.';
+    } elseif (($start = maple_booking_date($startDate)) === null || ($end = maple_booking_date($endDate)) === null) {
+        $bookingError = 'Please enter valid arrival and departure dates.';
+    } elseif ($start < new DateTimeImmutable('today')) {
+        $bookingError = 'Arrival cannot be in the past.';
+    } elseif ($end <= $start) {
+        $bookingError = 'Departure must be later than arrival.';
+    } elseif ($people === false || $people === null) {
+        $bookingError = 'Please enter a valid number of people.';
+    } else {
+        $selectedAccommodation = maple_booking_accommodation($conn, (int) $huisId);
+        if ($selectedAccommodation === null) {
+            $bookingError = 'This accommodation is no longer available.';
+        } elseif ($people > (int) $selectedAccommodation['Max']) {
+            $bookingError = 'The selected number of people exceeds this accommodation\'s maximum occupancy.';
+        } else {
+            // Recheck immediately before the later final reservation step as well to avoid races.
+            $available = maple_booking_is_available($conn, (int) $huisId, $startDate, $endDate);
+            if ($available !== true) {
+                $bookingError = $available === false
+                    ? 'This accommodation is no longer available for the selected dates.'
+                    : 'Availability could not be verified. Please try again later.';
+            } else {
+                $_SESSION['pending_booking'] = [
+                    'huis_id' => (int) $huisId,
+                    'start_date' => $startDate,
+                    'end_date' => $endDate,
+                    'people' => (int) $people,
+                ];
+
+                if (empty($_SESSION['user_id'])) {
+                    $_SESSION['booking_login_redirect'] = 'Book-Resi.php';
+                    header('Location: Login.php');
+                } else {
+                    header('Location: Book-Resi.php');
+                }
+                exit;
+            }
+        }
+    }
+}
+
+$filterArrival = trim((string) ($_GET['arrival'] ?? ''));
+$filterDeparture = trim((string) ($_GET['departure'] ?? ''));
+$filterGuests = filter_var($_GET['guests'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
 $accommodations = [];
 $accommodationStatement = $conn->prepare(
@@ -17,7 +78,14 @@ if ($accommodationStatement) {
 
     if ($accommodationResult) {
         while ($accommodation = $accommodationResult->fetch_assoc()) {
-            $accommodations[] = $accommodation;
+            $matchesGuests = $filterGuests === false || $filterGuests === null || (int) $accommodation['Max'] >= $filterGuests;
+            $matchesAvailability = true;
+            if (maple_booking_date($filterArrival) !== null && maple_booking_date($filterDeparture) !== null && $filterDeparture > $filterArrival) {
+                $matchesAvailability = maple_booking_is_available($conn, (int) $accommodation['Huis_id'], $filterArrival, $filterDeparture) === true;
+            }
+            if ($matchesGuests && $matchesAvailability) {
+                $accommodations[] = $accommodation;
+            }
         }
     }
 
@@ -61,9 +129,9 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
                 </div>
 
                 <form class="cottage-search" id="cottage-search" action="#overview-heading" method="get" aria-label="Search cottages">
-                    <label><span>Guests</span><select id="guests" name="guests"><option value="">Any number</option><option value="1">1 guests</option><option value="2">2 guests</option><option value="3">3 guests</option><option value="4">4 guests</option><option value="5">5 guests</option></select></label>
-                    <label><span>Arrival</span><input id="arrival" type="date" name="arrival" aria-label="Arrival date"></label>
-                    <label><span>Departure</span><input id="departure" type="date" name="departure" aria-label="Departure date"></label>
+                    <label><span>Guests</span><select id="guests" name="guests"><option value="">Any number</option><?php foreach ([1, 2, 3, 4, 5, 6] as $guestOption): ?><option value="<?= $guestOption; ?>"<?= $filterGuests === $guestOption ? ' selected' : ''; ?>><?= $guestOption; ?> guests</option><?php endforeach; ?></select></label>
+                    <label><span>Arrival</span><input id="arrival" type="date" name="arrival" value="<?= htmlspecialchars($filterArrival, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Arrival date"></label>
+                    <label><span>Departure</span><input id="departure" type="date" name="departure" value="<?= htmlspecialchars($filterDeparture, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Departure date"></label>
                     <button type="submit">Search cottages</button>
                 </form>
                 <nav class="cottage-tabs" aria-label="Accommodation categories">
@@ -93,6 +161,9 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
                     <div class="cottage-options-divider" id="cottage-options-divider" hidden><span>Overige opties</span></div>
                 </div>
                 <p class="cottage-no-results" id="cottage-no-results" hidden>No exact matches. See the other options below.</p>
+                <?php if ($bookingError !== ''): ?>
+                    <p class="booking-error" role="alert"><?= htmlspecialchars($bookingError, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php endif; ?>
             </div>
         </section>
         <section class="accommodations-note">
@@ -118,7 +189,26 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
                     <div><dt>Facilities</dt><dd id="accommodation-modal-facilities"></dd></div>
                     <div><dt>Description</dt><dd id="accommodation-modal-description"></dd></div>
                 </dl>
+                <button class="booking-button" id="book-now-button" type="button">BOOK NOW</button>
             </div>
+        </section>
+    </div>
+    <div class="booking-modal" id="booking-modal" hidden aria-hidden="true">
+        <div class="booking-modal__overlay" data-booking-modal-close="true"></div>
+        <section class="booking-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title" tabindex="-1">
+            <button class="accommodation-modal__close" type="button" aria-label="Close booking confirmation" data-booking-modal-close="true">&times;</button>
+            <p class="section-label">CONFIRM YOUR STAY</p>
+            <h2 id="booking-modal-title">Complete your booking</h2>
+            <p id="booking-accommodation-name"></p>
+            <form method="post" action="Accomodatie.php" id="booking-confirmation-form">
+                <input type="hidden" name="booking_action" value="continue">
+                <input type="hidden" name="csrf" value="<?= htmlspecialchars((string) $_SESSION['booking_csrf'], ENT_QUOTES, 'UTF-8'); ?>">
+                <input type="hidden" name="huis_id" id="booking-huis-id" value="">
+                <label>Arrival<input type="date" name="start_date" id="booking-start-date" required></label>
+                <label>Departure<input type="date" name="end_date" id="booking-end-date" required></label>
+                <label>Number of people<input type="number" name="people" id="booking-people" min="1" step="1" required></label>
+                <button class="booking-button" type="submit">CONTINUE BOOKING</button>
+            </form>
         </section>
     </div>
     <?php include __DIR__ . '/../Includes/Footer.php'; ?>

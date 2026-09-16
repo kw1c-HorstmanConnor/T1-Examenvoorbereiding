@@ -13,7 +13,12 @@ $email = '';
 $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 if ($requestMethod === 'POST') {
-    $loginResult = maple_handle_login($_POST, 'Admin.php', '../Index.php?view=home');
+    $bookingRedirect = !empty($_SESSION['pending_booking']) && ($_SESSION['booking_login_redirect'] ?? '') === 'Book-Resi.php';
+    $loginResult = maple_handle_login(
+        $_POST,
+        $bookingRedirect ? 'Book-Resi.php' : 'Admin.php',
+        $bookingRedirect ? 'Book-Resi.php' : '../Index.php?view=home'
+    );
     $loginError = $loginResult['error'];
     $username = $loginResult['values']['username'];
     $email = $loginResult['values']['email'];
