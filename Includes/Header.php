@@ -74,7 +74,7 @@ $isAuthPage = in_array($currentPage, ['login', 'register'], true);
             <?php if ($loggedInVoornaam !== ''): ?>
                 <span class="header-account"><?= htmlspecialchars($loggedInVoornaam, ENT_QUOTES, 'UTF-8'); ?></span>
                 <?php if ($loggedInRoleName === 'admin'): ?>
-                    <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/Admin.php', ENT_QUOTES, 'UTF-8'); ?>">Admin</a>
+                    <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/AdminPanel.php', ENT_QUOTES, 'UTF-8'); ?>">Admin</a>
                 <?php endif; ?>
                 <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/Logout.php', ENT_QUOTES, 'UTF-8'); ?>">Logout</a>
             <?php else: ?>
