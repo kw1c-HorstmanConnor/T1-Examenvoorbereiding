@@ -17,6 +17,7 @@ if (!isset($currentPage)) {
             'Admin.php' => 'admin',
             'Evenementen.php' => 'events',
             'Omgeving.php' => 'omgeving',
+            'Reviews.php' => 'reviews',
     ];
     $currentPage = $pageMap[$scriptName] ?? 'home';
 }
@@ -27,6 +28,7 @@ $navItems = [
         'faciliteiten' => ['label' => 'Faciliteiten', 'href' => $basePath . 'Index.php?view=home#faciliteiten', 'dropdown' => false],
         'activiteiten' => ['label' => 'Activiteiten', 'href' => $basePath . 'Pages/Activiteiten.php', 'dropdown' => false],
         'events' => ['label' => 'Events', 'href' => $basePath . 'Pages/Evenementen.php', 'dropdown' => true],
+        'reviews' => ['label' => 'Reviews', 'href' => $basePath . 'Pages/Reviews.php', 'dropdown' => false],
         'omgeving' => ['label' => 'Omgeving', 'href' => $basePath . 'Pages/Omgeving.php', 'dropdown' => false],
 ];
 $isAuthPage = in_array($currentPage, ['login', 'register'], true);

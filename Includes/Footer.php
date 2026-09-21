@@ -24,6 +24,7 @@ $assetBase = $assetBase ?? $rootPrefix;
             <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home#faciliteiten', ENT_QUOTES, 'UTF-8'); ?>">Facilities</a>
             <a href="<?= htmlspecialchars($basePath . 'Pages/Activiteiten.php', ENT_QUOTES, 'UTF-8'); ?>">Activities</a>
             <a href="<?= htmlspecialchars($basePath . 'Pages/Evenementen.php', ENT_QUOTES, 'UTF-8'); ?>">Events</a>
+            <a href="<?= htmlspecialchars($basePath . 'Pages/Reviews.php', ENT_QUOTES, 'UTF-8'); ?>">Reviews</a>
             <a href="<?= htmlspecialchars($basePath . 'Pages/Omgeving.php', ENT_QUOTES, 'UTF-8'); ?>">Surroundings</a>
         </nav>
 

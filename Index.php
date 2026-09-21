@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/Functions/Helpers/Database.php';
 require_once __DIR__ . '/Functions/Helpers/Session.php';
 require_once __DIR__ . '/Functions/Helpers/View.php';
+require_once __DIR__ . '/Functions/Reviews/Reviews.php';
 
 $view = $_GET['view'] ?? 'splash';
 $isHomeView = $view === 'home';
@@ -18,6 +19,7 @@ $requestedDeparture = trim((string) ($_GET['vertrek'] ?? ''));
 $requestedGuests = filter_var($_GET['gasten'] ?? 2, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 6]]) ?: 2;
 $arrivalLabel = $requestedArrival !== '' ? $requestedArrival : 'Kies een datum';
 $departureLabel = $requestedDeparture !== '' ? $requestedDeparture : 'Kies een datum';
+$homepageReviews = $isHomeView ? array_slice(maple_published_reviews(), 0, 4) : [];
 
 $fallbackAccomodations = [
     [
@@ -287,67 +289,42 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
                 </div>
             </section>
 
-            <section class="home-section reviews" id="reviews">
-                <div class="page-container">
-                    <div class="section-header section-header--reviews">
-                        <div>
-                            <p class="section-label">GASTEN OVER ONS</p>
-                            <h2 class="section-title">Wat onze gasten zeggen</h2>
+            <?php if ($homepageReviews !== []): ?>
+                <section class="home-section reviews" id="reviews">
+                    <div class="page-container">
+                        <div class="section-header section-header--reviews">
+                            <div>
+                                <p class="section-label">GASTEN OVER ONS</p>
+                                <h2 class="section-title">Wat onze gasten zeggen</h2>
+                            </div>
+                            <a class="text-link text-link--top" href="Pages/Reviews.php">Alle reviews <span class="text-link__arrow" aria-hidden="true"></span></a>
                         </div>
-                        <a class="text-link text-link--top" href="#reviews">Alle reviews <span class="text-link__arrow" aria-hidden="true"></span></a>
+
+                        <div class="review-grid">
+                            <?php foreach ($homepageReviews as $index => $review): ?>
+                                <?php
+                                $reviewRating = (int) $review['Rating'];
+                                $postedDate = maple_review_format_date($review['Aangemaakt'] ?? null);
+                                $avatarClass = 'review-avatar--' . ['one', 'two', 'three', 'four'][$index % 4];
+                                ?>
+                                <article class="review-card">
+                                    <div class="review-card__header">
+                                        <span class="review-avatar <?= htmlspecialchars($avatarClass, ENT_QUOTES, 'UTF-8'); ?>" aria-hidden="true"></span>
+                                        <div>
+                                            <h3 data-no-translate><?= htmlspecialchars(maple_review_display_name($review), ENT_QUOTES, 'UTF-8'); ?></h3>
+                                            <?php if ($postedDate !== ''): ?>
+                                                <p><?= htmlspecialchars($postedDate, ENT_QUOTES, 'UTF-8'); ?></p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                    <div class="stars" aria-label="<?= $reviewRating; ?> van 5 sterren"><?= maple_review_stars_html($reviewRating); ?></div>
+                                    <p data-no-translate><?= htmlspecialchars((string) $review['Omschrijving'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
-
-                    <div class="review-grid">
-                        <article class="review-card">
-                            <div class="review-card__header">
-                                <span class="review-avatar review-avatar--one" aria-hidden="true"></span>
-                                <div>
-                                    <h3>Lisa &amp; Mark</h3>
-                                    <p>Mei 2026</p>
-                                </div>
-                            </div>
-                            <div class="stars" aria-label="5 van 5 sterren">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                            <p>Prachtige locatie, geweldige faciliteiten en een super vriendelijk team. Wij komen zeker terug!</p>
-                        </article>
-
-                        <article class="review-card">
-                            <div class="review-card__header">
-                                <span class="review-avatar review-avatar--two" aria-hidden="true"></span>
-                                <div>
-                                    <h3>Tom</h3>
-                                    <p>April 2026</p>
-                                </div>
-                            </div>
-                            <div class="stars" aria-label="5 van 5 sterren">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                            <p>De omgeving is adembenemend. Overdag hiken, 's avonds kampvuur. Perfecte vakantie!</p>
-                        </article>
-
-                        <article class="review-card">
-                            <div class="review-card__header">
-                                <span class="review-avatar review-avatar--three" aria-hidden="true"></span>
-                                <div>
-                                    <h3>Sanne &amp; Jeroen</h3>
-                                    <p>Mei 2026</p>
-                                </div>
-                            </div>
-                            <div class="stars" aria-label="5 van 5 sterren">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                            <p>Luxe bungalow, alles was schoon en compleet. Echt genieten in de natuur.</p>
-                        </article>
-
-                        <article class="review-card">
-                            <div class="review-card__header">
-                                <span class="review-avatar review-avatar--four" aria-hidden="true"></span>
-                                <div>
-                                    <h3>Mike</h3>
-                                    <p>April 2026</p>
-                                </div>
-                            </div>
-                            <div class="stars" aria-label="5 van 5 sterren">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                            <p>Canoe&euml;n op het meer was het hoogtepunt van onze trip. Aanrader voor iedereen!</p>
-                        </article>
-                    </div>
-                </div>
-            </section>
+                </section>
+            <?php endif; ?>
         </main>
 
         <?php include __DIR__ . '/Includes/Footer.php'; ?>
