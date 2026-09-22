@@ -125,42 +125,6 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
 
             <div class="home-hero__content page-container">
                 <h1 class="home-hero__title" id="home-heading">Enjoy<br>the Canadian Wild</h1>
-
-                <form class="booking-panel" id="booking" action="Index.php#accommodaties" method="get">
-                    <input type="hidden" name="view" value="home">
-                    <label class="booking-field">
-                        <span class="booking-field__label">Aankomst</span>
-                        <span class="booking-field__control">
-                            <input class="booking-field__input" type="date" name="aankomst" value="<?= maple_e($requestedArrival); ?>" aria-label="Aankomstdatum">
-                            <span class="booking-field__value"><?= maple_e($arrivalLabel); ?></span>
-                            <span class="booking-field__icon booking-field__icon--calendar" aria-hidden="true"></span>
-                        </span>
-                    </label>
-
-                    <label class="booking-field">
-                        <span class="booking-field__label">Vertrek</span>
-                        <span class="booking-field__control">
-                            <input class="booking-field__input" type="date" name="vertrek" value="<?= maple_e($requestedDeparture); ?>" aria-label="Vertrekdatum">
-                            <span class="booking-field__value"><?= maple_e($departureLabel); ?></span>
-                            <span class="booking-field__icon booking-field__icon--calendar" aria-hidden="true"></span>
-                        </span>
-                    </label>
-
-                    <label class="booking-field">
-                        <span class="booking-field__label">Gasten</span>
-                        <span class="booking-field__control">
-                            <select class="booking-field__input" name="gasten" aria-label="Aantal gasten">
-                                <?php foreach ([1, 2, 3, 4, 5, 6] as $guestOption): ?>
-                                    <option value="<?= $guestOption; ?>"<?= $requestedGuests === $guestOption ? ' selected' : ''; ?>><?= $guestOption; ?> <?= $guestOption === 1 ? 'gast' : 'gasten'; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <span class="booking-field__value"><?= $requestedGuests; ?> <?= $requestedGuests === 1 ? 'gast' : 'gasten'; ?></span>
-                            <span class="booking-field__icon booking-field__icon--guests" aria-hidden="true"></span>
-                        </span>
-                    </label>
-
-                    <button class="booking-panel__submit" type="submit">Zoek beschikbaarheid</button>
-                </form>
             </div>
         </section>
 
@@ -196,7 +160,7 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
                                         <span>Vanaf</span>
                                         <strong>&euro; <?= maple_e(maple_home_price($accomodation['price'])); ?> <em>per nacht</em></strong>
                                     </div>
-                                    <a class="card-button" href="#booking">Bekijk beschikbaarheid</a>
+                                    <a class="card-button" href="Pages/Accomodatie.php">Bekijk beschikbaarheid</a>
                                 </div>
                             </article>
                         <?php endforeach; ?>
