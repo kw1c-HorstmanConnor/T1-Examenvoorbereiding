@@ -47,7 +47,7 @@
 .activities-hero__title {
     margin: 0;
     color: var(--soft-white);
-    font-family: 'BioRhymeRegular';
+    font-family: var(--font-heading);
     font-size: clamp(4rem, 8vw, 7.4rem);
     font-weight: 500;
     line-height: 0.92;
@@ -241,7 +241,7 @@
 .activities-cta__title {
     margin: 0;
     color: var(--soft-white);
-    font-family: 'BioRhymeRegular';
+    font-family: var(--font-heading);
     font-size: clamp(2.4rem, 4vw, 4rem);
     font-weight: 500;
     line-height: 1.05;
@@ -364,7 +364,7 @@
 .activity-modal__content h2 {
     margin: 0;
     color: #151914;
-    font-family: 'BioRhymeRegular';
+    font-family: var(--font-heading);
     font-size: clamp(2.2rem, 4vw, 3.6rem);
     font-weight: 500;
     line-height: 0.98;
