@@ -11,13 +11,15 @@ $loginNotice = maple_login_notice($_GET);
 $username = '';
 $email = '';
 $requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+$requestedRedirect = $_POST['redirect'] ?? $_GET['redirect'] ?? '';
+$loginRedirect = is_string($requestedRedirect) ? maple_login_safe_redirect_path($requestedRedirect) : '';
 
 if ($requestMethod === 'POST') {
     $bookingRedirect = !empty($_SESSION['pending_booking']) && ($_SESSION['booking_login_redirect'] ?? '') === 'Book-Resi.php';
     $loginResult = maple_handle_login(
         $_POST,
-        $bookingRedirect ? 'Book-Resi.php' : 'Admin.php',
-        $bookingRedirect ? 'Book-Resi.php' : '../Index.php?view=home'
+        $bookingRedirect ? 'Book-Resi.php' : ($loginRedirect !== '' ? $loginRedirect : 'Admin.php'),
+        $bookingRedirect ? 'Book-Resi.php' : ($loginRedirect !== '' ? $loginRedirect : '../Index.php?view=home')
     );
     $loginError = $loginResult['error'];
     $username = $loginResult['values']['username'];
@@ -47,6 +49,9 @@ $csrfToken = maple_login_csrf_token();
         <main class="login-main page-container">
             <form class="login-card" method="post" action="Login.php">
                 <input type="hidden" name="csrf" value="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8'); ?>">
+                <?php if ($loginRedirect !== ''): ?>
+                    <input type="hidden" name="redirect" value="<?= htmlspecialchars($loginRedirect, ENT_QUOTES, 'UTF-8'); ?>">
+                <?php endif; ?>
 
                 <p class="section-label section-label--light">LOGIN</p>
                 <h1>Welcome back</h1>

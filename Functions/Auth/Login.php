@@ -33,6 +33,23 @@ function maple_login_notice(array $query): string
     return '';
 }
 
+function maple_login_safe_redirect_path(string $redirectPath, string $fallbackPath = ''): string
+{
+    $redirectPath = trim($redirectPath);
+
+    if (
+        $redirectPath === ''
+        || preg_match('/[\x00-\x1f\x7f]/i', $redirectPath)
+        || preg_match('/^[a-z][a-z0-9+.-]*:/i', $redirectPath)
+        || substr($redirectPath, 0, 2) === '//'
+        || substr($redirectPath, 0, 1) === '\\'
+    ) {
+        return $fallbackPath;
+    }
+
+    return $redirectPath;
+}
+
 function maple_authenticate_user(string $email, string $password, $voornaam = null): bool
 {
     $email = trim($email);
@@ -105,6 +122,8 @@ function maple_handle_login(array $post, string $adminRedirect, string $userRedi
 {
     require_once __DIR__ . '/Authorization.php';
 
+    $adminRedirect = maple_login_safe_redirect_path($adminRedirect, 'Admin.php');
+    $userRedirect = maple_login_safe_redirect_path($userRedirect, '../Index.php?view=home');
     $username = trim((string) ($post['username'] ?? ''));
     $email = trim((string) ($post['email'] ?? ''));
     $password = (string) ($post['password'] ?? '');
