@@ -104,6 +104,102 @@
     padding-top: 4px;
 }
 
+.admin-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 24px;
+}
+
+.admin-tabs a,
+.admin-form button,
+.admin-form__actions a,
+.admin-record__actions a,
+.admin-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 8px 14px;
+    border: 1px solid #2f4935;
+    border-radius: 3px;
+    color: #2f4935;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.admin-tabs a.is-active,
+.admin-form button {
+    color: #fff;
+    background: #2f4935;
+}
+
+.admin-feedback {
+    margin: 0 0 20px;
+    padding: 12px 15px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.admin-feedback.success { color: #1d5629; background: #e4f4e6; }
+.admin-feedback.error { color: #822a22; background: #f9e5e2; }
+
+.admin-crud {
+    display: grid;
+    grid-template-columns: minmax(280px, .9fr) minmax(0, 1.4fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.admin-crud__form,
+.admin-crud__list {
+    padding: 24px;
+    border: 1px solid rgba(222, 218, 209, .9);
+    border-radius: 5px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(42, 36, 27, .045);
+}
+
+.admin-crud h2 { margin: 0 0 20px; font-family: var(--font-heading); font-size: 2rem; font-weight: 500; }
+.admin-form { display: grid; gap: 14px; }
+.admin-form label { display: grid; gap: 6px; color: #313a31; font-size: 13px; font-weight: 700; }
+.admin-form input,
+.admin-form textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    border: 1px solid #c9c7bd;
+    border-radius: 3px;
+    color: #151914;
+    background: #fff;
+    font: inherit;
+    font-weight: 400;
+}
+.admin-form textarea { resize: vertical; }
+.admin-form small { font-weight: 400; }
+.admin-form__actions,
+.admin-record__actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.admin-form__actions { margin-top: 4px; }
+.admin-delete { border-color: #9a3028; color: #9a3028; }
+.admin-records { display: grid; gap: 10px; }
+.admin-record { display: flex; justify-content: space-between; gap: 16px; padding: 14px 0; border-bottom: 1px solid #e6e2d8; }
+.admin-record:last-child { border-bottom: 0; }
+.admin-record h3 { margin: 0 0 5px; font-size: 15px; }
+.admin-record p { margin: 0; color: #576057; font-size: 12px; line-height: 1.5; }
+.admin-record__actions form { margin: 0; }
+
+@media (max-width: 820px) {
+    .admin-crud { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 520px) {
+    .admin-record { flex-direction: column; }
+}
+
 .admin-workspace__header {
     display: flex;
     align-items: flex-end;
