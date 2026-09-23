@@ -16,7 +16,7 @@ if ($requestMethod === 'POST') {
     $bookingRedirect = !empty($_SESSION['pending_booking']) && ($_SESSION['booking_login_redirect'] ?? '') === 'Book-Resi.php';
     $loginResult = maple_handle_login(
         $_POST,
-        $bookingRedirect ? 'Book-Resi.php' : 'Admin.php',
+        $bookingRedirect ? 'Book-Resi.php' : 'AdminPanel.php',
         $bookingRedirect ? 'Book-Resi.php' : '../Index.php?view=home'
     );
     $loginError = $loginResult['error'];
