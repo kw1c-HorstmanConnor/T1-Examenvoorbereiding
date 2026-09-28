@@ -8,7 +8,7 @@ require_once __DIR__ . '/../Helpers/Database.php';
 // -------------------------------------------------------------------------
 
 // Returns the requested month, with the current month as the earliest option.
-function maple_events_calendar_month(?string $requestedMonth): DateTimeImmutable
+function maple_events_calendar_month($requestedMonth): DateTimeImmutable
 {
     $currentMonth = new DateTimeImmutable('first day of this month midnight');
     $requestedMonth = trim((string) $requestedMonth);
@@ -71,7 +71,7 @@ function maple_events_by_date(DateTimeImmutable $month): array
 // -------------------------------------------------------------------------
 
 // Builds the dates, labels, navigation values, and events used by the calendar.
-function maple_events_calendar_data(?string $requestedMonth): array
+function maple_events_calendar_data($requestedMonth): array
 {
     $month = maple_events_calendar_month($requestedMonth);
     $currentMonth = new DateTimeImmutable('first day of this month midnight');
