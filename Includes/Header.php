@@ -88,7 +88,6 @@ if ($currentPage === 'reviews') {
             <?php else: ?>
                 <a class="header-login" href="<?= htmlspecialchars($loginHref, ENT_QUOTES, 'UTF-8'); ?>">Login</a>
             <?php endif; ?>
-            <a class="header-booking" href="<?= htmlspecialchars($basePath . 'Index.php?view=home#booking', ENT_QUOTES, 'UTF-8'); ?>">Boek je verblijf</a>
         </div>
     <?php endif; ?>
 </header>

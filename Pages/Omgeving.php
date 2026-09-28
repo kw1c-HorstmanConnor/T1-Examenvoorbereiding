@@ -230,7 +230,6 @@ $currentPage = 'omgeving';
                     <p>Trade busy streets for mountain trails, screens for sunsets and alarms for mornings beside the lake.</p>
                     <div class="surroundings-final-cta__actions">
                         <a class="surroundings-button surroundings-button--light" href="../Pages/Accomodatie.php">View accommodations</a>
-                        <a class="surroundings-button" href="../Index.php?view=home#booking">Book your stay</a>
                     </div>
                 </div>
             </section>
