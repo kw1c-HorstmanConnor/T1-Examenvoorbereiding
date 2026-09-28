@@ -42,6 +42,11 @@ function maple_vacation_is_cancelled_label(string $label): bool
     return (bool) preg_match('/cancel|annul|geannul/i', $label);
 }
 
+function maple_vacation_is_unpaid_label(string $label): bool
+{
+    return (bool) preg_match('/unpaid|onbetaald|reserved|gereserveerd/i', $label);
+}
+
 function maple_vacation_date($value)
 {
     if ($value === null || $value === '') {
@@ -69,6 +74,7 @@ function maple_vacation_redirect_with_notice(string $type, string $message)
 
 $statusLabels = [];
 $cancelledStatusId = null;
+$cancelledStatusCount = 0;
 try {
     $statusStatement = $conn->prepare('SELECT * FROM `status`');
     if ($statusStatement) {
@@ -82,17 +88,17 @@ try {
             $label = maple_vacation_status_label($status);
             $statusLabels[$statusId] = $label;
             if (maple_vacation_is_cancelled_label($label)) {
-                if ($cancelledStatusId !== null && $cancelledStatusId !== $statusId) {
-                    $cancelledStatusId = null; // Do not guess when cancellation statuses are ambiguous.
-                } elseif ($cancelledStatusId === null) {
-                    $cancelledStatusId = $statusId;
-                }
+                $cancelledStatusCount++;
+                $cancelledStatusId = $statusId;
             }
         }
         $statusStatement->close();
     }
 } catch (Throwable $exception) {
     // The overview remains available; cancellation is safely unavailable.
+}
+if ($cancelledStatusCount !== 1) {
+    $cancelledStatusId = null;
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['vacation_action'] ?? '') === 'cancel') {
@@ -110,7 +116,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['vacation_action
 
     try {
         $reservationStatement = $conn->prepare(
-            'SELECT r.`Reservatie_id`, r.`Aan_date`, r.`Out_date`, r.`Status_id`, a.`Huis_naam`
+            'SELECT r.`Reservatie_id`, r.`Aan_date`, r.`Out_date`, r.`Status_id`,
+                    DATE_ADD(r.`reservation`, INTERVAL 1 MONTH) AS `expires_at`, a.`Huis_naam`
              FROM `reservaties` r
              INNER JOIN `accomodaties` a ON a.`Huis_id` = r.`Huis_id`
              WHERE r.`Reservatie_id` = ? AND r.`User_id` = ?
@@ -130,6 +137,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['vacation_action
         }
         if ((int) $reservation['Status_id'] === $cancelledStatusId || maple_vacation_is_cancelled_label($statusLabels[(int) $reservation['Status_id']] ?? '')) {
             maple_vacation_redirect_with_notice('error', 'This vacation has already been cancelled.');
+        }
+        $statusLabel = (string) ($statusLabels[(int) $reservation['Status_id']] ?? '');
+        $expiresAt = maple_vacation_date($reservation['expires_at']);
+        if (maple_vacation_is_unpaid_label($statusLabel)
+            && ($expiresAt === null || $expiresAt <= new DateTimeImmutable())) {
+            maple_vacation_redirect_with_notice('error', 'This unpaid reservation has already expired.');
         }
 
         $arrival = maple_vacation_date((string) $reservation['Aan_date']);
@@ -162,10 +175,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['vacation_action
 
 $notice = $_SESSION['my_vacation_notice'] ?? null;
 unset($_SESSION['my_vacation_notice']);
+$activeReservationCount = maple_booking_active_reservation_count($conn, $userId);
 $reservations = [];
 try {
     $overviewStatement = $conn->prepare(
         'SELECT r.`Reservatie_id`, r.`Aan_date`, r.`Out_date`, r.`Total_prijs`, r.`Status_id`,
+                DATE_ADD(r.`reservation`, INTERVAL 1 MONTH) AS `expires_at`,
                 a.`Huis_naam`, a.`Locatie`, s.`Status` AS `Status_label`
          FROM `reservaties` r
          INNER JOIN `accomodaties` a ON a.`Huis_id` = r.`Huis_id`
@@ -186,11 +201,22 @@ try {
             $departure = maple_vacation_date((string) $reservation['Out_date']);
             $today = new DateTimeImmutable('today');
             $isCancelled = maple_vacation_is_cancelled_label((string) $reservation['status_label']);
-            $reservation['category'] = $isCancelled ? 'Cancelled vacations' : (($departure !== null && $departure <= $today) ? 'Past vacations' : (($arrival !== null && $arrival <= $today) ? 'Current vacation' : 'Upcoming vacations'));
+            $expiresAt = maple_vacation_is_unpaid_label((string) $reservation['status_label'])
+                ? maple_vacation_date($reservation['expires_at'])
+                : null;
+            $isExpired = $expiresAt === null && maple_vacation_is_unpaid_label((string) $reservation['status_label'])
+                ? true
+                : ($expiresAt !== null && $expiresAt <= new DateTimeImmutable());
+            if ($isExpired) {
+                $reservation['status_label'] = 'Expired';
+            }
+            $reservation['category'] = $isCancelled ? 'Cancelled vacations' : ($isExpired ? 'Expired reservations' : (($departure !== null && $departure <= $today) ? 'Past vacations' : (($arrival !== null && $arrival <= $today) ? 'Current vacation' : 'Upcoming vacations')));
             $reservation['arrival'] = $arrival;
             $reservation['departure'] = $departure;
+            $reservation['expires_at'] = $expiresAt;
+            $reservation['is_unpaid'] = !$isExpired && maple_vacation_is_unpaid_label((string) ($reservation['Status_label'] ?? ''));
             $reservation['nights'] = ($arrival !== null && $departure !== null && $departure > $arrival) ? (int) $arrival->diff($departure)->days : 0;
-            $reservation['can_cancel'] = $cancelledStatusId !== null && !$isCancelled && $arrival !== null && $arrival > $today;
+            $reservation['can_cancel'] = $cancelledStatusId !== null && !$isCancelled && !$isExpired && $arrival !== null && $arrival > $today;
             $reservations[] = $reservation;
         }
         $overviewStatement->close();
@@ -199,7 +225,7 @@ try {
     $notice = ['type' => 'error', 'message' => 'Your reservations could not be loaded. Please try again later.'];
 }
 
-$categories = ['Upcoming vacations', 'Current vacation', 'Past vacations', 'Cancelled vacations'];
+$categories = ['Upcoming vacations', 'Current vacation', 'Past vacations', 'Expired reservations', 'Cancelled vacations'];
 ?>
 <!doctype html>
 <html lang="en">
@@ -223,6 +249,9 @@ $categories = ['Upcoming vacations', 'Current vacation', 'Past vacations', 'Canc
     <?php if (is_array($notice)): ?>
         <p class="my-vacation__notice my-vacation__notice--<?= ($notice['type'] ?? '') === 'success' ? 'success' : 'error'; ?>" role="<?= ($notice['type'] ?? '') === 'success' ? 'status' : 'alert'; ?>"><?= htmlspecialchars((string) ($notice['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></p>
     <?php endif; ?>
+    <?php if ($activeReservationCount !== null && $activeReservationCount >= 2): ?>
+        <p class="my-vacation__notice my-vacation__notice--info" role="status">You have reached the maximum of two active reservations for this account. Cancel or complete one before making another reservation.</p>
+    <?php endif; ?>
     <?php if ($reservations === []): ?>
         <section class="my-vacation__empty"><h2>No vacations booked yet</h2><p>You don't have any vacations booked yet.</p><a class="outline-button" href="Accomodatie.php">View accommodations <span class="button-arrow" aria-hidden="true"></span></a></section>
     <?php else: ?>
@@ -231,7 +260,9 @@ $categories = ['Upcoming vacations', 'Current vacation', 'Past vacations', 'Canc
             <?php if ($categoryReservations !== []): ?>
                 <section class="my-vacation__section" aria-labelledby="<?= htmlspecialchars(strtolower(str_replace(' ', '-', $category)), ENT_QUOTES, 'UTF-8'); ?>"><h2 id="<?= htmlspecialchars(strtolower(str_replace(' ', '-', $category)), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($category, ENT_QUOTES, 'UTF-8'); ?></h2><div class="my-vacation__grid">
                 <?php foreach ($categoryReservations as $reservation): ?>
-                    <article class="vacation-card"><p class="vacation-card__number">Reservation #<?= (int) $reservation['Reservatie_id']; ?></p><h3><?= htmlspecialchars((string) $reservation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?></h3><p class="vacation-card__location"><?= htmlspecialchars((string) $reservation['Locatie'], ENT_QUOTES, 'UTF-8'); ?></p><dl><div><dt>Arrival</dt><dd><?= htmlspecialchars(maple_vacation_format_date($reservation['arrival']), ENT_QUOTES, 'UTF-8'); ?></dd></div><div><dt>Departure</dt><dd><?= htmlspecialchars(maple_vacation_format_date($reservation['departure']), ENT_QUOTES, 'UTF-8'); ?></dd></div><div><dt>Nights</dt><dd><?= (int) $reservation['nights']; ?></dd></div><div><dt>Total</dt><dd>&euro; <?= number_format((float) $reservation['Total_prijs'], 2, '.', ''); ?></dd></div></dl><p class="vacation-card__status"><span>Status</span><?= htmlspecialchars((string) $reservation['status_label'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <article class="vacation-card"><p class="vacation-card__number">Reservation #<?= (int) $reservation['Reservatie_id']; ?></p><h3><?= htmlspecialchars((string) $reservation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?></h3><p class="vacation-card__location"><?= htmlspecialchars((string) $reservation['Locatie'], ENT_QUOTES, 'UTF-8'); ?></p><dl><div><dt>Arrival</dt><dd><?= htmlspecialchars(maple_vacation_format_date($reservation['arrival']), ENT_QUOTES, 'UTF-8'); ?></dd></div><div><dt>Departure</dt><dd><?= htmlspecialchars(maple_vacation_format_date($reservation['departure']), ENT_QUOTES, 'UTF-8'); ?></dd></div><div><dt>Nights</dt><dd><?= (int) $reservation['nights']; ?></dd></div><div><dt>Total</dt><dd>&euro; <?= number_format((float) $reservation['Total_prijs'], 2, '.', ''); ?></dd></div><?php if ($reservation['is_unpaid'] && $reservation['expires_at'] !== null): ?><div><dt>Held until</dt><dd><?= htmlspecialchars(maple_vacation_format_date($reservation['expires_at']), ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?></dl><p class="vacation-card__status"><span>Status</span><?= htmlspecialchars((string) $reservation['status_label'], ENT_QUOTES, 'UTF-8'); ?></p>
+                    <?php if ($reservation['is_unpaid']): ?><p>This unpaid reservation is held temporarily. Complete payment before the date shown above.</p><?php endif; ?>
+                    <?php if ($reservation['is_unpaid']): ?><button class="vacation-card__pay" type="button">BETALEN</button><?php endif; ?>
                     <?php if ($reservation['can_cancel']): ?><button class="vacation-card__cancel" type="button" data-cancel-button data-reservation-id="<?= (int) $reservation['Reservatie_id']; ?>" data-name="<?= htmlspecialchars((string) $reservation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-dates="<?= htmlspecialchars(maple_vacation_format_date($reservation['arrival']) . ' – ' . maple_vacation_format_date($reservation['departure']), ENT_QUOTES, 'UTF-8'); ?>">Cancel vacation</button><?php endif; ?>
                     </article>
                 <?php endforeach; ?>

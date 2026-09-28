@@ -27,6 +27,18 @@ function maple_booking_date(string $value)
     return $date;
 }
 
+function maple_booking_add_calendar_months(DateTimeImmutable $date, int $months): DateTimeImmutable
+{
+    $targetMonth = $date->modify('first day of this month')->modify('+' . $months . ' months');
+    $targetDay = min((int) $date->format('d'), (int) $targetMonth->format('t'));
+
+    return $targetMonth->setDate(
+        (int) $targetMonth->format('Y'),
+        (int) $targetMonth->format('m'),
+        $targetDay
+    );
+}
+
 function maple_booking_accommodation(mysqli $database, int $huisId)
 {
     $statement = $database->prepare('SELECT Huis_id, Huis_naam, PPN, `Max` FROM accomodaties WHERE Huis_id = ? LIMIT 1');
@@ -41,6 +53,60 @@ function maple_booking_accommodation(mysqli $database, int $huisId)
     $statement->close();
 
     return is_array($accommodation) ? $accommodation : null;
+}
+
+function maple_booking_status_id(mysqli $database, array $labels)
+{
+    if ($labels === []) {
+        return null;
+    }
+
+    $normalisedLabels = array_map('strtolower', $labels);
+    $result = $database->query('SELECT `Status_id`, `Status` FROM `status`');
+    if (!$result) {
+        return null;
+    }
+
+    while ($status = $result->fetch_assoc()) {
+        if (in_array(strtolower(trim((string) $status['Status'])), $normalisedLabels, true)) {
+            return (int) $status['Status_id'];
+        }
+    }
+
+    return null;
+}
+
+function maple_booking_active_reservation_count(mysqli $database, int $userId)
+{
+    $statement = $database->prepare(
+        'SELECT COUNT(*) AS `active_count`
+         FROM `reservaties` r
+         INNER JOIN `status` s ON s.`Status_id` = r.`Status_id`
+         WHERE r.`User_id` = ?
+           AND r.`Out_date` > NOW()
+           AND (
+               LOWER(s.`Status`) IN (\'paid\', \'confirmed\', \'betaald\', \'bevestigd\')
+               OR (
+                   LOWER(s.`Status`) IN (\'unpaid\', \'reserved\', \'onbetaald\', \'gereserveerd\')
+                   AND r.`reservation` IS NOT NULL
+                   AND DATE_ADD(r.`reservation`, INTERVAL 1 MONTH) > NOW()
+               )
+           )'
+    );
+    if (!$statement) {
+        return null;
+    }
+
+    $statement->bind_param('i', $userId);
+    if (!$statement->execute()) {
+        $statement->close();
+        return null;
+    }
+    $result = $statement->get_result();
+    $row = $result ? $result->fetch_assoc() : null;
+    $statement->close();
+
+    return is_array($row) ? (int) $row['active_count'] : null;
 }
 
 function maple_booking_identifier(string $identifier): string
@@ -94,12 +160,56 @@ function maple_booking_is_available(mysqli $database, int $huisId, string $start
     }
 
     $statement->bind_param('iss', $huisId, $endDate, $startDate);
-    $statement->execute();
+    if (!$statement->execute()) {
+        $statement->close();
+        return null;
+    }
     $result = $statement->get_result();
+    if (!$result) {
+        $statement->close();
+        return null;
+    }
     $isBlocked = $result && $result->num_rows > 0;
     $statement->close();
+    if ($isBlocked) {
+        return false;
+    }
 
-    return !$isBlocked;
+    $reservationStatement = $database->prepare(
+        'SELECT 1
+         FROM `reservaties` r
+         INNER JOIN `status` s ON s.`Status_id` = r.`Status_id`
+         WHERE r.`Huis_id` = ?
+           AND r.`Aan_date` < ?
+           AND r.`Out_date` > ?
+           AND (
+               LOWER(s.`Status`) IN (\'paid\', \'confirmed\', \'betaald\', \'bevestigd\')
+               OR (
+                   LOWER(s.`Status`) IN (\'unpaid\', \'reserved\', \'onbetaald\', \'gereserveerd\')
+                   AND r.`reservation` IS NOT NULL
+                   AND DATE_ADD(r.`reservation`, INTERVAL 1 MONTH) > NOW()
+               )
+           )
+         LIMIT 1'
+    );
+    if (!$reservationStatement) {
+        return null;
+    }
+
+    $reservationStatement->bind_param('iss', $huisId, $endDate, $startDate);
+    if (!$reservationStatement->execute()) {
+        $reservationStatement->close();
+        return null;
+    }
+    $reservationResult = $reservationStatement->get_result();
+    if (!$reservationResult) {
+        $reservationStatement->close();
+        return null;
+    }
+    $hasActiveReservation = $reservationResult && $reservationResult->num_rows > 0;
+    $reservationStatement->close();
+
+    return !$hasActiveReservation;
 }
 
 $conn->set_charset($databaseConfig['charset']);
