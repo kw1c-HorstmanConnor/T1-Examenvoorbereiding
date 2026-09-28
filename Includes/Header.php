@@ -32,6 +32,11 @@ $navItems = [
         'omgeving' => ['label' => 'Omgeving', 'href' => $basePath . 'Pages/Omgeving.php', 'dropdown' => false],
 ];
 $isAuthPage = in_array($currentPage, ['login', 'register'], true);
+$loginHref = $basePath . 'Pages/Login.php';
+
+if ($currentPage === 'reviews') {
+    $loginHref .= '?redirect=' . rawurlencode('Reviews.php');
+}
 ?>
 <?php if (empty($fontAwesomeLoaded)): ?>
     <?php $fontAwesomeLoaded = true; ?>
@@ -80,7 +85,7 @@ $isAuthPage = in_array($currentPage, ['login', 'register'], true);
                 <?php endif; ?>
                 <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/Logout.php', ENT_QUOTES, 'UTF-8'); ?>">Logout</a>
             <?php else: ?>
-                <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/Login.php', ENT_QUOTES, 'UTF-8'); ?>">Login</a>
+                <a class="header-login" href="<?= htmlspecialchars($loginHref, ENT_QUOTES, 'UTF-8'); ?>">Login</a>
             <?php endif; ?>
             <a class="header-booking" href="<?= htmlspecialchars($basePath . 'Index.php?view=home#booking', ENT_QUOTES, 'UTF-8'); ?>">Boek je verblijf</a>
         </div>

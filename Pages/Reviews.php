@@ -29,6 +29,7 @@ $reviewSummary = maple_reviews_summary();
 $reviews = maple_published_reviews();
 $totalReviews = (int) $reviewSummary['count'];
 $averageRating = $totalReviews > 0 ? number_format((float) $reviewSummary['average'], 1) : '0.0';
+$reviewLoginUrl = 'Login.php?redirect=' . rawurlencode('Reviews.php#review-form');
 ?>
 <!doctype html>
 <html lang="en">
@@ -161,7 +162,7 @@ $averageRating = $totalReviews > 0 ? number_format((float) $reviewSummary['avera
                     <?php else: ?>
                         <div class="review-login-prompt">
                             <p>Sign in to leave a review.</p>
-                            <a class="review-login-button" href="Login.php">Log in</a>
+                            <a class="review-login-button" href="<?= htmlspecialchars($reviewLoginUrl, ENT_QUOTES, 'UTF-8'); ?>">Log in</a>
                         </div>
                     <?php endif; ?>
                 </section>
