@@ -210,6 +210,12 @@
         if (persist) {
             storeLanguage(selectedLanguage);
         }
+
+        window.dispatchEvent(new CustomEvent('maple:languagechange', {
+            detail: {
+                language: selectedLanguage
+            }
+        }));
     }
 
     function scheduleLanguageApply() {
@@ -291,6 +297,20 @@
         applyLanguage(currentLanguage);
         watchLanguageChanges();
     }
+
+    const publicApplyLanguage = applyLanguage;
+
+    window.MapleLanguage = {
+        getLanguage() {
+            return currentLanguage;
+        },
+        translate(value, language = currentLanguage) {
+            return translateValue(String(value), getDictionary(language));
+        },
+        applyLanguage(language) {
+            publicApplyLanguage(language);
+        }
+    };
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', startLanguageSystem, { once: true });

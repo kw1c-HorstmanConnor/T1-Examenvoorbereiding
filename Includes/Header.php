@@ -13,6 +13,7 @@ if (!isset($currentPage)) {
     $pageMap = [
             'Index.php' => 'home',
             'Accomodatie.php' => 'accommodaties',
+            'Faciliteiten.php' => 'faciliteiten',
             'Activiteiten.php' => 'activiteiten',
             'Admin.php' => 'admin',
             'Evenementen.php' => 'events',
@@ -25,7 +26,7 @@ if (!isset($currentPage)) {
 $navItems = [
         'home' => ['label' => 'Home', 'href' => $basePath . 'Index.php?view=home', 'dropdown' => false],
         'accommodaties' => ['label' => 'Accommodaties', 'href' => $basePath . 'Pages/Accomodatie.php', 'dropdown' => true],
-        'faciliteiten' => ['label' => 'Faciliteiten', 'href' => $basePath . 'Index.php?view=home#faciliteiten', 'dropdown' => false],
+        'faciliteiten' => ['label' => 'Faciliteiten', 'href' => $basePath . 'Pages/Faciliteiten.php', 'dropdown' => false],
         'activiteiten' => ['label' => 'Activiteiten', 'href' => $basePath . 'Pages/Activiteiten.php', 'dropdown' => false],
         'events' => ['label' => 'Events', 'href' => $basePath . 'Pages/Evenementen.php', 'dropdown' => true],
         'reviews' => ['label' => 'Reviews', 'href' => $basePath . 'Pages/Reviews.php', 'dropdown' => false],

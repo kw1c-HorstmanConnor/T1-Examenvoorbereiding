@@ -145,7 +145,7 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
                             <article class="accommodation-card">
                                 <div class="accommodation-card__image accommodation-card__image--<?= maple_e($accomodation['image_class']); ?>">
                                     <?php if ($accomodation['badge'] !== ''): ?>
-                                        <span class="popular-badge"><?= maple_e($accomodation['badge']); ?></span>
+                                       <span class="popular-badge"><?= maple_e($accomodation['badge']); ?></span>
                                     <?php endif; ?>
                                 </div>
                                 <div class="accommodation-card__body">

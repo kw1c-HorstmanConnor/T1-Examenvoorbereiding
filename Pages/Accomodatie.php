@@ -6,6 +6,7 @@ $currentPage = 'accommodaties';
 
 require_once __DIR__ . '/../Includes/DataBase.php';
 require_once __DIR__ . '/../Functions/Helpers/Session.php';
+require_once __DIR__ . '/../Functions/Facilities/Facilities.php';
 
 $bookingError = '';
 if (empty($_SESSION['booking_csrf'])) {
@@ -147,14 +148,18 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
                 </div>
                 <div class="accommodations-list">
                     <?php foreach ($accommodations as $index => $accommodation): ?>
-                        <?php $imageClass = $accommodationImageClasses[$index % count($accommodationImageClasses)]; ?>
-                        <article class="accommodation-card accommodation-card--listing" data-huis-id="<?= (int) $accommodation['Huis_id']; ?>" data-huis-name="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-location="<?= htmlspecialchars($accommodation['Locatie'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?>" data-facilities="<?= htmlspecialchars($accommodation['Voorzieningen'], ENT_QUOTES, 'UTF-8'); ?>" data-max="<?= (int) $accommodation['Max']; ?>" data-description="<?= htmlspecialchars($accommodation['Omschr'], ENT_QUOTES, 'UTF-8'); ?>" data-type="bungalow" data-guests="<?= (int) $accommodation['Max']; ?>" data-available-from="2026-01-01" data-available-to="2026-12-31" tabindex="0" role="button" aria-label="View details for <?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php
+                        $imageClass = $accommodationImageClasses[$index % count($accommodationImageClasses)];
+                        $facilityNames = maple_facility_names_from_keys(maple_facility_parse_values((string) ($accommodation['Voorzieningen'] ?? '')));
+                        $facilityDisplay = $facilityNames !== [] ? implode(', ', $facilityNames) : 'No facilities listed';
+                        ?>
+                        <article id="huis-<?= (int) $accommodation['Huis_id']; ?>" class="accommodation-card accommodation-card--listing" data-huis-id="<?= (int) $accommodation['Huis_id']; ?>" data-huis-name="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-location="<?= htmlspecialchars($accommodation['Locatie'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?>" data-facilities="<?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?>" data-max="<?= (int) $accommodation['Max']; ?>" data-description="<?= htmlspecialchars($accommodation['Omschr'], ENT_QUOTES, 'UTF-8'); ?>" data-type="bungalow" data-guests="<?= (int) $accommodation['Max']; ?>" data-available-from="2026-01-01" data-available-to="2026-12-31" tabindex="0" role="button" aria-label="View details for <?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>">
                             <div class="accommodation-card__image accommodation-card__image--<?= $imageClass; ?>"><?php if ($index === 0): ?><span class="popular-badge">Popular</span><?php endif; ?></div>
                             <div class="accommodation-card__body">
                                 <h3><?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?></h3>
                                 <div class="accommodation-meta" aria-label="Features"><span><i class="meta-icon meta-icon--guest" aria-hidden="true"></i><?= (int) $accommodation['Max']; ?> guests</span></div>
                                 <p><?= htmlspecialchars($accommodation['Omschr'], ENT_QUOTES, 'UTF-8'); ?></p>
-                                <ul class="accommodation-highlights"><li><?= htmlspecialchars($accommodation['Voorzieningen'], ENT_QUOTES, 'UTF-8'); ?></li></ul>
+                                <ul class="accommodation-highlights"><li><?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?></li></ul>
                                 <div class="price-block"><span>From</span><strong>&euro; <?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?> <em>per night</em></strong></div>
                             </div>
                         </article>

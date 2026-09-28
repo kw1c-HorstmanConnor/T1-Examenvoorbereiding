@@ -21,7 +21,7 @@ $assetBase = $assetBase ?? $rootPrefix;
         <nav class="footer-column" aria-label="Quick links">
             <h2>Quick links</h2>
             <a href="<?= htmlspecialchars($basePath . 'Pages/Accomodatie.php', ENT_QUOTES, 'UTF-8'); ?>">Cottages</a>
-            <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home#faciliteiten', ENT_QUOTES, 'UTF-8'); ?>">Facilities</a>
+            <a href="<?= htmlspecialchars($basePath . 'Pages/Faciliteiten.php', ENT_QUOTES, 'UTF-8'); ?>">Facilities</a>
             <a href="<?= htmlspecialchars($basePath . 'Pages/Activiteiten.php', ENT_QUOTES, 'UTF-8'); ?>">Activities</a>
             <a href="<?= htmlspecialchars($basePath . 'Pages/Evenementen.php', ENT_QUOTES, 'UTF-8'); ?>">Events</a>
             <a href="<?= htmlspecialchars($basePath . 'Pages/Reviews.php', ENT_QUOTES, 'UTF-8'); ?>">Reviews</a>
