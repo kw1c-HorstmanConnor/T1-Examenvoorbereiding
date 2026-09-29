@@ -24,13 +24,13 @@ if (!isset($currentPage)) {
 }
 
 $navItems = [
-        'home' => ['label' => 'Home', 'href' => $basePath . 'Index.php?view=home', 'dropdown' => false],
-        'accommodaties' => ['label' => 'Accommodaties', 'href' => $basePath . 'Pages/Accomodatie.php', 'dropdown' => true],
-        'faciliteiten' => ['label' => 'Faciliteiten', 'href' => $basePath . 'Pages/Faciliteiten.php', 'dropdown' => false],
-        'activiteiten' => ['label' => 'Activiteiten', 'href' => $basePath . 'Pages/Activiteiten.php', 'dropdown' => false],
-        'events' => ['label' => 'Events', 'href' => $basePath . 'Pages/Evenementen.php', 'dropdown' => true],
-        'reviews' => ['label' => 'Reviews', 'href' => $basePath . 'Pages/Reviews.php', 'dropdown' => false],
-        'omgeving' => ['label' => 'Omgeving', 'href' => $basePath . 'Pages/Omgeving.php', 'dropdown' => false],
+        'home' => ['label' => 'Home', 'href' => $basePath . 'Index.php?view=home'],
+        'accommodaties' => ['label' => 'Accommodaties', 'href' => $basePath . 'Pages/Accomodatie.php'],
+        'faciliteiten' => ['label' => 'Faciliteiten', 'href' => $basePath . 'Pages/Faciliteiten.php'],
+        'activiteiten' => ['label' => 'Activiteiten', 'href' => $basePath . 'Pages/Activiteiten.php'],
+        'events' => ['label' => 'Events', 'href' => $basePath . 'Pages/Evenementen.php'],
+        'reviews' => ['label' => 'Reviews', 'href' => $basePath . 'Pages/Reviews.php'],
+        'omgeving' => ['label' => 'Omgeving', 'href' => $basePath . 'Pages/Omgeving.php'],
 ];
 $isAuthPage = in_array($currentPage, ['login', 'register'], true);
 $loginHref = $basePath . 'Pages/Login.php';
@@ -65,9 +65,6 @@ if ($currentPage === 'reviews') {
             <?php foreach ($navItems as $key => $item): ?>
                 <a class="site-nav__link<?= $currentPage === $key ? ' site-nav__link--active' : ''; ?>" href="<?= htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>">
                     <?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?>
-                    <?php if ($item['dropdown']): ?>
-                        <span class="chevron" aria-hidden="true"></span>
-                    <?php endif; ?>
                 </a>
             <?php endforeach; ?>
         </nav>
