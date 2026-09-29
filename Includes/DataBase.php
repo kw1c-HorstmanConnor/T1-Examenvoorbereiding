@@ -76,6 +76,32 @@ function maple_booking_status_id(mysqli $database, array $labels)
     return null;
 }
 
+/**
+ * Returns a status only when the supplied labels identify one database row.
+ * Ambiguous or missing status configuration must never silently change a booking.
+ */
+function maple_booking_unique_status_id(mysqli $database, array $labels)
+{
+    if ($labels === []) {
+        return null;
+    }
+
+    $normalisedLabels = array_map('strtolower', $labels);
+    $result = $database->query('SELECT `Status_id`, `Status` FROM `status`');
+    if (!$result) {
+        return null;
+    }
+
+    $matchingIds = [];
+    while ($status = $result->fetch_assoc()) {
+        if (in_array(strtolower(trim((string) $status['Status'])), $normalisedLabels, true)) {
+            $matchingIds[] = (int) $status['Status_id'];
+        }
+    }
+
+    return count($matchingIds) === 1 ? $matchingIds[0] : null;
+}
+
 function maple_booking_active_reservation_count(mysqli $database, int $userId)
 {
     $statement = $database->prepare(
@@ -144,7 +170,7 @@ function maple_booking_blocked_columns(mysqli $database)
         : null;
 }
 
-function maple_booking_is_available(mysqli $database, int $huisId, string $startDate, string $endDate)
+function maple_booking_is_available(mysqli $database, int $huisId, string $startDate, string $endDate, bool $lockRows = false)
 {
     $columns = maple_booking_blocked_columns($database);
     if ($columns === null) {
@@ -153,7 +179,8 @@ function maple_booking_is_available(mysqli $database, int $huisId, string $start
 
     $sql = 'SELECT 1 FROM `blocked` WHERE ' . maple_booking_identifier($columns['huis'])
         . ' = ? AND ' . maple_booking_identifier($columns['start']) . ' < ?'
-        . ' AND ' . maple_booking_identifier($columns['end']) . ' > ? LIMIT 1';
+        . ' AND ' . maple_booking_identifier($columns['end']) . ' > ? LIMIT 1'
+        . ($lockRows ? ' FOR UPDATE' : '');
     $statement = $database->prepare($sql);
     if (!$statement) {
         return null;
@@ -190,7 +217,7 @@ function maple_booking_is_available(mysqli $database, int $huisId, string $start
                    AND DATE_ADD(r.`reservation`, INTERVAL 1 MONTH) > NOW()
                )
            )
-         LIMIT 1'
+         LIMIT 1' . ($lockRows ? ' FOR UPDATE' : '')
     );
     if (!$reservationStatement) {
         return null;

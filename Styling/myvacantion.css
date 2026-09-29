@@ -1,3 +1,20 @@
+.my-vacation-page .site-header .site-logo__image { filter: brightness(0); }
+.my-vacation-page .site-nav__link { color: #151914; }
+.my-vacation-page .site-nav__link:hover { color: #000; }
+.my-vacation-page .header-login,
+.my-vacation-page .header-account { color: #151914; background: rgba(21, 25, 20, .04); border-color: rgba(21, 25, 20, .24); }
+.my-vacation-page .header-login:hover { background: rgba(21, 25, 20, .1); border-color: rgba(21, 25, 20, .36); }
+.my-vacation-page .language-select {
+    color: #151914;
+    background-color: rgba(21, 25, 20, .04);
+    background-image: linear-gradient(45deg, transparent 50%, #151914 50%), linear-gradient(135deg, #151914 50%, transparent 50%);
+    border-color: rgba(21, 25, 20, .24);
+}
+.my-vacation-page .language-select:hover { background-color: rgba(21, 25, 20, .1); border-color: rgba(21, 25, 20, .36); }
+.my-vacation-page .site-nav__link:focus-visible,
+.my-vacation-page .language-select:focus-visible,
+.my-vacation-page .header-login:focus-visible,
+.my-vacation-page .header-account:focus-visible { outline-color: #151914; }
 .my-vacation { padding-top: clamp(48px, 7vw, 82px); padding-bottom: clamp(64px, 9vw, 110px); }
 .my-vacation h1, .my-vacation h2, .vacation-card h3, .vacation-modal h2 { color: var(--color-forest); }
 .my-vacation h1 { margin: 8px 0 0; font-size: clamp(3rem, 6vw, 5rem); line-height: .95; }
@@ -16,4 +33,9 @@
 .vacation-card__cancel { padding: 12px 17px; border: 0; border-radius: 4px; background: #8c3024; color: #fff; font: inherit; font-weight: 700; cursor: pointer; }.vacation-card__cancel:hover { background: #6e241a; }
 .my-vacation__empty { margin-top: 34px; }.my-vacation__empty h2 { margin-top: 0; }.my-vacation__empty p { margin-bottom: 22px; color: #4a544b; }
 .vacation-modal[hidden] { display: none; }.vacation-modal { position: fixed; z-index: 20; inset: 0; display: grid; place-items: center; padding: 20px; }.vacation-modal__overlay { position: absolute; inset: 0; background: rgba(21,25,20,.56); }.vacation-modal__dialog { position: relative; width: min(100%, 500px); padding: 30px; background: #fff; border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,.25); }.vacation-modal__dialog h2 { margin: 8px 0 18px; font-size: 38px; }.vacation-modal__dialog p { color: #404a40; }.vacation-modal__close { position: absolute; top: 10px; right: 14px; border: 0; background: transparent; color: #263126; font-size: 30px; cursor: pointer; }.vacation-modal__actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 24px; }.vacation-modal__actions .outline-button { cursor: pointer; }
+.vacation-modal__details { margin: 0 0 18px; }
+.vacation-modal__details div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--color-border); }
+.vacation-modal__details dt { color: #687067; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+.vacation-modal__details dd { margin: 0; color: #263126; font-weight: 700; text-align: right; }
+.vacation-modal__warning { padding: 12px 14px; color: #8c3024 !important; background: #fff0ed; border-left: 3px solid #bd554c; }
 @media (max-width: 700px) { .my-vacation__grid { grid-template-columns: 1fr; }.vacation-card dl { gap: 12px; }.vacation-modal__dialog { padding: 26px 20px; }.vacation-modal__actions > * { width: 100%; text-align: center; }.header-account { display: none; } }

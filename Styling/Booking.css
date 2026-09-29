@@ -1,5 +1,22 @@
- .booking-page { min-height: 100vh; background: #f8f7f3; }
+.booking-page { min-height: 100vh; background: #f8f7f3; }
 .booking-page .site-header { color: #294438; }
+.booking-page .site-header .site-logo__image { filter: brightness(0); }
+.booking-page .site-nav__link { color: #151914; }
+.booking-page .site-nav__link:hover { color: #000; }
+.booking-page .header-login,
+.booking-page .header-account { color: #151914; background: rgba(21, 25, 20, .04); border-color: rgba(21, 25, 20, .24); }
+.booking-page .header-login:hover { background: rgba(21, 25, 20, .1); border-color: rgba(21, 25, 20, .36); }
+.booking-page .language-select {
+    color: #151914;
+    background-color: rgba(21, 25, 20, .04);
+    background-image: linear-gradient(45deg, transparent 50%, #151914 50%), linear-gradient(135deg, #151914 50%, transparent 50%);
+    border-color: rgba(21, 25, 20, .24);
+}
+.booking-page .language-select:hover { background-color: rgba(21, 25, 20, .1); border-color: rgba(21, 25, 20, .36); }
+.booking-page .site-nav__link:focus-visible,
+.booking-page .language-select:focus-visible,
+.booking-page .header-login:focus-visible,
+.booking-page .header-account:focus-visible { outline-color: #151914; }
 .booking-summary { max-width: 760px; padding-top: 5rem; padding-bottom: 5rem; }
 .booking-summary h1 { margin: .3rem 0 2rem; color: #294438; font-family: "Cormorant Garamond", Georgia, serif; font-size: clamp(2.6rem, 6vw, 4.5rem); font-weight: 600; }
 .booking-summary__details { margin: 0; background: #fff; border: 1px solid #e2dfd7; border-radius: .35rem; box-shadow: 0 5px 14px rgba(46,44,35,.07); }
