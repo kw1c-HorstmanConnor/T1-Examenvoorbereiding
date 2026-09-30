@@ -68,6 +68,7 @@ tabs.forEach(function (tab) {
 const accommodationModal = document.querySelector('#accommodation-modal');
 const modalDialog = document.querySelector('.accommodation-modal__dialog');
 const modalImage = document.querySelector('#accommodation-modal-image');
+const modalPhoto = document.querySelector('#accommodation-modal-photo');
 const modalTitle = document.querySelector('#accommodation-modal-title');
 const modalLocation = document.querySelector('#accommodation-modal-location');
 const modalPrice = document.querySelector('#accommodation-modal-price');
@@ -85,9 +86,25 @@ const bookingPeople = document.querySelector('#booking-people');
 let previouslyFocusedElement = null;
 let activeAccommodation = null;
 
-function openAccommodationModal(card) {
-    const image = card.querySelector('.accommodation-card__image');
+document.querySelectorAll('.accommodation-card__photo').forEach(function (image) {
+    image.addEventListener('error', function () {
+        if (image.dataset.fallbackSrc && image.dataset.fallbackApplied !== '1') {
+            image.dataset.fallbackApplied = '1';
+            image.src = image.dataset.fallbackSrc;
+        }
+    });
+});
 
+if (modalPhoto) {
+    modalPhoto.addEventListener('error', function () {
+        if (modalPhoto.dataset.fallbackSrc && modalPhoto.dataset.fallbackApplied !== '1') {
+            modalPhoto.dataset.fallbackApplied = '1';
+            modalPhoto.src = modalPhoto.dataset.fallbackSrc;
+        }
+    });
+}
+
+function openAccommodationModal(card) {
     previouslyFocusedElement = document.activeElement;
     modalTitle.textContent = card.dataset.huisName;
     modalLocation.textContent = card.dataset.location;
@@ -102,8 +119,10 @@ function openAccommodationModal(card) {
     };
 
     modalImage.className = 'accommodation-modal__image';
-    if (image) {
-        modalImage.className += ' ' + image.className;
+    if (modalPhoto) {
+        modalPhoto.dataset.fallbackApplied = '0';
+        modalPhoto.src = card.dataset.imageSrc || modalPhoto.src;
+        modalPhoto.alt = card.dataset.huisName || 'Accommodation image';
     }
 
     accommodationModal.hidden = false;

@@ -843,6 +843,16 @@ select.language-select {
 .accommodation-card__image {
     position: relative;
     min-height: 166px;
+    overflow: hidden;
+    background-color: #efe9dc;
+}
+
+.accommodation-card__photo {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .accommodation-card__image--comfort {

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Helpers/Database.php';
 require_once __DIR__ . '/../Helpers/View.php';
+require_once __DIR__ . '/../Accommodations/AccommodationImages.php';
 
 function maple_supported_facility_languages(): array
 {
@@ -415,7 +416,7 @@ function maple_facility_load_accommodations_from_database(): array
     $imageClasses = ['comfort', 'luxe', 'premium'];
     $pdo = maple_pdo();
     $statement = $pdo->prepare('
-        SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschr
+        SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschrijving, Afbeelding
         FROM accomodaties
         ORDER BY Huis_id ASC
     ');
@@ -432,7 +433,8 @@ function maple_facility_load_accommodations_from_database(): array
             'location' => (string) ($row['Locatie'] ?? ''),
             'price' => (float) ($row['PPN'] ?? 0),
             'maxGuests' => (int) ($row['Max'] ?? 0),
-            'description' => (string) ($row['Omschr'] ?? ''),
+            'description' => (string) ($row['Omschrijving'] ?? ''),
+            'image' => (string) ($row['Afbeelding'] ?? ''),
             'legacyFacilities' => $facilities,
             'facilityValues' => $facilityKeys,
             'facilityNames' => maple_facility_names_from_keys($facilityKeys),

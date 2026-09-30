@@ -193,6 +193,8 @@ if (!is_string($facilitiesJson)) {
                                 <?php
                                 $facilityValues = $accommodation['facilityValues'] ?? [];
                                 $imageClass = maple_facility_slug((string) ($accommodation['imageClass'] ?? 'comfort'));
+                                $imageUrl = maple_accommodation_image_url($accommodation['image'] ?? '', $assetBase);
+                                $fallbackImageUrl = maple_accommodation_image_fallback_url($assetBase);
                                 ?>
                                 <article
                                     class="facility-cottage"
@@ -200,7 +202,9 @@ if (!is_string($facilitiesJson)) {
                                     data-cottage-id="<?= (int) $accommodation['id']; ?>"
                                     data-facilities="<?= maple_e(implode(',', $facilityValues)); ?>"
                                 >
-                                    <div class="facility-cottage__image facility-cottage__image--<?= maple_e($imageClass); ?>" aria-hidden="true"></div>
+                                    <div class="facility-cottage__image facility-cottage__image--<?= maple_e($imageClass); ?>" aria-hidden="true">
+                                        <img src="<?= maple_e($imageUrl); ?>" alt="" data-fallback-src="<?= maple_e($fallbackImageUrl); ?>">
+                                    </div>
                                     <div class="facility-cottage__body">
                                         <h4 data-no-translate><?= maple_e($accommodation['name']); ?></h4>
                                         <?php if ((string) $accommodation['description'] !== ''): ?>

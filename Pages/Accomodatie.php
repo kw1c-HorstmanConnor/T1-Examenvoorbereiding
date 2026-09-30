@@ -6,6 +6,7 @@ $currentPage = 'accommodaties';
 
 require_once __DIR__ . '/../Includes/DataBase.php';
 require_once __DIR__ . '/../Functions/Helpers/Session.php';
+require_once __DIR__ . '/../Functions/Accommodations/AccommodationImages.php';
 require_once __DIR__ . '/../Functions/Facilities/Facilities.php';
 
 $bookingError = '';
@@ -72,7 +73,7 @@ $filterGuests = filter_var($_GET['guests'] ?? null, FILTER_VALIDATE_INT, ['optio
 
 $accommodations = [];
 $accommodationStatement = $conn->prepare(
-    'SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, Max, Omschr FROM accomodaties ORDER BY Huis_id'
+    'SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschrijving, Afbeelding FROM accomodaties ORDER BY Huis_id'
 );
 
 if ($accommodationStatement) {
@@ -154,13 +155,19 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
                         $imageClass = $accommodationImageClasses[$index % count($accommodationImageClasses)];
                         $facilityNames = maple_facility_names_from_keys(maple_facility_parse_values((string) ($accommodation['Voorzieningen'] ?? '')));
                         $facilityDisplay = $facilityNames !== [] ? implode(', ', $facilityNames) : 'No facilities listed';
+                        $description = (string) ($accommodation['Omschrijving'] ?? '');
+                        $imageUrl = maple_accommodation_image_url($accommodation['Afbeelding'] ?? '', $assetBase);
+                        $fallbackImageUrl = maple_accommodation_image_fallback_url($assetBase);
                         ?>
-                        <article id="huis-<?= (int) $accommodation['Huis_id']; ?>" class="accommodation-card accommodation-card--listing" data-huis-id="<?= (int) $accommodation['Huis_id']; ?>" data-huis-name="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-location="<?= htmlspecialchars($accommodation['Locatie'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?>" data-facilities="<?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?>" data-max="<?= (int) $accommodation['Max']; ?>" data-description="<?= htmlspecialchars($accommodation['Omschr'], ENT_QUOTES, 'UTF-8'); ?>" data-type="bungalow" data-guests="<?= (int) $accommodation['Max']; ?>" data-available-from="2026-01-01" data-available-to="2026-12-31" tabindex="0" role="button" aria-label="View details for <?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>">
-                            <div class="accommodation-card__image accommodation-card__image--<?= $imageClass; ?>"><?php if ($index === 0): ?><span class="popular-badge">Popular</span><?php endif; ?></div>
+                        <article id="huis-<?= (int) $accommodation['Huis_id']; ?>" class="accommodation-card accommodation-card--listing" data-huis-id="<?= (int) $accommodation['Huis_id']; ?>" data-huis-name="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-location="<?= htmlspecialchars($accommodation['Locatie'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?>" data-facilities="<?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?>" data-max="<?= (int) $accommodation['Max']; ?>" data-description="<?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?>" data-image-src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" data-type="bungalow" data-guests="<?= (int) $accommodation['Max']; ?>" data-available-from="2026-01-01" data-available-to="2026-12-31" tabindex="0" role="button" aria-label="View details for <?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>">
+                            <div class="accommodation-card__image accommodation-card__image--<?= $imageClass; ?>">
+                                <img class="accommodation-card__photo" src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-fallback-src="<?= htmlspecialchars($fallbackImageUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                                <?php if ($index === 0): ?><span class="popular-badge">Popular</span><?php endif; ?>
+                            </div>
                             <div class="accommodation-card__body">
                                 <h3><?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?></h3>
                                 <div class="accommodation-meta" aria-label="Features"><span><i class="meta-icon meta-icon--guest" aria-hidden="true"></i><?= (int) $accommodation['Max']; ?> guests</span></div>
-                                <p><?= htmlspecialchars($accommodation['Omschr'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                <p><?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?></p>
                                 <ul class="accommodation-highlights"><li><?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?></li></ul>
                                 <div class="price-block"><span>From</span><strong>&euro; <?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?> <em>per night</em></strong></div>
                             </div>
@@ -186,7 +193,9 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
         <div class="accommodation-modal__overlay" data-modal-close="true"></div>
         <section class="accommodation-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="accommodation-modal-title" tabindex="-1">
             <button class="accommodation-modal__close" type="button" aria-label="Close accommodation details" data-modal-close="true">&times;</button>
-            <div class="accommodation-modal__image" id="accommodation-modal-image" aria-hidden="true"></div>
+            <div class="accommodation-modal__image" id="accommodation-modal-image" aria-hidden="true">
+                <img id="accommodation-modal-photo" src="<?= htmlspecialchars(maple_accommodation_image_fallback_url($assetBase), ENT_QUOTES, 'UTF-8'); ?>" alt="" data-fallback-src="<?= htmlspecialchars(maple_accommodation_image_fallback_url($assetBase), ENT_QUOTES, 'UTF-8'); ?>">
+            </div>
             <div class="accommodation-modal__content">
                 <p class="section-label">ACCOMMODATION DETAILS</p>
                 <h2 id="accommodation-modal-title"></h2>

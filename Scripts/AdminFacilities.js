@@ -267,3 +267,94 @@
 
     updateAll();
 })();
+
+(() => {
+    const uploader = document.querySelector('[data-admin-image-uploader]');
+
+    if (!uploader) {
+        return;
+    }
+
+    const input = uploader.querySelector('[data-admin-image-input]');
+    const removeInput = uploader.querySelector('[data-admin-image-remove]');
+    const preview = uploader.querySelector('[data-admin-image-preview]');
+    const previewWrap = uploader.querySelector('[data-admin-image-preview-wrap]');
+    const placeholder = uploader.querySelector('[data-admin-image-placeholder]');
+    const currentSrc = uploader.dataset.currentSrc || '';
+    const fallbackSrc = uploader.dataset.fallbackSrc || currentSrc;
+    let objectUrl = '';
+
+    function setPlaceholder(text, src = fallbackSrc) {
+        if (preview) {
+            preview.src = src;
+            preview.alt = text;
+        }
+
+        if (placeholder) {
+            placeholder.textContent = text;
+        }
+
+        if (previewWrap) {
+            previewWrap.classList.add('is-placeholder');
+        }
+    }
+
+    function setPreview(src, altText) {
+        if (preview) {
+            preview.src = src;
+            preview.alt = altText;
+        }
+
+        if (previewWrap) {
+            previewWrap.classList.remove('is-placeholder');
+        }
+    }
+
+    function revokeObjectUrl() {
+        if (objectUrl !== '') {
+            URL.revokeObjectURL(objectUrl);
+            objectUrl = '';
+        }
+    }
+
+    if (input) {
+        input.addEventListener('change', () => {
+            revokeObjectUrl();
+            const file = input.files && input.files.length > 0 ? input.files[0] : null;
+
+            if (!file) {
+                if (removeInput && removeInput.checked) {
+                    setPlaceholder('Image will be removed');
+                } else {
+                    setPreview(currentSrc || fallbackSrc, 'Current accommodation image');
+                }
+                return;
+            }
+
+            objectUrl = URL.createObjectURL(file);
+            setPreview(objectUrl, file.name || 'Selected accommodation image');
+
+            if (removeInput) {
+                removeInput.checked = false;
+            }
+        });
+    }
+
+    if (removeInput) {
+        removeInput.addEventListener('change', () => {
+            revokeObjectUrl();
+
+            if (removeInput.checked) {
+                if (input) {
+                    input.value = '';
+                }
+                setPlaceholder('Image will be removed');
+                return;
+            }
+
+            setPreview(currentSrc || fallbackSrc, 'Current accommodation image');
+        });
+    }
+
+    window.addEventListener('beforeunload', revokeObjectUrl);
+})();

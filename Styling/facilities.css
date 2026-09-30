@@ -708,10 +708,21 @@
 }
 
 .facility-cottage__image {
+    position: relative;
     min-height: 168px;
+    overflow: hidden;
+    background-color: #efe9dc;
     background-image: url("../Images/background.png");
     background-repeat: no-repeat;
     background-size: cover;
+}
+
+.facility-cottage__image img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .facility-cottage__image--comfort {

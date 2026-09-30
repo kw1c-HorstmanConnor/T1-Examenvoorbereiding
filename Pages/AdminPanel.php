@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../Functions/Auth/Authorization.php';
 require_once __DIR__ . '/../Functions/Admin/AdminFunctions.php';
 require_once __DIR__ . '/../Functions/Admin/AccommodationFacilities.php';
+require_once __DIR__ . '/../Functions/Accommodations/AccommodationImages.php';
 maple_require_admin('Login.php');
 
 $basePath = '../';
@@ -42,27 +43,62 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             $price = filter_var($_POST['price'] ?? null, FILTER_VALIDATE_FLOAT); $maximum = filter_var($_POST['maximum'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 5]]);
             $selectedFacilityValues = maple_admin_facility_values_from_post($_POST['facilities'] ?? []);
             if ($action === 'delete' && $id) {
-                $stmt = $pdo->prepare('DELETE FROM accomodaties WHERE Huis_id = :huis_id'); $stmt->execute(['huis_id' => $id]); maple_admin_redirect($tab, 'Accommodation deleted.');
+                $currentImage = maple_accommodation_current_image($pdo, (int) $id);
+                $stmt = $pdo->prepare('DELETE FROM accomodaties WHERE Huis_id = :huis_id'); $stmt->execute(['huis_id' => $id]);
+                maple_accommodation_delete_file_if_unused($pdo, $currentImage);
+                maple_admin_redirect($tab, 'Accommodation deleted.');
             }
             if ($name === '' || !maple_admin_valid_location($location) || $price === false || $price < 0 || $maximum === false || max(mb_strlen($name), mb_strlen($description)) > 255) $error = 'Enter a name, cardinal-direction location, non-negative price, and between 1 and 5 maximum guests.';
-            elseif ($action === 'create') {
-                maple_admin_save_accommodation_with_facilities($pdo, null, [
-                    'name' => $name,
-                    'location' => $location,
-                    'price' => (float) $price,
-                    'maximum' => (int) $maximum,
-                    'description' => $description,
-                ], $selectedFacilityValues);
-                maple_admin_redirect($tab, 'Accommodation created.');
-            } elseif ($action === 'update' && $id) {
-                maple_admin_save_accommodation_with_facilities($pdo, (int) $id, [
-                    'name' => $name,
-                    'location' => $location,
-                    'price' => (float) $price,
-                    'maximum' => (int) $maximum,
-                    'description' => $description,
-                ], $selectedFacilityValues);
-                maple_admin_redirect($tab, 'Accommodation updated.');
+            else {
+                $currentImage = $action === 'update' && $id ? maple_accommodation_current_image($pdo, (int) $id) : null;
+                $imageValue = $currentImage;
+                $uploadedImage = null;
+                $removeImage = (string) ($_POST['remove_image'] ?? '') === '1';
+
+                try {
+                    if ($removeImage) {
+                        $imageValue = null;
+                    }
+
+                    $imageFile = $_FILES['accommodation_image'] ?? null;
+                    if (maple_accommodation_uploaded_file_present($imageFile)) {
+                        $uploadedImage = maple_accommodation_store_uploaded_image($imageFile, $name);
+                        $imageValue = $uploadedImage !== '' ? $uploadedImage : $imageValue;
+                    }
+
+                    if ($action === 'create') {
+                        maple_admin_save_accommodation_with_facilities($pdo, null, [
+                            'name' => $name,
+                            'location' => $location,
+                            'price' => (float) $price,
+                            'maximum' => (int) $maximum,
+                            'description' => $description,
+                            'image' => $imageValue,
+                        ], $selectedFacilityValues);
+                        maple_admin_redirect($tab, 'Accommodation created.');
+                    } elseif ($action === 'update' && $id) {
+                        maple_admin_save_accommodation_with_facilities($pdo, (int) $id, [
+                            'name' => $name,
+                            'location' => $location,
+                            'price' => (float) $price,
+                            'maximum' => (int) $maximum,
+                            'description' => $description,
+                            'image' => $imageValue,
+                        ], $selectedFacilityValues);
+
+                        if (($uploadedImage !== null || $removeImage) && $currentImage !== null && $currentImage !== $imageValue) {
+                            maple_accommodation_delete_file_if_unused($pdo, $currentImage);
+                        }
+
+                        maple_admin_redirect($tab, 'Accommodation updated.');
+                    }
+                } catch (Throwable $exception) {
+                    if ($uploadedImage !== null) {
+                        maple_accommodation_delete_file($uploadedImage);
+                    }
+
+                    throw $exception;
+                }
             }
         } else {
             $content = trim((string) ($_POST['content'] ?? '')); $published = maple_admin_datetime((string) ($_POST['published'] ?? ''));
@@ -77,18 +113,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             }
         }
     } catch (PDOException $exception) {
-        error_log($exception->getMessage());
+        error_log((string) $exception);
         $error = $exception->getMessage();
-    } catch (Throwable $exception) { $error = 'The change could not be saved. Please check the database connection.'; }
+    } catch (RuntimeException $exception) {
+        $error = $exception->getMessage();
+    } catch (Throwable $exception) {
+        error_log((string) $exception);
+        $error = 'The change could not be saved. Please check the database connection.';
+    }
 }
 
 $events = $accommodations = $news = [];
 try {
     $db = maple_db();
     $result = $db->query('SELECT evenementen_id, Titel, Omschrijving, Start_time, Locatie FROM evenementen ORDER BY Start_time DESC'); $events = $result ? $result->fetch_all(MYSQLI_ASSOC) : []; $result?->free();
-    $result = $db->query('SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, Max, Omschr FROM accomodaties ORDER BY Huis_id DESC'); $accommodations = $result ? $result->fetch_all(MYSQLI_ASSOC) : []; $result?->free();
+    $result = $db->query('SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschrijving, Afbeelding FROM accomodaties ORDER BY Huis_id DESC'); $accommodations = $result ? $result->fetch_all(MYSQLI_ASSOC) : []; $result?->free();
     $result = $db->query('SELECT Nieuws_id, Inhoud, Aangemaakt, Gepubliceerd FROM nieuws ORDER BY Aangemaakt DESC'); $news = $result ? $result->fetch_all(MYSQLI_ASSOC) : []; $result?->free();
-} catch (Throwable $exception) { $error = $error ?: 'The admin data could not be loaded. Please check the database connection.'; }
+} catch (Throwable $exception) {
+    error_log((string) $exception);
+    $error = $error ?: $exception->getMessage();
+}
 
 $adminFacilities = maple_facility_sort(maple_facility_definitions());
 $adminFacilitiesByCategory = maple_facilities_by_category($adminFacilities);
@@ -119,7 +163,14 @@ $notice = (string) ($_SESSION['admin_notice'] ?? ''); unset($_SESSION['admin_not
     <div class="admin-crud__form">
         <p class="section-label">ACCOMMODATIONS</p>
         <h2><?= $editing ? 'Edit accommodation' : 'New accommodation'; ?></h2>
-        <form class="admin-form" method="post">
+        <?php
+        $editingImage = (string) ($editing['Afbeelding'] ?? '');
+        $editingHasImageValue = maple_accommodation_image_filename($editingImage) !== '';
+        $editingHasImageFile = maple_accommodation_image_exists($editingImage);
+        $editingImageUrl = maple_accommodation_image_url($editingImage, $assetBase);
+        $fallbackImageUrl = maple_accommodation_image_fallback_url($assetBase);
+        ?>
+        <form class="admin-form" method="post" enctype="multipart/form-data">
             <input type="hidden" name="csrf" value="<?= maple_admin_e($csrf); ?>">
             <input type="hidden" name="tab" value="accommodations">
             <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create'; ?>">
@@ -135,7 +186,47 @@ $notice = (string) ($_SESSION['admin_notice'] ?? ''); unset($_SESSION['admin_not
             </label>
             <label>Price per night<input required type="number" min="0" step="0.01" name="price" value="<?= maple_admin_e($editing['PPN'] ?? ''); ?>"></label>
             <label>Maximum guests<input required type="number" min="1" max="5" name="maximum" value="<?= maple_admin_e($editing['Max'] ?? ''); ?>"></label>
-            <label>Description<textarea maxlength="255" name="description" rows="4"><?= maple_admin_e($editing['Omschr'] ?? ''); ?></textarea></label>
+            <label>Description<textarea maxlength="255" name="description" rows="4"><?= maple_admin_e($editing['Omschrijving'] ?? ''); ?></textarea></label>
+
+            <section
+                class="admin-image-uploader"
+                data-admin-image-uploader
+                data-current-src="<?= maple_admin_e($editingImageUrl); ?>"
+                data-fallback-src="<?= maple_admin_e($fallbackImageUrl); ?>"
+            >
+                <div class="admin-image-uploader__heading">
+                    <div>
+                        <h3>Accommodation image</h3>
+                        <p>JPG, PNG or WebP. Maximum 5 MB.</p>
+                    </div>
+                    <?php if ($editingHasImageValue && !$editingHasImageFile): ?>
+                        <span class="admin-image-status">File missing</span>
+                    <?php elseif ($editingHasImageFile): ?>
+                        <span class="admin-image-status">Current image</span>
+                    <?php endif; ?>
+                </div>
+                <div class="admin-image-preview<?= $editingHasImageFile ? '' : ' is-placeholder'; ?>" data-admin-image-preview-wrap>
+                    <img
+                        src="<?= maple_admin_e($editingImageUrl); ?>"
+                        alt="<?= $editingHasImageFile ? maple_admin_e('Current image for ' . (string) ($editing['Huis_naam'] ?? 'accommodation')) : 'Accommodation image placeholder'; ?>"
+                        data-admin-image-preview
+                    >
+                    <span data-admin-image-placeholder><?= $editingHasImageValue && !$editingHasImageFile ? 'Image file missing' : 'No image selected'; ?></span>
+                </div>
+                <div class="admin-image-controls">
+                    <label class="admin-image-button">
+                        Choose image
+                        <input type="file" name="accommodation_image" accept="image/jpeg,image/png,image/webp" data-admin-image-input>
+                    </label>
+                    <?php if ($editingHasImageValue): ?>
+                        <label class="admin-check-row admin-image-remove">
+                            <input type="checkbox" name="remove_image" value="1" data-admin-image-remove>
+                            Remove image
+                        </label>
+                    <?php endif; ?>
+                </div>
+                <p class="admin-image-help">Recommended: JPG, PNG or WebP. Maximum 5 MB.</p>
+            </section>
 
             <section class="admin-facility-picker" data-admin-facility-picker aria-labelledby="admin-facility-picker-title">
                 <section class="admin-facility-presets" aria-labelledby="admin-facility-preset-title">
@@ -224,9 +315,23 @@ $notice = (string) ($_SESSION['admin_notice'] ?? ''); unset($_SESSION['admin_not
     <div class="admin-crud__list">
         <h2>All accommodations</h2>
         <?php foreach ($accommodations as $a): ?>
-            <?php $tagCount = count(maple_facility_parse_values((string) ($a['Voorzieningen'] ?? ''))); ?>
-            <article class="admin-record">
+            <?php
+            $tagCount = count(maple_facility_parse_values((string) ($a['Voorzieningen'] ?? '')));
+            $thumbnailImage = (string) ($a['Afbeelding'] ?? '');
+            $thumbnailUrl = maple_accommodation_image_url($thumbnailImage, $assetBase);
+            $hasThumbnail = maple_accommodation_image_exists($thumbnailImage);
+            ?>
+            <article class="admin-record admin-record--accommodation">
+                <div class="admin-record__summary">
+                    <div class="admin-record__thumb<?= $hasThumbnail ? '' : ' is-placeholder'; ?>">
+                        <?php if ($hasThumbnail): ?>
+                            <img src="<?= maple_admin_e($thumbnailUrl); ?>" alt="<?= maple_admin_e((string) $a['Huis_naam']); ?>">
+                        <?php else: ?>
+                            <span>No image</span>
+                        <?php endif; ?>
+                    </div>
                 <div><h3><?= maple_admin_e($a['Huis_naam']); ?></h3><p><?= maple_admin_e($a['Locatie']); ?> · €<?= maple_admin_e($a['PPN']); ?> / night · <?= (int) $a['Max']; ?> guests · <?= $tagCount; ?> facility tags</p></div>
+                </div>
                 <div class="admin-record__actions"><a href="AdminPanel.php?tab=accommodations&edit=<?= (int) $a['Huis_id']; ?>">Edit</a><form method="post"><input type="hidden" name="csrf" value="<?= maple_admin_e($csrf); ?>"><input type="hidden" name="tab" value="accommodations"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int) $a['Huis_id']; ?>"><button class="admin-delete" onclick="return confirm('Delete this accommodation?');">Delete</button></form></div>
             </article>
         <?php endforeach; ?>

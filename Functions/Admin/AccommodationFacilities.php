@@ -17,8 +17,8 @@ function maple_admin_save_accommodation_with_facilities(PDO $pdo, ?int $huisId, 
 
         if ($huisId === null) {
             $statement = $pdo->prepare('
-                INSERT INTO accomodaties (Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschr)
-                VALUES (:name, :location, :price, :facilities, :maximum, :description)
+                INSERT INTO accomodaties (Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschrijving, Afbeelding)
+                VALUES (:name, :location, :price, :facilities, :maximum, :description, :image)
             ');
             $statement->execute([
                 'name' => $values['name'],
@@ -27,6 +27,7 @@ function maple_admin_save_accommodation_with_facilities(PDO $pdo, ?int $huisId, 
                 'facilities' => $facilitiesCsv,
                 'maximum' => $values['maximum'],
                 'description' => $values['description'],
+                'image' => $values['image'] ?? null,
             ]);
             $huisId = (int) $pdo->lastInsertId();
         } else {
@@ -37,7 +38,8 @@ function maple_admin_save_accommodation_with_facilities(PDO $pdo, ?int $huisId, 
                     PPN = :price,
                     Voorzieningen = :facilities,
                     `Max` = :maximum,
-                    Omschr = :description
+                    Omschrijving = :description,
+                    Afbeelding = :image
                 WHERE Huis_id = :huis_id
             ');
             $statement->execute([
@@ -47,6 +49,7 @@ function maple_admin_save_accommodation_with_facilities(PDO $pdo, ?int $huisId, 
                 'facilities' => $facilitiesCsv,
                 'maximum' => $values['maximum'],
                 'description' => $values['description'],
+                'image' => $values['image'] ?? null,
                 'huis_id' => $huisId,
             ]);
         }

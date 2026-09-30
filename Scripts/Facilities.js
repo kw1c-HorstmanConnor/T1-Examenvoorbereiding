@@ -15,6 +15,15 @@
     const modalCottages = document.querySelector('[data-modal-cottages]');
     const focusableSelector = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+    document.querySelectorAll('.facility-cottage__image img').forEach((image) => {
+        image.addEventListener('error', () => {
+            if (image.dataset.fallbackSrc && image.dataset.fallbackApplied !== '1') {
+                image.dataset.fallbackApplied = '1';
+                image.src = image.dataset.fallbackSrc;
+            }
+        });
+    });
+
     let facilities = [];
     let accommodations = [];
     let activeFacility = null;
