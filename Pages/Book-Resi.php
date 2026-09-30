@@ -203,6 +203,7 @@ $submissionToken = (string) ($_SESSION['booking_submission_token'] ?? '');
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../Styling/index.css">
     <link rel="stylesheet" href="../Styling/Booking.css">
+    <?php include __DIR__ . '/../Includes/LanguagesScripts.php'; ?>
 </head>
 <body class="booking-page">
 <?php include __DIR__ . '/../Includes/Header.php'; ?>

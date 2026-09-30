@@ -43,7 +43,57 @@
         const trimmed = value.trim();
         const words = dictionary._words || {};
 
-        const guestMatch = trimmed.match(/^(\d+)\s+(gast|gasten)$/i);
+        const namedVacationMatch = trimmed.match(/^My vacation:\s*(.+)$/i);
+        if (namedVacationMatch && words.myVacationNamed) {
+            return words.myVacationNamed.replace('{name}', namedVacationMatch[1]);
+        }
+
+        const reservationNumberMatch = trimmed.match(/^Reservation\s+#(\d+)$/i);
+        if (reservationNumberMatch && words.reservationNumber) {
+            return words.reservationNumber.replace('{number}', reservationNumberMatch[1]);
+        }
+
+        const cottageCountMatch = trimmed.match(/^(\d+)\s+cottages available$/i);
+        if (cottageCountMatch && words.cottagesAvailable) {
+            return words.cottagesAvailable.replace('{count}', cottageCountMatch[1]);
+        }
+
+        const accommodationDetailsMatch = trimmed.match(/^View details for\s+(.+)$/i);
+        if (accommodationDetailsMatch && words.viewAccommodationDetails) {
+            return words.viewAccommodationDetails.replace('{name}', accommodationDetailsMatch[1]);
+        }
+
+        const activityDetailsMatch = trimmed.match(/^Open activity details:\s*(.+)$/i);
+        if (activityDetailsMatch && words.openActivityDetails) {
+            return words.openActivityDetails.replace('{name}', activityDetailsMatch[1]);
+        }
+
+        const refundSummaryMatch = trimmed.match(/^Je annuleert (\d+) dagen voor aankomst\. Volgens de annuleringsvoorwaarden ontvang je (\d+)% terug: (€[\d.,]+) van (€[\d.,]+)\.$/i);
+        if (refundSummaryMatch && words.refundSummary) {
+            return words.refundSummary
+                .replace('{days}', refundSummaryMatch[1])
+                .replace('{percentage}', refundSummaryMatch[2])
+                .replace('{refund}', refundSummaryMatch[3])
+                .replace('{total}', refundSummaryMatch[4]);
+        }
+
+        const cancellationNoticeMatch = trimmed.match(/^De reservering is geannuleerd\. Volgens de annuleringsvoorwaarden bedraagt de terugbetaling (€[\d.,]+)\. De daadwerkelijke betaalverwerking wordt later gekoppeld\.$/i);
+        if (cancellationNoticeMatch && words.cancellationNotice) {
+            return words.cancellationNotice.replace('{refund}', cancellationNoticeMatch[1]);
+        }
+
+        const eventDateMatch = trimmed.match(/^Events op (\d{2}-\d{2}-\d{4})$/i);
+        if (eventDateMatch && words.eventsOn) {
+            return words.eventsOn.replace('{date}', eventDateMatch[1]);
+        }
+
+        const shortDateMatch = trimmed.match(/^(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{4})$/i);
+        if (shortDateMatch && words.shortMonths) {
+            const translatedMonth = words.shortMonths[shortDateMatch[2].toLowerCase()] || shortDateMatch[2];
+            return `${shortDateMatch[1]} ${translatedMonth} ${shortDateMatch[3]}`;
+        }
+
+        const guestMatch = trimmed.match(/^(\d+)\s+(gast|gasten|guest|guests)$/i);
         if (guestMatch && words.guest && words.guests) {
             const amount = Number(guestMatch[1]);
             return `${amount} ${amount === 1 ? words.guest : words.guests}`;
