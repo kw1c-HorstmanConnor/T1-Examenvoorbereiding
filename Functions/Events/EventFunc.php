@@ -8,7 +8,7 @@ require_once __DIR__ . '/../Helpers/Database.php';
 // -------------------------------------------------------------------------
 
 // Returns the requested month, defaulting to the current month for invalid input.
-function maple_events_calendar_month(?string $requestedMonth): DateTimeImmutable
+function maple_events_calendar_month($requestedMonth): DateTimeImmutable
 {
     $requestedMonth = trim((string) $requestedMonth);
     $month = DateTimeImmutable::createFromFormat('!Y-m', $requestedMonth);
@@ -73,6 +73,7 @@ function maple_events_by_date(DateTimeImmutable $month): array
 function maple_events_calendar_data(?string $requestedMonth): array
 {
     $month = maple_events_calendar_month($requestedMonth);
+    $currentMonth = new DateTimeImmutable('first day of this month midnight');
     $months = [
         1 => 'januari', 2 => 'februari', 3 => 'maart', 4 => 'april',
         5 => 'mei', 6 => 'juni', 7 => 'juli', 8 => 'augustus',
@@ -85,7 +86,7 @@ function maple_events_calendar_data(?string $requestedMonth): array
         'first_weekday' => (int) $month->format('N'),
         'next_month' => $month->modify('+1 month')->format('Y-m'),
         'previous_month' => $month->modify('-1 month')->format('Y-m'),
-        'can_go_previous' => true,
+        'can_go_previous' => $month > $currentMonth,
         'month_label' => ucfirst($months[(int) $month->format('n')]) . ' ' . $month->format('Y'),
         'weekdays' => ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'],
         'events_by_date' => maple_events_by_date($month),

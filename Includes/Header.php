@@ -77,7 +77,7 @@ if ($currentPage === 'reviews') {
                 <option value="de">DE</option>
             </select>
             <?php if ($loggedInVoornaam !== ''): ?>
-                <span class="header-account"><?= htmlspecialchars($loggedInVoornaam, ENT_QUOTES, 'UTF-8'); ?></span>
+                <a class="header-account" href="<?= htmlspecialchars($basePath . 'Pages/MyVacation.php', ENT_QUOTES, 'UTF-8'); ?>">My vacation<?= $loggedInVoornaam !== '' ? ': ' . htmlspecialchars($loggedInVoornaam, ENT_QUOTES, 'UTF-8') : ''; ?></a>
                 <?php if ($loggedInRoleName === 'admin'): ?>
                     <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/AdminPanel.php', ENT_QUOTES, 'UTF-8'); ?>">Admin</a>
                 <?php endif; ?>

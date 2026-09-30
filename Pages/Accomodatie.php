@@ -51,6 +51,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['booking_action'
                     'end_date' => $endDate,
                     'people' => (int) $people,
                 ];
+                // A confirmation token may only authorize the pending booking that created it.
+                unset($_SESSION['booking_submission_token']);
 
                 if (empty($_SESSION['user_id'])) {
                     $_SESSION['booking_login_redirect'] = 'Book-Resi.php';
