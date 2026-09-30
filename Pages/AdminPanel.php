@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../Functions/Auth/Authorization.php';
+require_once __DIR__ . '/../Functions/Admin/AdminFunctions.php';
 require_once __DIR__ . '/../Functions/Admin/AccommodationFacilities.php';
 maple_require_admin('Login.php');
 
@@ -11,28 +12,6 @@ $currentPage = 'admin';
 $tabs = ['events', 'accommodations', 'news'];
 $tab = in_array($_GET['tab'] ?? '', $tabs, true) ? $_GET['tab'] : 'events';
 $error = '';
-
-function maple_admin_e($value): string { return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); }
-function maple_admin_datetime(string $value): ?string {
-    if ($value === '') return null;
-    $date = DateTimeImmutable::createFromFormat('!Y-m-d\\TH:i', $value);
-    return $date && $date->format('Y-m-d\\TH:i') === $value ? $date->format('Y-m-d H:i:s') : null;
-}
-function maple_admin_redirect(string $tab, string $notice): void {
-    $_SESSION['admin_notice'] = $notice;
-    header('Location: AdminPanel.php?tab=' . rawurlencode($tab));
-    exit;
-}
-function maple_admin_text(string $value, int $maxLength = 255): string {
-    $value = trim($value);
-    return mb_strlen($value) <= $maxLength ? $value : mb_substr($value, 0, $maxLength);
-}
-function maple_admin_location_options(): array {
-    return ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
-}
-function maple_admin_valid_location(string $location): bool {
-    return in_array($location, maple_admin_location_options(), true);
-}
 
 if (empty($_SESSION['admin_csrf'])) $_SESSION['admin_csrf'] = bin2hex(random_bytes(32));
 $csrf = (string) $_SESSION['admin_csrf'];
