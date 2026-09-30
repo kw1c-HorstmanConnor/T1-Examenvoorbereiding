@@ -68,6 +68,11 @@
             return words.openActivityDetails.replace('{name}', activityDetailsMatch[1]);
         }
 
+        const facilityDetailsMatch = trimmed.match(/^Open facility details:\s*(.+)$/i);
+        if (facilityDetailsMatch && words.openFacilityDetails) {
+            return words.openFacilityDetails.replace('{name}', facilityDetailsMatch[1]);
+        }
+
         const refundSummaryMatch = trimmed.match(/^Je annuleert (\d+) dagen voor aankomst\. Volgens de annuleringsvoorwaarden ontvang je (\d+)% terug: (€[\d.,]+) van (€[\d.,]+)\.$/i);
         if (refundSummaryMatch && words.refundSummary) {
             return words.refundSummary
@@ -85,6 +90,21 @@
         const eventDateMatch = trimmed.match(/^Events op (\d{2}-\d{2}-\d{4})$/i);
         if (eventDateMatch && words.eventsOn) {
             return words.eventsOn.replace('{date}', eventDateMatch[1]);
+        }
+
+        const eventCountMatch = trimmed.match(/^(\d+) events planned$/i);
+        if (eventCountMatch && words.eventCount) {
+            return words.eventCount.replace('{count}', eventCountMatch[1]);
+        }
+
+        const openEventsMatch = trimmed.match(/^Open events for (\d{2}-\d{2}-\d{4})$/i);
+        if (openEventsMatch && words.openEventsFor) {
+            return words.openEventsFor.replace('{date}', openEventsMatch[1]);
+        }
+
+        const showAllEventsMatch = trimmed.match(/^Show all events for (\d{2}-\d{2}-\d{4})$/i);
+        if (showAllEventsMatch && words.showAllEventsFor) {
+            return words.showAllEventsFor.replace('{date}', showAllEventsMatch[1]);
         }
 
         const shortDateMatch = trimmed.match(/^(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{4})$/i);

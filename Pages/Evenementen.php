@@ -89,7 +89,7 @@ $currentPage = 'events';
 
                 <div class="page-container event-calendar" aria-labelledby="calendar-title">
                     <div class="event-calendar__header">
-                        <h2 class="event-calendar__month" id="calendar-title"><?= htmlspecialchars($monthLabel, ENT_QUOTES, 'UTF-8'); ?></h2>
+                        <h2 class="event-calendar__month" id="calendar-title" data-calendar-month-label="<?= htmlspecialchars($month->format('Y-m'), ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($monthLabel, ENT_QUOTES, 'UTF-8'); ?></h2>
                         <div class="event-calendar__navigation" aria-label="Kalendernavigatie">
                             <?php if ($canGoPrevious): ?>
                                 <a class="outline-button outline-button--small" href="?month=<?= htmlspecialchars($previousMonth, ENT_QUOTES, 'UTF-8'); ?>" data-calendar-month>Vorige maand</a>
@@ -101,8 +101,8 @@ $currentPage = 'events';
                     </div>
 
                     <div class="event-calendar__weekdays" aria-hidden="true">
-                        <?php foreach ($weekdays as $weekday): ?>
-                            <span><?= htmlspecialchars(substr($weekday, 0, 2), ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php foreach ($weekdays as $weekdayIndex => $weekday): ?>
+                            <span data-calendar-weekday="<?= (int) $weekdayIndex + 1; ?>"><?= htmlspecialchars(substr($weekday, 0, 2), ENT_QUOTES, 'UTF-8'); ?></span>
                         <?php endforeach; ?>
                     </div>
 
@@ -201,13 +201,54 @@ $currentPage = 'events';
         const dayDialogToday = dayDialog.querySelector('[data-calendar-dialog-today]');
         const dayDialogCount = dayDialog.querySelector('[data-calendar-dialog-count]');
         const dayDialogBody = dayDialog.querySelector('[data-calendar-dialog-body]');
-        const dayDialogDateFormatter = new Intl.DateTimeFormat('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric',
-        });
+        const calendarMonthLabel = document.querySelector('[data-calendar-month-label]');
+        const calendarWeekdays = document.querySelectorAll('[data-calendar-weekday]');
+        const calendarLocales = {
+            en: 'en-GB',
+            es: 'es-ES',
+            fr: 'fr-FR',
+            de: 'de-DE',
+        };
         let activeCalendarDay = null;
+
+        const translateCalendarText = (value) => {
+            if (!window.MapleLanguage) {
+                return value;
+            }
+
+            return window.MapleLanguage.translate(value);
+        };
+
+        const formatCalendarDate = (date) => {
+            const language = window.MapleLanguage ? window.MapleLanguage.getLanguage() : 'en';
+            const locale = calendarLocales[language] || calendarLocales.en;
+
+            return new Intl.DateTimeFormat(locale, {
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+            }).format(date);
+        };
+
+        const localizeCalendarHeader = () => {
+            const language = window.MapleLanguage ? window.MapleLanguage.getLanguage() : 'en';
+            const locale = calendarLocales[language] || calendarLocales.en;
+            const monthParts = calendarMonthLabel.dataset.calendarMonthLabel.split('-').map(Number);
+            const monthDate = new Date(monthParts[0], monthParts[1] - 1, 1);
+            calendarMonthLabel.textContent = new Intl.DateTimeFormat(locale, {
+                month: 'long',
+                year: 'numeric',
+            }).format(monthDate);
+
+            calendarWeekdays.forEach((weekday) => {
+                const weekdayIndex = Number(weekday.dataset.calendarWeekday);
+                const weekdayDate = new Date(2024, 0, weekdayIndex);
+                weekday.textContent = new Intl.DateTimeFormat(locale, {weekday: 'short'}).format(weekdayDate);
+            });
+        };
+
+        localizeCalendarHeader();
 
         const dateFromKey = (dateKey) => {
             const [year, month, day] = dateKey.split('-').map(Number);
@@ -217,10 +258,10 @@ $currentPage = 'events';
 
         const eventCountLabel = (eventCount) => {
             if (eventCount === 0) {
-                return 'No events planned';
+                return translateCalendarText('No events planned');
             }
 
-            return eventCount === 1 ? '1 event planned' : `${eventCount} events planned`;
+            return translateCalendarText(eventCount === 1 ? '1 event planned' : `${eventCount} events planned`);
         };
 
         const createTextElement = (tagName, className, text) => {
@@ -238,8 +279,8 @@ $currentPage = 'events';
                 const emptyState = document.createElement('div');
                 emptyState.className = 'calendar-day-dialog__empty';
                 emptyState.append(
-                    createTextElement('h4', '', 'No events planned for this day.'),
-                    createTextElement('p', '', 'A quiet day at Maple Camp.')
+                    createTextElement('h4', '', translateCalendarText('No events planned for this day.')),
+                    createTextElement('p', '', translateCalendarText('A quiet day at Maple Camp.'))
                 );
                 dayDialogBody.append(emptyState);
 
@@ -260,7 +301,7 @@ $currentPage = 'events';
                 eventMeta.className = 'calendar-day-dialog__event-meta';
 
                 if (eventItem.startLabel) {
-                    eventMeta.append(createTextElement('span', '', `${eventItem.startLabel} uur`));
+                    eventMeta.append(createTextElement('span', '', `${eventItem.startLabel} ${translateCalendarText('uur')}`));
                 }
 
                 if (eventItem.location) {
@@ -286,7 +327,7 @@ $currentPage = 'events';
             ));
 
             activeCalendarDay = calendarDay;
-            dayDialogTitle.textContent = dayDialogDateFormatter.format(dateFromKey(dateKey));
+            dayDialogTitle.textContent = formatCalendarDate(dateFromKey(dateKey));
             dayDialogToday.hidden = dateKey !== todayKey;
             dayDialogCount.textContent = eventCountLabel(events.length);
             dayDialog.classList.toggle('calendar-day-dialog--past', dateKey < todayKey);
@@ -363,6 +404,23 @@ $currentPage = 'events';
                 activeCalendarDay.focus({ preventScroll: true });
                 activeCalendarDay = null;
             }
+        });
+
+        window.addEventListener('maple:languagechange', () => {
+            localizeCalendarHeader();
+
+            if (!activeCalendarDay || !dayDialog.open) {
+                return;
+            }
+
+            const dateKey = activeCalendarDay.dataset.calendarDate;
+            const events = [...(calendarEventsByDate[dateKey] ?? [])].sort((firstEvent, secondEvent) => (
+                String(firstEvent.startTime ?? '').localeCompare(String(secondEvent.startTime ?? ''))
+            ));
+
+            dayDialogTitle.textContent = formatCalendarDate(dateFromKey(dateKey));
+            dayDialogCount.textContent = eventCountLabel(events.length);
+            renderDayDialogEvents(events, dateKey);
         });
     </script>
 </body>

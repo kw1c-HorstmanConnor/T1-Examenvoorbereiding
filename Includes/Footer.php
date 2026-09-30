@@ -11,7 +11,7 @@ $assetBase = $assetBase ?? $rootPrefix;
                 <img class="site-logo__image" src="<?= htmlspecialchars($assetBase . 'Images/maple_logo.png', ENT_QUOTES, 'UTF-8'); ?>" alt="">
             </a>
             <p>A unique 20+ camping experience in the heart of the Canadian wilderness. Unwind, seek adventure and make memories that last a lifetime.</p>
-            <div class="social-links" aria-label="Social media">
+            <div class="social-links" aria-label="Sociale media">
                 <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>" aria-label="Facebook">f</a>
                 <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>" aria-label="Instagram"><span class="social-icon social-icon--instagram" aria-hidden="true"></span></a>
                 <a href="<?= htmlspecialchars($basePath . 'Index.php?view=home', ENT_QUOTES, 'UTF-8'); ?>" aria-label="YouTube"><span class="social-icon social-icon--youtube" aria-hidden="true"></span></a>

@@ -13,8 +13,12 @@ $facilitiesData = maple_facilities_data();
 $facilities = $facilitiesData['facilities'];
 $accommodations = $facilitiesData['accommodations'];
 $facilitiesByCategory = maple_facilities_by_category($facilities);
-$popularFacilities = array_values(array_filter($facilities, static fn(array $facility): bool => (bool) ($facility['popular'] ?? false)));
-$filterFacilities = array_values(array_filter($facilities, static fn(array $facility): bool => (bool) ($facility['filter'] ?? false)));
+$popularFacilities = array_values(array_filter($facilities, static function (array $facility): bool {
+    return (bool) ($facility['popular'] ?? false);
+}));
+$filterFacilities = array_values(array_filter($facilities, static function (array $facility): bool {
+    return (bool) ($facility['filter'] ?? false);
+}));
 
 $facilityBySlug = [];
 foreach ($facilities as $facility) {

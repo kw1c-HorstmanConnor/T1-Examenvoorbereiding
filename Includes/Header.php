@@ -70,7 +70,7 @@ if ($currentPage === 'reviews') {
         </nav>
 
         <div class="site-header__actions">
-            <select class="language-select" data-language-select data-no-translate aria-label="Language">
+            <select class="language-select" data-language-select aria-label="Language">
                 <option value="en">EN</option>
                 <option value="es">ES</option>
                 <option value="fr">FR</option>
