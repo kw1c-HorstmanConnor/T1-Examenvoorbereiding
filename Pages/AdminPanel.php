@@ -27,6 +27,12 @@ function maple_admin_text(string $value, int $maxLength = 255): string {
     $value = trim($value);
     return mb_strlen($value) <= $maxLength ? $value : mb_substr($value, 0, $maxLength);
 }
+function maple_admin_location_options(): array {
+    return ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest'];
+}
+function maple_admin_valid_location(string $location): bool {
+    return in_array($location, maple_admin_location_options(), true);
+}
 
 if (empty($_SESSION['admin_csrf'])) $_SESSION['admin_csrf'] = bin2hex(random_bytes(32));
 $csrf = (string) $_SESSION['admin_csrf'];
@@ -45,7 +51,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             if ($action === 'delete' && $id) {
                 $stmt = $db->prepare('DELETE FROM evenementen WHERE evenementen_id = ?'); $stmt->bind_param('i', $id); $stmt->execute(); $stmt->close(); maple_admin_redirect($tab, 'Event deleted.');
             }
-            if ($title === '' || !$start || max(mb_strlen($title), mb_strlen($description), mb_strlen($location)) > 255) $error = 'Enter a title, valid start date and time, and values up to 255 characters.';
+            if ($title === '' || !$start || !maple_admin_valid_location($location) || max(mb_strlen($title), mb_strlen($description)) > 255) $error = 'Enter a title, valid start date and time, and choose a cardinal-direction location.';
             elseif ($action === 'create') {
                 $userId = (int) maple_current_user()['user_id']; $stmt = $db->prepare('INSERT INTO evenementen (User_id, Titel, Omschrijving, Start_time, Locatie) VALUES (?, ?, ?, ?, ?)'); $stmt->bind_param('issss', $userId, $title, $description, $start, $location); $stmt->execute(); $stmt->close(); maple_admin_redirect($tab, 'Event created.');
             } elseif ($action === 'update' && $id) {
@@ -54,12 +60,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         } elseif ($tab === 'accommodations') {
             $pdo = maple_pdo();
             $name = trim((string) ($_POST['name'] ?? '')); $location = trim((string) ($_POST['location'] ?? '')); $description = trim((string) ($_POST['description'] ?? ''));
-            $price = filter_var($_POST['price'] ?? null, FILTER_VALIDATE_FLOAT); $maximum = filter_var($_POST['maximum'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+            $price = filter_var($_POST['price'] ?? null, FILTER_VALIDATE_FLOAT); $maximum = filter_var($_POST['maximum'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 5]]);
             $selectedFacilityValues = maple_admin_facility_values_from_post($_POST['facilities'] ?? []);
             if ($action === 'delete' && $id) {
                 $stmt = $pdo->prepare('DELETE FROM accomodaties WHERE Huis_id = :huis_id'); $stmt->execute(['huis_id' => $id]); maple_admin_redirect($tab, 'Accommodation deleted.');
             }
-            if ($name === '' || $location === '' || $price === false || $price < 0 || $maximum === false || max(mb_strlen($name), mb_strlen($location), mb_strlen($description)) > 255) $error = 'Enter a name, location, non-negative price, maximum guests, and values up to 255 characters.';
+            if ($name === '' || !maple_admin_valid_location($location) || $price === false || $price < 0 || $maximum === false || max(mb_strlen($name), mb_strlen($description)) > 255) $error = 'Enter a name, cardinal-direction location, non-negative price, and between 1 and 5 maximum guests.';
             elseif ($action === 'create') {
                 maple_admin_save_accommodation_with_facilities($pdo, null, [
                     'name' => $name,
@@ -128,7 +134,7 @@ $notice = (string) ($_SESSION['admin_notice'] ?? ''); unset($_SESSION['admin_not
 <body class="admin-view"><div class="admin-page"><section class="admin-top" aria-labelledby="admin-heading"><?php include __DIR__ . '/../Includes/Header.php'; ?><div class="admin-top__content page-container"><p class="section-label section-label--light">ADMIN</p><h1 id="admin-heading">Content management</h1><p>Create, edit, and remove events, accommodations, and news.</p></div></section>
 <main class="admin-main page-container"><nav class="admin-tabs" aria-label="Admin sections"><a class="<?= $tab === 'events' ? 'is-active' : ''; ?>" href="AdminPanel.php?tab=events">Events</a><a class="<?= $tab === 'accommodations' ? 'is-active' : ''; ?>" href="AdminPanel.php?tab=accommodations">Accommodations</a><a class="<?= $tab === 'news' ? 'is-active' : ''; ?>" href="AdminPanel.php?tab=news">News</a></nav><?php if ($notice): ?><p class="admin-feedback success" role="status"><?= maple_admin_e($notice); ?></p><?php endif; ?><?php if ($error): ?><p class="admin-feedback error" role="alert"><?= maple_admin_e($error); ?></p><?php endif; ?>
 <?php if ($tab === 'events'): ?>
-<section class="admin-crud"><div class="admin-crud__form"><p class="section-label">EVENTS</p><h2><?= $editing ? 'Edit event' : 'New event'; ?></h2><form class="admin-form" method="post"><input type="hidden" name="csrf" value="<?= maple_admin_e($csrf); ?>"><input type="hidden" name="tab" value="events"><input type="hidden" name="action" value="<?= $editing ? 'update' : 'create'; ?>"><?php if ($editing): ?><input type="hidden" name="id" value="<?= (int) $editing['evenementen_id']; ?>"><?php endif; ?><label>Title<input required maxlength="255" name="title" value="<?= maple_admin_e($editing['Titel'] ?? ''); ?>"></label><label>Start date and time<input required type="datetime-local" name="start_time" value="<?= maple_admin_e($editing ? date('Y-m-d\\TH:i', strtotime($editing['Start_time'])) : ''); ?>"></label><label>Location<input maxlength="255" name="location" value="<?= maple_admin_e($editing['Locatie'] ?? ''); ?>"></label><label>Description<textarea maxlength="255" name="description" rows="4"><?= maple_admin_e($editing['Omschrijving'] ?? ''); ?></textarea></label><div class="admin-form__actions"><button><?= $editing ? 'Save event' : 'Create event'; ?></button><?php if ($editing): ?><a href="AdminPanel.php?tab=events">Cancel</a><?php endif; ?></div></form></div><div class="admin-crud__list"><h2>All events</h2><?php foreach ($events as $event): ?><article class="admin-record"><div><h3><?= maple_admin_e($event['Titel']); ?></h3><p><?= maple_admin_e($event['Start_time']); ?> · <?= maple_admin_e($event['Locatie']); ?></p></div><div class="admin-record__actions"><a href="AdminPanel.php?tab=events&edit=<?= (int) $event['evenementen_id']; ?>">Edit</a><form method="post"><input type="hidden" name="csrf" value="<?= maple_admin_e($csrf); ?>"><input type="hidden" name="tab" value="events"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int) $event['evenementen_id']; ?>"><button class="admin-delete" onclick="return confirm('Delete this event?');">Delete</button></form></div></article><?php endforeach; ?></div></section>
+<section class="admin-crud"><div class="admin-crud__form"><p class="section-label">EVENTS</p><h2><?= $editing ? 'Edit event' : 'New event'; ?></h2><form class="admin-form" method="post"><input type="hidden" name="csrf" value="<?= maple_admin_e($csrf); ?>"><input type="hidden" name="tab" value="events"><input type="hidden" name="action" value="<?= $editing ? 'update' : 'create'; ?>"><?php if ($editing): ?><input type="hidden" name="id" value="<?= (int) $editing['evenementen_id']; ?>"><?php endif; ?><label>Title<input required maxlength="255" name="title" value="<?= maple_admin_e($editing['Titel'] ?? ''); ?>"></label><label>Start date and time<input required type="datetime-local" name="start_time" value="<?= maple_admin_e($editing ? date('Y-m-d\\TH:i', strtotime($editing['Start_time'])) : ''); ?>"></label><label>Location<select required name="location"><option value="" disabled<?= !maple_admin_valid_location((string) ($editing['Locatie'] ?? '')) ? ' selected' : ''; ?>>Choose a direction</option><?php foreach (maple_admin_location_options() as $direction): ?><option value="<?= maple_admin_e($direction); ?>"<?= ($editing['Locatie'] ?? '') === $direction ? ' selected' : ''; ?>><?= maple_admin_e($direction); ?></option><?php endforeach; ?></select></label><label>Description<textarea maxlength="255" name="description" rows="4"><?= maple_admin_e($editing['Omschrijving'] ?? ''); ?></textarea></label><div class="admin-form__actions"><button><?= $editing ? 'Save event' : 'Create event'; ?></button><?php if ($editing): ?><a href="AdminPanel.php?tab=events">Cancel</a><?php endif; ?></div></form></div><div class="admin-crud__list"><h2>All events</h2><?php foreach ($events as $event): ?><article class="admin-record"><div><h3><?= maple_admin_e($event['Titel']); ?></h3><p><?= maple_admin_e($event['Start_time']); ?> · <?= maple_admin_e($event['Locatie']); ?></p></div><div class="admin-record__actions"><a href="AdminPanel.php?tab=events&edit=<?= (int) $event['evenementen_id']; ?>">Edit</a><form method="post"><input type="hidden" name="csrf" value="<?= maple_admin_e($csrf); ?>"><input type="hidden" name="tab" value="events"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="<?= (int) $event['evenementen_id']; ?>"><button class="admin-delete" onclick="return confirm('Delete this event?');">Delete</button></form></div></article><?php endforeach; ?></div></section>
 <?php elseif ($tab === 'accommodations'): ?>
 <section class="admin-crud">
     <div class="admin-crud__form">
@@ -140,9 +146,16 @@ $notice = (string) ($_SESSION['admin_notice'] ?? ''); unset($_SESSION['admin_not
             <input type="hidden" name="action" value="<?= $editing ? 'update' : 'create'; ?>">
             <?php if ($editing): ?><input type="hidden" name="id" value="<?= (int) $editing['Huis_id']; ?>"><?php endif; ?>
             <label>Name<input required maxlength="255" name="name" value="<?= maple_admin_e($editing['Huis_naam'] ?? ''); ?>"></label>
-            <label>Location<input required maxlength="255" name="location" value="<?= maple_admin_e($editing['Locatie'] ?? ''); ?>"></label>
+            <label>Location
+                <select required name="location">
+                    <option value="" disabled<?= !maple_admin_valid_location((string) ($editing['Locatie'] ?? '')) ? ' selected' : ''; ?>>Choose a direction</option>
+                    <?php foreach (maple_admin_location_options() as $direction): ?>
+                        <option value="<?= maple_admin_e($direction); ?>"<?= ($editing['Locatie'] ?? '') === $direction ? ' selected' : ''; ?>><?= maple_admin_e($direction); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </label>
             <label>Price per night<input required type="number" min="0" step="0.01" name="price" value="<?= maple_admin_e($editing['PPN'] ?? ''); ?>"></label>
-            <label>Maximum guests<input required type="number" min="1" name="maximum" value="<?= maple_admin_e($editing['Max'] ?? ''); ?>"></label>
+            <label>Maximum guests<input required type="number" min="1" max="5" name="maximum" value="<?= maple_admin_e($editing['Max'] ?? ''); ?>"></label>
             <label>Description<textarea maxlength="255" name="description" rows="4"><?= maple_admin_e($editing['Omschr'] ?? ''); ?></textarea></label>
 
             <section class="admin-facility-picker" data-admin-facility-picker aria-labelledby="admin-facility-picker-title">
