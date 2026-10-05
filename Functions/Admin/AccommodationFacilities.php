@@ -8,7 +8,10 @@ function maple_admin_facility_values_from_post($value): array
     return maple_facility_values_from_post($value);
 }
 
-function maple_admin_save_accommodation_with_facilities(PDO $pdo, ?int $huisId, array $values, array $facilityValues): int
+/**
+ * @param int|null $huisId
+ */
+function maple_admin_save_accommodation_with_facilities(PDO $pdo, $huisId, array $values, array $facilityValues): int
 {
     $facilitiesCsv = maple_facility_csv($facilityValues);
 

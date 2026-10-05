@@ -31,7 +31,10 @@ function maple_accommodation_image_filename($value): string
     return $filename;
 }
 
-function maple_accommodation_image_path($value): ?string
+/**
+ * @return string|null
+ */
+function maple_accommodation_image_path($value)
 {
     $filename = maple_accommodation_image_filename($value);
 
@@ -67,7 +70,7 @@ function maple_accommodation_uploaded_file_present($file): bool
         && (int) $file['error'] !== UPLOAD_ERR_NO_FILE;
 }
 
-function maple_accommodation_ensure_upload_directory(): void
+function maple_accommodation_ensure_upload_directory()
 {
     $directory = maple_accommodation_image_upload_directory();
 
@@ -152,7 +155,10 @@ function maple_accommodation_store_uploaded_image(array $file, string $accommoda
     return $filename;
 }
 
-function maple_accommodation_current_image(PDO $pdo, int $huisId): ?string
+/**
+ * @return string|null
+ */
+function maple_accommodation_current_image(PDO $pdo, int $huisId)
 {
     $statement = $pdo->prepare('
         SELECT Afbeelding
@@ -166,7 +172,7 @@ function maple_accommodation_current_image(PDO $pdo, int $huisId): ?string
     return is_string($image) && trim($image) !== '' ? $image : null;
 }
 
-function maple_accommodation_delete_file(string $image): void
+function maple_accommodation_delete_file(string $image)
 {
     $path = maple_accommodation_image_path($image);
 
@@ -188,7 +194,10 @@ function maple_accommodation_delete_file(string $image): void
     }
 }
 
-function maple_accommodation_delete_file_if_unused(PDO $pdo, ?string $image): void
+/**
+ * @param string|null $image
+ */
+function maple_accommodation_delete_file_if_unused(PDO $pdo, $image)
 {
     $filename = maple_accommodation_image_filename($image);
 

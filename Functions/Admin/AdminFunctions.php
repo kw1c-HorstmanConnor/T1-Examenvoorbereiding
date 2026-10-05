@@ -14,7 +14,7 @@ function maple_admin_e($value): string
  *
  * Returns null when the submitted value is empty or invalid.
  */
-function maple_admin_datetime(string $value): ?string
+function maple_admin_datetime(string $value)
 {
     if ($value === '') {
         return null;
@@ -28,7 +28,7 @@ function maple_admin_datetime(string $value): ?string
 /**
  * Stores a one-time admin notification and returns the user to the selected tab.
  */
-function maple_admin_redirect(string $tab, string $notice): void
+function maple_admin_redirect(string $tab, string $notice)
 {
     $_SESSION['admin_notice'] = $notice;
     header('Location: AdminPanel.php?tab=' . rawurlencode($tab));

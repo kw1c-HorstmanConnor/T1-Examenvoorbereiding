@@ -76,7 +76,7 @@ function maple_handle_registration(array $post): array
         $errors[] = 'Passwords do not match.';
     }
 
-    [$phoneIsValid, $phoneNumber] = maple_normalize_phone_number(
+    list($phoneIsValid, $phoneNumber) = maple_normalize_phone_number(
         $values['phone_country_code'],
         $values['telefoonnummer']
     );

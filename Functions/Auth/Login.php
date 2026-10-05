@@ -142,7 +142,10 @@ function maple_email_exists(string $email): bool
     return $exists;
 }
 
-function maple_default_role_id(): ?int
+/**
+ * @return int|null
+ */
+function maple_default_role_id()
 {
     $db = maple_db();
     $statement = $db->prepare('SELECT `Role_id`, `Role_name` FROM `Roles` ORDER BY `Role_id` ASC');
@@ -200,14 +203,18 @@ function maple_role_exists(int $roleId): bool
     return $exists;
 }
 
+/**
+ * @param string|null $telefoonnummer
+ * @return int|null
+ */
 function maple_register_user(
     string $voornaam,
     string $achternaam,
     string $email,
-    ?string $telefoonnummer,
+    $telefoonnummer,
     string $password,
     int $roleId
-): ?int {
+) {
     if (!maple_table_has_column('User', 'Password_hash')) {
         throw new RuntimeException('Password hash column is missing.');
     }

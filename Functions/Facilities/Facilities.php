@@ -136,7 +136,7 @@ function maple_facility_definitions(): array
 
     $definitions = [];
     foreach ($facilities as $index => $facility) {
-        [$key, $name, $category, $icon, $filter, $description] = $facility;
+        list($key, $name, $category, $icon, $filter, $description) = $facility;
         $definitions[] = [
             'id' => $index + 1,
             'key' => $key,
@@ -353,7 +353,10 @@ function maple_facility_detect_preset(array $facilityKeys): string
     return 'custom';
 }
 
-function maple_facility_by_value(array $facilities, string $value): ?array
+/**
+ * @return array|null
+ */
+function maple_facility_by_value(array $facilities, string $value)
 {
     $keys = maple_facility_parse_values($value);
     $key = $keys[0] ?? $value;
@@ -476,7 +479,7 @@ function maple_facilities_data(): array
         error_log('Facilities accommodations could not be loaded: ' . $exception->getMessage());
     }
 
-    [$facilities, $accommodations] = maple_facility_apply_accommodations($facilities, $accommodations);
+    list($facilities, $accommodations) = maple_facility_apply_accommodations($facilities, $accommodations);
 
     return [
         'facilities' => $facilities,
@@ -503,7 +506,9 @@ function maple_facilities_by_category(array $facilities): array
         $grouped[$category][] = $facility;
     }
 
-    return array_filter($grouped, static fn(array $items): bool => $items !== []);
+    return array_filter($grouped, static function (array $items): bool {
+        return $items !== [];
+    });
 }
 
 function maple_facility_price($price): string

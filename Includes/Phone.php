@@ -38,11 +38,11 @@ function maple_normalize_phone_number(string $countryCode, string $phone): array
         return [false, null];
     }
 
-    if (str_starts_with($compactPhone, $countryCode)) {
+    if (strpos($compactPhone, $countryCode) === 0) {
         $compactPhone = substr($compactPhone, strlen($countryCode));
-    } elseif (str_starts_with($compactPhone, '00' . $countryDigits)) {
+    } elseif (strpos($compactPhone, '00' . $countryDigits) === 0) {
         $compactPhone = substr($compactPhone, strlen('00' . $countryDigits));
-    } elseif (str_starts_with($compactPhone, '+') || str_starts_with($compactPhone, '00')) {
+    } elseif (strpos($compactPhone, '+') === 0 || strpos($compactPhone, '00') === 0) {
         return [false, null];
     }
 
@@ -52,7 +52,7 @@ function maple_normalize_phone_number(string $countryCode, string $phone): array
         return [false, null];
     }
 
-    if (str_starts_with($localDigits, '0')) {
+    if (strpos($localDigits, '0') === 0) {
         $localDigits = substr($localDigits, 1);
     }
 
