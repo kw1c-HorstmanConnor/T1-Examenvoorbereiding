@@ -18,6 +18,28 @@ function maple_db(): mysqli
     return $conn;
 }
 
+function maple_pdo(): PDO
+{
+    static $pdo = null;
+
+    if ($pdo instanceof PDO) {
+        return $pdo;
+    }
+
+    $pdo = new PDO(
+        'mysql:host=' . MAPLE_DB_HOST . ';dbname=' . MAPLE_DB_NAME . ';charset=utf8mb4',
+        MAPLE_DB_USER,
+        MAPLE_DB_PASSWORD,
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ]
+    );
+
+    return $pdo;
+}
+
 function maple_table_has_column(string $table, string $column): bool
 {
     $allowedTables = [
@@ -211,7 +233,7 @@ function maple_register_user(
     string $voornaam,
     string $achternaam,
     string $email,
-    ?int $telefoonnummer,
+    ?string $telefoonnummer,
     string $password,
     int $roleId
 ): ?int {
@@ -224,35 +246,30 @@ function maple_register_user(
     }
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-    $db = maple_db();
+    $db = maple_pdo();
     $statement = $db->prepare('
         INSERT INTO `User`
             (`Voornaam`, `Role_id`, `Achternaam`, `Email`, `Telefoonnummer`, `Password_hash`)
         VALUES
-            (?, ?, ?, ?, ?, ?)
+            (:voornaam, :role_id, :achternaam, :email, :telefoonnummer, :password_hash)
     ');
 
-    if (!$statement) {
-        throw new RuntimeException('Could not prepare user insert.');
-    }
-
-    $statement->bind_param(
-        'sissis',
-        $voornaam,
-        $roleId,
-        $achternaam,
-        $email,
+    $statement->bindValue(':voornaam', $voornaam, PDO::PARAM_STR);
+    $statement->bindValue(':role_id', $roleId, PDO::PARAM_INT);
+    $statement->bindValue(':achternaam', $achternaam, PDO::PARAM_STR);
+    $statement->bindValue(':email', $email, PDO::PARAM_STR);
+    $statement->bindValue(
+        ':telefoonnummer',
         $telefoonnummer,
-        $passwordHash
+        $telefoonnummer === null ? PDO::PARAM_NULL : PDO::PARAM_STR
     );
+    $statement->bindValue(':password_hash', $passwordHash, PDO::PARAM_STR);
 
     if (!$statement->execute()) {
-        $statement->close();
         throw new RuntimeException('Could not create user.');
     }
 
-    $newUserId = (int) $db->insert_id;
-    $statement->close();
+    $newUserId = (int) $db->lastInsertId();
 
     return $newUserId > 0 ? $newUserId : null;
 }

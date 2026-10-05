@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/Login.php';
+require_once __DIR__ . '/Phone.php';
 
 function maple_register_form_values(): array
 {
@@ -14,17 +15,6 @@ function maple_register_form_values(): array
     ];
 }
 
-function maple_phone_country_options(): array
-{
-    return [
-        '+31' => 'Netherlands',
-        '+32' => 'Belgium',
-        '+33' => 'France',
-        '+41' => 'Switzerland',
-        '+49' => 'Germany',
-    ];
-}
-
 function maple_register_csrf_token(): string
 {
     if (empty($_SESSION['register_csrf'])) {
@@ -32,39 +22,6 @@ function maple_register_csrf_token(): string
     }
 
     return (string) $_SESSION['register_csrf'];
-}
-
-function maple_normalize_phone_number(string $countryCode, string $phone): array
-{
-    $countryCode = trim($countryCode);
-    $phone = trim($phone);
-    $countryOptions = maple_phone_country_options();
-
-    if ($phone === '') {
-        return [true, null];
-    }
-
-    if (!isset($countryOptions[$countryCode])) {
-        return [false, null];
-    }
-
-    if (!preg_match('/^[0-9\-\s().]{6,16}$/', $phone)) {
-        return [false, null];
-    }
-
-    $digits = preg_replace('/\D+/', '', $phone);
-    $digits = ltrim((string) $digits, '0');
-
-    if ($digits === '' || strlen($digits) < 6) {
-        return [false, null];
-    }
-
-    // Telefoonnummer is currently an INT column, so keep the stored value in INT range.
-    if (strlen($digits) > 10 || (strlen($digits) === 10 && strcmp($digits, '2147483647') > 0)) {
-        return [false, null];
-    }
-
-    return [true, (int) $digits];
 }
 
 function maple_handle_registration(array $post): array
