@@ -571,6 +571,12 @@ window.MapleLanguages.fr = {
     "No events planned for this day.": "Aucun événement n’est prévu ce jour-là.",
     "A quiet day at Maple Camp.": "Une journée paisible à Maple Camp.",
     "Show more": "Afficher plus",
+    "2-4 hours": "2 à 4 heures",
+    "1-2 hours": "1 à 2 heures",
+    "90 minutes": "90 minutes",
+    "Half day": "Demi-journée",
+    "75 minutes": "75 minutes",
+    "Evening": "En soirée",
     "_words": {
         "guest": "voyageur",
         "guests": "voyageurs",

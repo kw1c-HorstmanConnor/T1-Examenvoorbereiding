@@ -73,7 +73,7 @@ $filterGuests = filter_var($_GET['guests'] ?? null, FILTER_VALIDATE_INT, ['optio
 
 $accommodations = [];
 $accommodationStatement = $conn->prepare(
-    'SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschrijving, Afbeelding FROM accomodaties ORDER BY Huis_id'
+    'SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschr, Afbeelding FROM accomodaties ORDER BY Huis_id'
 );
 
 if ($accommodationStatement) {
@@ -139,12 +139,6 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
                     <label><span>Departure</span><input id="departure" type="date" name="departure" value="<?= htmlspecialchars($filterDeparture, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Departure date"></label>
                     <button type="submit">Search cottages</button>
                 </form>
-                <nav class="cottage-tabs" aria-label="Accommodation categories">
-                    <a class="cottage-tabs__item cottage-tabs__item--active" data-type="all" href="#overview-heading">All accommodations</a>
-                    <a class="cottage-tabs__item" data-type="bungalow" href="#overview-heading">Bungalows</a>
-                    <a class="cottage-tabs__item" data-type="electric" href="#overview-heading">Camping with electricity</a>
-                    <a class="cottage-tabs__item" data-type="wild" href="#overview-heading">Wild camping</a>
-                </nav>
                 <div class="cottage-toolbar" aria-label="Cottage overview controls">
                     <p><strong><?= count($accommodations); ?> cottages available</strong><span>Choose the comfort level that suits your stay.</span></p>
                     <div class="cottage-filter-row"><label>Sort by <select aria-label="Sort cottages"><option>Recommended</option><option>Price: low to high</option><option>Most spacious</option></select></label><button type="button">Filters</button><button type="button">Bedrooms</button><button type="button">Facilities</button></div>

@@ -203,6 +203,7 @@ $currentPage = 'events';
         const dayDialogBody = dayDialog.querySelector('[data-calendar-dialog-body]');
         const calendarMonthLabel = document.querySelector('[data-calendar-month-label]');
         const calendarWeekdays = document.querySelectorAll('[data-calendar-weekday]');
+        const calendarDayNames = document.querySelectorAll('.event-calendar__day[data-calendar-date] .event-calendar__day-name');
         const calendarLocales = {
             en: 'en-GB',
             es: 'es-ES',
@@ -246,6 +247,20 @@ $currentPage = 'events';
                 const weekdayDate = new Date(2024, 0, weekdayIndex);
                 weekday.textContent = new Intl.DateTimeFormat(locale, {weekday: 'short'}).format(weekdayDate);
             });
+
+            calendarDayNames.forEach((dayName) => {
+                const calendarDay = dayName.closest('[data-calendar-date]');
+
+                if (!calendarDay) {
+                    return;
+                }
+
+                const dateParts = calendarDay.dataset.calendarDate.split('-').map(Number);
+                const calendarDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                dayName.textContent = new Intl.DateTimeFormat(locale, {weekday: 'short'}).format(calendarDate);
+            });
+
+            dayDialogToday.textContent = translateCalendarText('Today');
         };
 
         localizeCalendarHeader();

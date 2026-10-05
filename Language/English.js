@@ -571,6 +571,12 @@ window.MapleLanguages.en = {
     "Cottage overview controls": "Cottage overview controls",
     "cottages available": "cottages available",
     "Map centered on Kokanee Creek Provincial Park, British Columbia": "Map centered on Kokanee Creek Provincial Park, British Columbia",
+    "2-4 hours": "2-4 hours",
+    "1-2 hours": "1-2 hours",
+    "90 minutes": "90 minutes",
+    "Half day": "Half day",
+    "75 minutes": "75 minutes",
+    "Evening": "Evening",
     "_words": {
         "guest": "guest",
         "guests": "guests",

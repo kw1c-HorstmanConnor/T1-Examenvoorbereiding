@@ -142,7 +142,7 @@
         setText(modalTitle, translation.title);
         setText(modalDescription, translation.description);
         setText(modalLocation, activity.location);
-        setText(modalDuration, activity.duration);
+        setText(modalDuration, translate(activity.duration));
         setText(modalPrice, formatPrice(activity.price));
         setText(modalExtra, translation.extra);
         setRow(locationRow, activity.location);

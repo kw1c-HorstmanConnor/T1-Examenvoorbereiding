@@ -27,7 +27,7 @@ $fallbackAccomodations = [
         'guests' => 4,
         'bedrooms' => 2,
         'area' => 45,
-        'description' => 'Sfeervolle bungalow met alles wat je nodig hebt voor een ontspannen verblijf in de natuur.',
+        'description' => 'test data as a fallback.',
         'price' => 120,
     ],
     [
@@ -35,7 +35,7 @@ $fallbackAccomodations = [
         'guests' => 4,
         'bedrooms' => 2,
         'area' => 60,
-        'description' => 'Ruim en luxe ingericht met extra comfort en een prachtig uitzicht op de bergen.',
+        'description' => 'test data as a fallback.',
         'price' => 145,
     ],
     [
@@ -43,7 +43,7 @@ $fallbackAccomodations = [
         'guests' => 6,
         'bedrooms' => 3,
         'area' => 75,
-        'description' => 'Extra ruim, modern en stijlvol. Perfect voor een langer verblijf of extra luxe.',
+        'description' => 'test data as a fallback.',
         'price' => 175,
     ],
 ];
@@ -52,17 +52,17 @@ $fallbackEvents = [
     [
         'title' => 'Kampvuur avond',
         'datetime' => '2026-05-24 20:00:00',
-        'description' => 'Gezellige avond bij het kampvuur met live muziek en marshmallows.',
+        'description' => 'test data as a fallback.',
     ],
     [
         'title' => 'Wandeltocht Rockies',
         'datetime' => '2026-05-26 09:00:00',
-        'description' => 'Begeleide wandeltocht door de prachtige Rocky Mountains.',
+        'description' => 'test data as a fallback.',
     ],
     [
         'title' => 'Canoe Experience',
         'datetime' => '2026-05-28 10:00:00',
-        'description' => 'Ontdek het meer tijdens een ontspannen canoe tocht.',
+        'description' => 'test data as a fallback.',
     ],
 ];
 

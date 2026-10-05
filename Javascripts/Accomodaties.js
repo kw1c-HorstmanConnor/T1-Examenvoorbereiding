@@ -85,6 +85,23 @@ const bookingEndDate = document.querySelector('#booking-end-date');
 const bookingPeople = document.querySelector('#booking-people');
 let previouslyFocusedElement = null;
 let activeAccommodation = null;
+let activeAccommodationCard = null;
+
+function translateAccommodationText(value) {
+    if (window.MapleLanguage && typeof window.MapleLanguage.translate === 'function') {
+        return window.MapleLanguage.translate(value);
+    }
+
+    return value;
+}
+
+function updateAccommodationModal(card) {
+    if (!card) {
+        return;
+    }
+
+    modalDescription.textContent = translateAccommodationText(card.dataset.description || '');
+}
 
 document.querySelectorAll('.accommodation-card__photo').forEach(function (image) {
     image.addEventListener('error', function () {
@@ -111,7 +128,8 @@ function openAccommodationModal(card) {
     modalPrice.textContent = '€' + card.dataset.price;
     modalMax.textContent = card.dataset.max + ' guests';
     modalFacilities.textContent = card.dataset.facilities;
-    modalDescription.textContent = card.dataset.description;
+    updateAccommodationModal(card);
+    activeAccommodationCard = card;
     activeAccommodation = {
         huisId: card.dataset.huisId,
         name: card.dataset.huisName,
@@ -130,6 +148,12 @@ function openAccommodationModal(card) {
     document.body.classList.add('accommodation-modal-open');
     modalDialog.focus();
 }
+
+window.addEventListener('maple:languagechange', function () {
+    if (activeAccommodationCard && !accommodationModal.hidden) {
+        updateAccommodationModal(activeAccommodationCard);
+    }
+});
 
 function openBookingModal() {
     if (!activeAccommodation) {
