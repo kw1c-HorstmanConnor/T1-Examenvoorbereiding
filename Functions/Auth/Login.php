@@ -118,6 +118,133 @@ function maple_authenticate_user(string $email, string $password, $voornaam = nu
     }
 }
 
+function maple_email_exists(string $email): bool
+{
+    $email = trim($email);
+
+    if ($email === '') {
+        return false;
+    }
+
+    $db = maple_db();
+    $statement = $db->prepare('SELECT `User_id` FROM `User` WHERE LOWER(`Email`) = LOWER(?) LIMIT 1');
+
+    if (!$statement) {
+        throw new RuntimeException('Could not prepare email lookup.');
+    }
+
+    $statement->bind_param('s', $email);
+    $statement->execute();
+    $result = $statement->get_result();
+    $exists = $result instanceof mysqli_result && $result->num_rows > 0;
+    $statement->close();
+
+    return $exists;
+}
+
+function maple_default_role_id(): ?int
+{
+    $db = maple_db();
+    $statement = $db->prepare('SELECT `Role_id`, `Role_name` FROM `Roles` ORDER BY `Role_id` ASC');
+
+    if (!$statement) {
+        throw new RuntimeException('Could not prepare role lookup.');
+    }
+
+    $statement->execute();
+    $result = $statement->get_result();
+    $roles = $result instanceof mysqli_result ? $result->fetch_all(MYSQLI_ASSOC) : [];
+    $statement->close();
+
+    if ($roles === []) {
+        return null;
+    }
+
+    $preferredRoleNames = ['user', 'customer', 'klant', 'gebruiker', 'guest', 'gast', 'member', 'bezoeker'];
+    $adminRoleNames = ['admin', 'administrator', 'beheerder'];
+
+    foreach ($preferredRoleNames as $preferredRoleName) {
+        foreach ($roles as $role) {
+            if (strtolower(trim((string) $role['Role_name'])) === $preferredRoleName) {
+                return (int) $role['Role_id'];
+            }
+        }
+    }
+
+    foreach ($roles as $role) {
+        $roleName = strtolower(trim((string) $role['Role_name']));
+
+        if (!in_array($roleName, $adminRoleNames, true)) {
+            return (int) $role['Role_id'];
+        }
+    }
+
+    return null;
+}
+
+function maple_role_exists(int $roleId): bool
+{
+    $db = maple_db();
+    $statement = $db->prepare('SELECT `Role_id` FROM `Roles` WHERE `Role_id` = ? LIMIT 1');
+
+    if (!$statement) {
+        throw new RuntimeException('Could not prepare role validation.');
+    }
+
+    $statement->bind_param('i', $roleId);
+    $statement->execute();
+    $result = $statement->get_result();
+    $exists = $result instanceof mysqli_result && $result->num_rows > 0;
+    $statement->close();
+
+    return $exists;
+}
+
+function maple_register_user(
+    string $voornaam,
+    string $achternaam,
+    string $email,
+    ?string $telefoonnummer,
+    string $password,
+    int $roleId
+): ?int {
+    if (!maple_table_has_column('User', 'Password_hash')) {
+        throw new RuntimeException('Password hash column is missing.');
+    }
+
+    if (!maple_role_exists($roleId)) {
+        throw new RuntimeException('Registration role does not exist.');
+    }
+
+    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+    $db = maple_pdo();
+    $statement = $db->prepare('
+        INSERT INTO `User`
+            (`Voornaam`, `Role_id`, `Achternaam`, `Email`, `Telefoonnummer`, `Password_hash`)
+        VALUES
+            (:voornaam, :role_id, :achternaam, :email, :telefoonnummer, :password_hash)
+    ');
+
+    $statement->bindValue(':voornaam', $voornaam, PDO::PARAM_STR);
+    $statement->bindValue(':role_id', $roleId, PDO::PARAM_INT);
+    $statement->bindValue(':achternaam', $achternaam, PDO::PARAM_STR);
+    $statement->bindValue(':email', $email, PDO::PARAM_STR);
+    $statement->bindValue(
+        ':telefoonnummer',
+        $telefoonnummer,
+        $telefoonnummer === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+    );
+    $statement->bindValue(':password_hash', $passwordHash, PDO::PARAM_STR);
+
+    if (!$statement->execute()) {
+        throw new RuntimeException('Could not create user.');
+    }
+
+    $newUserId = (int) $db->lastInsertId();
+
+    return $newUserId > 0 ? $newUserId : null;
+}
+
 function maple_handle_login(array $post, string $adminRedirect, string $userRedirect): array
 {
     require_once __DIR__ . '/Authorization.php';
