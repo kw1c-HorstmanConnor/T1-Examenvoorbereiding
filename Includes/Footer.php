@@ -62,3 +62,28 @@ $assetBase = $assetBase ?? $rootPrefix;
         <p>Designed with &#9825; for nature lovers</p>
     </div>
 </footer>
+
+<button class="back-to-top" type="button" aria-label="Back to top" hidden>
+    <span aria-hidden="true">&uarr;</span>
+</button>
+
+<script>
+    (() => {
+        const backToTopButton = document.querySelector('.back-to-top');
+
+        if (!backToTopButton) {
+            return;
+        }
+
+        const updateBackToTopVisibility = () => {
+            backToTopButton.hidden = window.scrollY <= 250;
+        };
+
+        window.addEventListener('scroll', updateBackToTopVisibility, { passive: true });
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo(0, 0);
+        });
+
+        updateBackToTopVisibility();
+    })();
+</script>

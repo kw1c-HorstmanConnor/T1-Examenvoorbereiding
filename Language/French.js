@@ -611,6 +611,7 @@ window.MapleLanguages.fr = {
             "december": "décembre"
         }
     },
+    "Back to top": "Retour en haut",
     "Language": "Langue",
     "© 2026 Maple Camp. All rights reserved.": "© 2026 Maple Camp. Tous droits réservés.",
     "Maple Camp home": "Accueil Maple Camp",
