@@ -34,7 +34,7 @@ function maple_events_by_date(DateTimeImmutable $month): array
         $monthStart = $month->format('Y-m-d 00:00:00');
         $nextMonthStart = $month->modify('+1 month')->format('Y-m-d 00:00:00');
         $statement = $database->prepare('
-            SELECT `evenementen_id`, `Titel`, `Start_time`, `Omschrijving`, `Locatie`
+            SELECT `evenementen_id`, `Titel`, `Start_time`, `Omschr`, `Locatie`
             FROM `evenementen`
             WHERE `Start_time` >= ? AND `Start_time` < ?
             ORDER BY `Start_time` ASC
