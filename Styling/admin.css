@@ -1,4 +1,35 @@
 /* Admin */
+/* Keep nested editors within the viewport, including long stored values. */
+body .admin-crud, body .admin-status, body .admin-section-grid,
+body .admin-facility-preset-grid, body .admin-translation-grid { grid-template-columns: minmax(0, 1fr); }
+body .admin-crud__form, body .admin-crud__list { min-width: 0; padding: 1rem; }
+body .admin-record { flex-direction: column; align-items: stretch; }
+body .admin-record > *, body .admin-record__summary > * { min-width: 0; }
+body .admin-workspace__header, body .admin-image-uploader__heading,
+body .admin-facility-presets__heading, body .admin-facility-picker__header,
+body .admin-facility-group__heading { flex-direction: column; align-items: flex-start; }
+body .admin-facility-preset { flex-wrap: wrap; }
+body .admin-tabs a, body .admin-record__actions a,
+body .admin-form__actions a, body .admin-facility-tag > span,
+body .admin-image-button { min-height: 44px; }
+body .admin-facility-tag, body .admin-selected-chip { max-width: 100%; }
+body .admin-form input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+body .admin-form select { min-height: 44px; }
+body .admin-facility-tag input { min-height: 0; }
+body .admin-record p, body .admin-form label, body .admin-inline-warning,
+body .admin-empty-state { font-size: .875rem; }
+@media (min-width: 48rem) {
+    body .admin-status, body .admin-section-grid,
+    body .admin-facility-preset-grid, body .admin-translation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    body .admin-crud__form, body .admin-crud__list { padding: 1.5rem; }
+    body .admin-record { flex-direction: row; flex-wrap: wrap; }
+}
+@media (min-width: 64rem) {
+    body .admin-crud { grid-template-columns: minmax(0, .9fr) minmax(0, 1.4fr); }
+    body .admin-status { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    body .admin-section-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 .admin-view {
     min-height: 100vh;
     color: var(--dark);

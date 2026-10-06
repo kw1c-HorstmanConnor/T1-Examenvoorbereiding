@@ -307,7 +307,6 @@ $categories = ['Upcoming vacations', 'Current vacation', 'Past vacations', 'Expi
                                 <?php if ($reservation['is_unpaid'] && $reservation['expires_at'] !== null): ?><div><dt>Held until</dt><dd><?= htmlspecialchars(maple_vacation_format_date($reservation['expires_at']), ENT_QUOTES, 'UTF-8'); ?></dd></div><?php endif; ?>
                             </dl>
                             <p class="vacation-card__status"><span>Status</span><?= htmlspecialchars((string) $reservation['status_label'], ENT_QUOTES, 'UTF-8'); ?></p>
-                            <?php if ($reservation['is_unpaid']): ?><p>This historical unpaid reservation is held temporarily until the date shown above.</p><?php endif; ?>
                             <?php if ($reservation['can_cancel']): ?>
                                 <button class="vacation-card__cancel" type="button" data-cancel-button
                                     data-reservation-id="<?= (int) $reservation['Reservatie_id']; ?>"

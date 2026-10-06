@@ -17,10 +17,12 @@ $currentUser = maple_current_user();
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../Styling/index.css">
+    <link rel="stylesheet" href="../Styling/admin.css">
     <?php include __DIR__ . '/../Includes/LanguagesScripts.php'; ?>
 </head>
 <body class="admin-view">
     <div class="admin-page">
+        <section class="admin-top">
             <?php include __DIR__ . '/../Includes/Header.php'; ?>
 
             <div class="admin-top__content page-container">
@@ -38,6 +40,7 @@ $currentUser = maple_current_user();
                 </article>
             </section>
 
+            <section class="admin-workspace">
                 <div class="admin-workspace__header">
                 </div>
 

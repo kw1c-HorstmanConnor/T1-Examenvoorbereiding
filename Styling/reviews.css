@@ -508,3 +508,17 @@
         grid-template-columns: 1fr;
     }
 }
+body .reviews-dashboard__grid, body .reviews-list { grid-template-columns: minmax(0, 1fr); }
+body .reviews-summary, body .review-panel { min-width: 0; padding: 1.25rem; }
+body .review-rating-stars { gap: 0; flex-wrap: wrap; }
+body .review-rating-star { width: 44px; height: 44px; }
+body .review-submit { min-width: 0; width: 100%; }
+@media (min-width: 48rem) {
+    body .reviews-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    body .reviews-summary, body .review-panel { padding: 2rem; }
+    body .review-submit { width: auto; }
+}
+@media (min-width: 64rem) {
+    body .reviews-dashboard__grid { grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr); }
+    body .reviews-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
