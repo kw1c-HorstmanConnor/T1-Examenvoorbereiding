@@ -7,7 +7,7 @@ function maple_load_database_connection()
 {
     global $conn;
 
-    require_once __DIR__ . '/../../Includes/DataBase.php';
+    require_once __DIR__ . '/../../Includes/Database.php';
 }
 
 function maple_db(): mysqli
