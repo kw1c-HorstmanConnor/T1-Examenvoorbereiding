@@ -240,3 +240,4 @@ function maple_booking_is_available(mysqli $database, int $huisId, string $start
 }
 
 $conn->set_charset($databaseConfig['charset']);
+//Database Include
