@@ -418,8 +418,38 @@ function maple_facility_load_accommodations_from_database(): array
 {
     $imageClasses = ['comfort', 'luxe', 'premium'];
     $pdo = maple_pdo();
+
+    $columns = [];
+    $columnsResult = $pdo->query('SHOW COLUMNS FROM `accomodaties`');
+    foreach ($columnsResult->fetchAll() as $column) {
+        $field = (string) ($column['Field'] ?? '');
+        if ($field !== '') {
+            $columns[strtolower($field)] = $field;
+        }
+    }
+
+    $findColumn = static function (array $names) use ($columns): string {
+        foreach ($names as $name) {
+            $key = strtolower((string) $name);
+            if (isset($columns[$key])) {
+                return $columns[$key];
+            }
+        }
+
+        return '';
+    };
+
+    $descriptionColumn = $findColumn(['Omschrijving', 'Omschr']);
+    $imageColumn = $findColumn(['Afbeelding']);
+    $descriptionSelect = $descriptionColumn !== ''
+        ? '`' . str_replace('`', '``', $descriptionColumn) . '` AS `Omschrijving`'
+        : "'' AS `Omschrijving`";
+    $imageSelect = $imageColumn !== ''
+        ? '`' . str_replace('`', '``', $imageColumn) . '` AS `Afbeelding`'
+        : "'' AS `Afbeelding`";
+
     $statement = $pdo->prepare('
-        SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschrijving, Afbeelding
+        SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, ' . $descriptionSelect . ', ' . $imageSelect . '
         FROM accomodaties
         ORDER BY Huis_id ASC
     ');

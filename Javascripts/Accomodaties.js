@@ -72,13 +72,23 @@ tabs.forEach(function (tab) {
 const accommodationModal = document.querySelector('#accommodation-modal');
 const modalDialog = document.querySelector('.accommodation-modal__dialog');
 const modalImage = document.querySelector('#accommodation-modal-image');
+const modalStage = document.querySelector('#accommodation-modal-stage');
 const modalPhoto = document.querySelector('#accommodation-modal-photo');
+const modalPlaceholder = document.querySelector('#accommodation-modal-placeholder');
+const modalPrevButton = document.querySelector('[data-gallery-prev]');
+const modalNextButton = document.querySelector('[data-gallery-next]');
+const modalCounter = document.querySelector('#accommodation-modal-counter');
+const modalThumbnails = document.querySelector('#accommodation-modal-thumbnails');
 const modalTitle = document.querySelector('#accommodation-modal-title');
 const modalLocation = document.querySelector('#accommodation-modal-location');
 const modalPrice = document.querySelector('#accommodation-modal-price');
+const modalBookingPrice = document.querySelector('#accommodation-modal-booking-price');
 const modalMax = document.querySelector('#accommodation-modal-max');
 const modalFacilities = document.querySelector('#accommodation-modal-facilities');
+const modalFacilitiesSection = document.querySelector('#accommodation-modal-facilities-section');
+const modalFacilitiesToggle = document.querySelector('#accommodation-modal-facilities-toggle');
 const modalDescription = document.querySelector('#accommodation-modal-description');
+const modalDescriptionSection = document.querySelector('#accommodation-modal-description-section');
 const bookNowButton = document.querySelector('#book-now-button');
 const bookingModal = document.querySelector('#booking-modal');
 const bookingDialog = document.querySelector('.booking-modal__dialog');
@@ -90,6 +100,12 @@ const bookingPeople = document.querySelector('#booking-people');
 let previouslyFocusedElement = null;
 let activeAccommodation = null;
 let activeAccommodationCard = null;
+let activeGallery = [];
+let activeGalleryIndex = 0;
+let facilitiesExpanded = false;
+let touchStartX = 0;
+let touchStartY = 0;
+const FACILITIES_COLLAPSED_LIMIT = 10;
 
 function translateAccommodationText(value) {
     if (window.MapleLanguage && typeof window.MapleLanguage.translate === 'function') {
@@ -99,12 +115,261 @@ function translateAccommodationText(value) {
     return value;
 }
 
-function updateAccommodationModal(card) {
-    if (!card || !modalDescription) {
+function parseAccommodationGallery(card) {
+    if (!card) {
+        return [];
+    }
+
+    try {
+        const gallery = JSON.parse(card.dataset.gallery || '[]');
+
+        if (Array.isArray(gallery)) {
+            return gallery
+                .filter(function (slide) {
+                    return slide && typeof slide.src === 'string' && slide.src.trim() !== '';
+                })
+                .map(function (slide) {
+                    return {
+                        src: slide.src,
+                        type: slide.type === 'floorplan' ? 'floorplan' : 'photo',
+                        label: typeof slide.label === 'string' ? slide.label : '',
+                        placeholder: slide.placeholder === true || slide.placeholder === '1'
+                    };
+                });
+        }
+    } catch (error) {
+    }
+
+    if (card.dataset.imageSrc) {
+        return [{
+            src: card.dataset.imageSrc,
+            type: 'photo',
+            label: 'Image',
+            placeholder: card.dataset.imagePlaceholder === '1'
+        }];
+    }
+
+    return [];
+}
+
+function gallerySlideAlt(slide, index) {
+    if (slide && slide.placeholder) {
+        return translateAccommodationText('No image available yet');
+    }
+
+    const name = activeAccommodationCard ? activeAccommodationCard.dataset.huisName || '' : '';
+    const label = slide && slide.label ? translateAccommodationText(slide.label) : translateAccommodationText('Image');
+    const prefix = name !== '' ? name + ' - ' : '';
+
+    return prefix + label + ' ' + (index + 1);
+}
+
+function renderGalleryThumbnails() {
+    if (!modalThumbnails) {
         return;
     }
 
-    modalDescription.textContent = translateAccommodationText(card.dataset.description || '');
+    modalThumbnails.textContent = '';
+    const hasMultipleSlides = activeGallery.length > 1;
+    modalThumbnails.hidden = !hasMultipleSlides;
+
+    if (!hasMultipleSlides) {
+        return;
+    }
+
+    activeGallery.forEach(function (slide, index) {
+        const button = document.createElement('button');
+        const image = document.createElement('img');
+
+        button.type = 'button';
+        button.className = 'accommodation-modal__thumb';
+        button.classList.toggle('is-active', index === activeGalleryIndex);
+        button.setAttribute('aria-label', translateAccommodationText('Image') + ' ' + (index + 1) + ' ' + translateAccommodationText('of') + ' ' + activeGallery.length);
+        button.setAttribute('aria-current', index === activeGalleryIndex ? 'true' : 'false');
+        button.addEventListener('click', function () {
+            goToAccommodationSlide(index);
+        });
+
+        image.src = slide.src;
+        image.alt = '';
+        image.loading = 'lazy';
+        image.classList.toggle('is-floorplan', slide.type === 'floorplan');
+        image.classList.toggle('is-placeholder', slide.placeholder);
+        image.addEventListener('error', function () {
+            if (modalPhoto && modalPhoto.dataset.fallbackSrc && image.src !== modalPhoto.dataset.fallbackSrc) {
+                image.src = modalPhoto.dataset.fallbackSrc;
+                image.classList.add('is-placeholder');
+            }
+        });
+
+        button.appendChild(image);
+        modalThumbnails.appendChild(button);
+    });
+}
+
+function renderAccommodationGallery() {
+    if (!modalPhoto || !modalImage) {
+        return;
+    }
+
+    if (activeGallery.length === 0) {
+        activeGallery = [{
+            src: modalPhoto.dataset.fallbackSrc || modalPhoto.src,
+            type: 'photo',
+            label: 'Image',
+            placeholder: true
+        }];
+        activeGalleryIndex = 0;
+    }
+
+    const slide = activeGallery[activeGalleryIndex] || activeGallery[0];
+    const hasMultipleSlides = activeGallery.length > 1;
+    const isPlaceholder = Boolean(slide.placeholder);
+    const isFloorplan = slide.type === 'floorplan';
+    const currentSource = modalPhoto.getAttribute('src') || '';
+
+    modalImage.className = 'accommodation-modal__gallery';
+    modalImage.classList.toggle('is-placeholder', isPlaceholder);
+    modalImage.classList.toggle('is-floorplan', isFloorplan);
+    modalImage.classList.toggle('has-multiple-images', hasMultipleSlides);
+
+    modalPhoto.classList.toggle('is-floorplan', isFloorplan);
+    modalPhoto.classList.toggle('is-placeholder', isPlaceholder);
+    modalPhoto.alt = gallerySlideAlt(slide, activeGalleryIndex);
+    modalPhoto.dataset.fallbackApplied = isPlaceholder ? '1' : '0';
+
+    if (currentSource !== slide.src) {
+        modalPhoto.classList.add('is-loading');
+        modalPhoto.src = slide.src;
+    } else {
+        window.requestAnimationFrame(function () {
+            modalPhoto.classList.remove('is-loading');
+        });
+    }
+
+    if (modalPlaceholder) {
+        modalPlaceholder.hidden = !isPlaceholder;
+        modalPlaceholder.textContent = translateAccommodationText('No image available yet');
+    }
+
+    if (modalPrevButton) {
+        modalPrevButton.hidden = !hasMultipleSlides;
+    }
+    if (modalNextButton) {
+        modalNextButton.hidden = !hasMultipleSlides;
+    }
+    if (modalCounter) {
+        modalCounter.hidden = !hasMultipleSlides;
+        modalCounter.textContent = (activeGalleryIndex + 1) + ' / ' + activeGallery.length;
+        modalCounter.setAttribute('aria-label', translateAccommodationText('Image') + ' ' + (activeGalleryIndex + 1) + ' ' + translateAccommodationText('of') + ' ' + activeGallery.length);
+    }
+
+    renderGalleryThumbnails();
+}
+
+function goToAccommodationSlide(index) {
+    if (activeGallery.length < 1) {
+        return;
+    }
+
+    activeGalleryIndex = (index + activeGallery.length) % activeGallery.length;
+    renderAccommodationGallery();
+}
+
+function showPreviousAccommodationSlide() {
+    if (activeGallery.length > 1) {
+        goToAccommodationSlide(activeGalleryIndex - 1);
+    }
+}
+
+function showNextAccommodationSlide() {
+    if (activeGallery.length > 1) {
+        goToAccommodationSlide(activeGalleryIndex + 1);
+    }
+}
+
+function parseFacilityNames(value) {
+    return String(value || '')
+        .split(',')
+        .map(function (facility) {
+            return facility.trim();
+        })
+        .filter(function (facility) {
+            return facility !== '';
+        });
+}
+
+function renderAccommodationFacilities(card) {
+    if (!modalFacilities || !modalFacilitiesSection) {
+        return;
+    }
+
+    const facilities = parseFacilityNames(card ? card.dataset.facilities || '' : '');
+    const visibleFacilities = facilitiesExpanded ? facilities : facilities.slice(0, FACILITIES_COLLAPSED_LIMIT);
+    const remainingCount = Math.max(0, facilities.length - FACILITIES_COLLAPSED_LIMIT);
+
+    modalFacilities.textContent = '';
+    modalFacilitiesSection.hidden = false;
+
+    if (facilities.length === 0 || (facilities.length === 1 && facilities[0] === 'No facilities listed')) {
+        const emptyChip = document.createElement('span');
+        emptyChip.className = 'accommodation-modal__chip accommodation-modal__chip--muted';
+        emptyChip.textContent = translateAccommodationText('No facilities listed');
+        modalFacilities.appendChild(emptyChip);
+    } else {
+        visibleFacilities.forEach(function (facility) {
+            const chip = document.createElement('span');
+            chip.className = 'accommodation-modal__chip';
+            chip.textContent = translateAccommodationText(facility);
+            modalFacilities.appendChild(chip);
+        });
+    }
+
+    if (modalFacilitiesToggle) {
+        modalFacilitiesToggle.hidden = remainingCount === 0;
+        modalFacilitiesToggle.textContent = facilitiesExpanded
+            ? translateAccommodationText('Show less')
+            : '+' + remainingCount + ' ' + translateAccommodationText('more');
+        modalFacilitiesToggle.setAttribute('aria-expanded', facilitiesExpanded ? 'true' : 'false');
+        modalFacilitiesToggle.setAttribute('aria-label', facilitiesExpanded ? translateAccommodationText('Show less') : translateAccommodationText('Show more'));
+    }
+}
+
+function updateAccommodationModal(card) {
+    if (!card) {
+        return;
+    }
+
+    if (modalDescription && modalDescriptionSection) {
+        const description = translateAccommodationText(card.dataset.description || '').trim();
+        modalDescription.textContent = description;
+        modalDescriptionSection.hidden = description === '';
+    }
+
+    renderAccommodationFacilities(card);
+    renderAccommodationGallery();
+}
+
+function markAccommodationImagePlaceholder(image) {
+    if (!image) {
+        return;
+    }
+
+    const imageContainer = image.closest('.accommodation-card__image, .accommodation-modal__gallery, .accommodation-modal__stage');
+    const card = image.closest('[data-accommodation-card]');
+
+    if (imageContainer) {
+        imageContainer.classList.add('is-placeholder');
+    }
+
+    if (card) {
+        card.dataset.imagePlaceholder = '1';
+        if (image.dataset.fallbackSrc) {
+            card.dataset.imageSrc = image.dataset.fallbackSrc;
+        }
+    }
+
+    image.alt = translateAccommodationText('No image available yet');
 }
 
 document.querySelectorAll('.accommodation-card__photo').forEach(function (image) {
@@ -113,15 +378,27 @@ document.querySelectorAll('.accommodation-card__photo').forEach(function (image)
             image.dataset.fallbackApplied = '1';
             image.src = image.dataset.fallbackSrc;
         }
+        markAccommodationImagePlaceholder(image);
     });
 });
 
 if (modalPhoto) {
+    modalPhoto.addEventListener('load', function () {
+        modalPhoto.classList.remove('is-loading');
+    });
+
     modalPhoto.addEventListener('error', function () {
         if (modalPhoto.dataset.fallbackSrc && modalPhoto.dataset.fallbackApplied !== '1') {
             modalPhoto.dataset.fallbackApplied = '1';
+            if (activeGallery[activeGalleryIndex]) {
+                activeGallery[activeGalleryIndex].src = modalPhoto.dataset.fallbackSrc;
+                activeGallery[activeGalleryIndex].placeholder = true;
+                activeGallery[activeGalleryIndex].type = 'photo';
+            }
             modalPhoto.src = modalPhoto.dataset.fallbackSrc;
         }
+        modalPhoto.classList.remove('is-loading');
+        markAccommodationImagePlaceholder(modalPhoto);
     });
 }
 
@@ -131,6 +408,18 @@ function openAccommodationModal(card) {
     }
 
     previouslyFocusedElement = document.activeElement;
+    activeAccommodationCard = card;
+    activeAccommodation = {
+        huisId: card.dataset.huisId,
+        name: card.dataset.huisName,
+        max: card.dataset.max,
+        detailUrl: card.dataset.detailUrl
+    };
+    activeGallery = parseAccommodationGallery(card);
+    activeGalleryIndex = 0;
+    facilitiesExpanded = false;
+
+    const priceText = '\u20ac' + (card.dataset.price || '0');
 
     if (modalTitle) {
         modalTitle.textContent = card.dataset.huisName || '';
@@ -139,32 +428,16 @@ function openAccommodationModal(card) {
         modalLocation.textContent = card.dataset.location || '';
     }
     if (modalPrice) {
-        modalPrice.textContent = '\u20ac' + (card.dataset.price || '0');
+        modalPrice.textContent = priceText;
+    }
+    if (modalBookingPrice) {
+        modalBookingPrice.textContent = priceText;
     }
     if (modalMax) {
         modalMax.textContent = (card.dataset.max || '0') + ' guests';
     }
-    if (modalFacilities) {
-        modalFacilities.textContent = card.dataset.facilities || '';
-    }
 
     updateAccommodationModal(card);
-    activeAccommodationCard = card;
-    activeAccommodation = {
-        huisId: card.dataset.huisId,
-        name: card.dataset.huisName,
-        max: card.dataset.max,
-        detailUrl: card.dataset.detailUrl
-    };
-
-    if (modalImage) {
-        modalImage.className = 'accommodation-modal__image';
-    }
-    if (modalPhoto) {
-        modalPhoto.dataset.fallbackApplied = '0';
-        modalPhoto.src = card.dataset.imageSrc || modalPhoto.src;
-        modalPhoto.alt = card.dataset.huisName || 'Accommodation image';
-    }
 
     accommodationModal.hidden = false;
     accommodationModal.setAttribute('aria-hidden', 'false');
@@ -229,6 +502,51 @@ function closeAccommodationModal() {
     if (previouslyFocusedElement) {
         previouslyFocusedElement.focus();
     }
+}
+
+if (modalPrevButton) {
+    modalPrevButton.addEventListener('click', showPreviousAccommodationSlide);
+}
+
+if (modalNextButton) {
+    modalNextButton.addEventListener('click', showNextAccommodationSlide);
+}
+
+if (modalFacilitiesToggle) {
+    modalFacilitiesToggle.addEventListener('click', function () {
+        facilitiesExpanded = !facilitiesExpanded;
+        renderAccommodationFacilities(activeAccommodationCard);
+    });
+}
+
+if (modalStage) {
+    modalStage.addEventListener('touchstart', function (event) {
+        if (activeGallery.length < 2 || event.changedTouches.length === 0) {
+            return;
+        }
+
+        touchStartX = event.changedTouches[0].clientX;
+        touchStartY = event.changedTouches[0].clientY;
+    }, { passive: true });
+
+    modalStage.addEventListener('touchend', function (event) {
+        if (activeGallery.length < 2 || event.changedTouches.length === 0) {
+            return;
+        }
+
+        const deltaX = event.changedTouches[0].clientX - touchStartX;
+        const deltaY = event.changedTouches[0].clientY - touchStartY;
+
+        if (Math.abs(deltaX) < 45 || Math.abs(deltaX) <= Math.abs(deltaY)) {
+            return;
+        }
+
+        if (deltaX > 0) {
+            showPreviousAccommodationSlide();
+        } else {
+            showNextAccommodationSlide();
+        }
+    }, { passive: true });
 }
 
 accommodationCards.forEach(function (card) {
@@ -301,5 +619,18 @@ document.addEventListener('keydown', function (event) {
         } else if (accommodationModal && !accommodationModal.hidden) {
             closeAccommodationModal();
         }
+        return;
+    }
+
+    if (!accommodationModal || accommodationModal.hidden || (bookingModal && !bookingModal.hidden)) {
+        return;
+    }
+
+    if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        showPreviousAccommodationSlide();
+    } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        showNextAccommodationSlide();
     }
 });
