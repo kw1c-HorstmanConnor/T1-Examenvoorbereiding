@@ -21,7 +21,7 @@ function maple_admin_save_accommodation_with_facilities(PDO $pdo, $huisId, array
 {
     $facilitiesCsv = maple_facility_csv($facilityValues);
     $columns = maple_accommodations_columns($pdo);
-    $descriptionColumn = maple_accommodations_find_column($columns, ['Omschrijving', 'Omschr']);
+    $descriptionColumn = maple_accommodations_find_column($columns, ['Omschrijving']);
 
     $params = [
         'name' => $values['name'],
