@@ -4,6 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/Functions/Helpers/Database.php';
 require_once __DIR__ . '/Functions/Helpers/Session.php';
 require_once __DIR__ . '/Functions/Helpers/View.php';
+require_once __DIR__ . '/Functions/Accommodations/Accommodations.php';
 require_once __DIR__ . '/Functions/Reviews/Reviews.php';
 
 $view = $_GET['view'] ?? 'splash';
@@ -21,32 +22,11 @@ $arrivalLabel = $requestedArrival !== '' ? $requestedArrival : 'Kies een datum';
 $departureLabel = $requestedDeparture !== '' ? $requestedDeparture : 'Kies een datum';
 $homepageReviews = $isHomeView ? array_slice(maple_published_reviews(), 0, 4) : [];
 
-$fallbackAccomodations = [
-    [
-        'title' => 'Bungalow Comfort',
-        'guests' => 4,
-        'bedrooms' => 2,
-        'area' => 45,
-        'description' => 'test data as a fallback.',
-        'price' => 120,
-    ],
-    [
-        'title' => 'Bungalow Luxe',
-        'guests' => 4,
-        'bedrooms' => 2,
-        'area' => 60,
-        'description' => 'test data as a fallback.',
-        'price' => 145,
-    ],
-    [
-        'title' => 'Bungalow Premium',
-        'guests' => 6,
-        'bedrooms' => 3,
-        'area' => 75,
-        'description' => 'test data as a fallback.',
-        'price' => 175,
-    ],
-];
+$homeAccommodationResult = $isHomeView
+    ? maple_home_accommodations(3)
+    : ['selection' => 'unavailable', 'items' => []];
+$homeAccomodations = $homeAccommodationResult['items'];
+$homeAccommodationSelection = $homeAccommodationResult['selection'];
 
 $fallbackEvents = [
     [
@@ -86,14 +66,6 @@ try {
     // Keep showing the fallback events when the database is unavailable.
 }
 
-$accommodationImageClasses = ['comfort', 'luxe', 'premium'];
-$homeAccomodations = [];
-foreach ($fallbackAccomodations as $index => $accommodation) {
-    $accommodation['image_class'] = $accommodationImageClasses[$index % count($accommodationImageClasses)];
-    $accommodation['badge'] = $index === 0 ? 'Popular' : '';
-    $homeAccomodations[] = $accommodation;
-}
-
 $eventImageClasses = ['campfire', 'rockies', 'canoe'];
 $homeEvents = [];
 foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
@@ -115,6 +87,10 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="Styling/index.css">
+    <?php if ($isHomeView): ?>
+        <link rel="stylesheet" href="Styling/accomodatie.css">
+        <script src="Javascripts/Accomodaties.js" defer></script>
+    <?php endif; ?>
     <?php include __DIR__ . '/Includes/LanguagesScripts.php'; ?>
 </head>
 <body class="<?= htmlspecialchars($bodyClass, ENT_QUOTES, 'UTF-8'); ?>">
@@ -134,37 +110,64 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
                     <div class="section-header">
                         <div>
                             <p class="section-label">ACCOMMODATIES</p>
-                            <h2 class="section-title">Comfort midden in de natuur</h2>
+                            <h2 class="section-title">Populaire verblijven</h2>
                             <p class="section-copy">Onze accommodaties zijn sfeervol, comfortabel en van alle gemakken voorzien.<br>Kies de accommodatie die bij jou past en geniet van een onvergetelijk verblijf.</p>
                         </div>
                         <a class="outline-button" href="Pages/Accomodatie.php">Bekijk alle accommodaties <span class="button-arrow" aria-hidden="true"></span></a>
                     </div>
 
-                    <div class="accommodation-grid">
-                        <?php foreach ($homeAccomodations as $accomodation): ?>
-                            <article class="accommodation-card">
-                                <div class="accommodation-card__image accommodation-card__image--<?= maple_e($accomodation['image_class']); ?>">
-                                    <?php if ($accomodation['badge'] !== ''): ?>
-                                       <span class="popular-badge"><?= maple_e($accomodation['badge']); ?></span>
-                                    <?php endif; ?>
-                                </div>
-                                <div class="accommodation-card__body">
-                                    <h3><?= maple_e($accomodation['title']); ?></h3>
-                                    <div class="accommodation-meta" aria-label="Kenmerken">
-                                        <span><i class="meta-icon meta-icon--guest" aria-hidden="true"></i><?= (int) $accomodation['guests']; ?> personen</span>
-                                        <span><i class="meta-icon meta-icon--bed" aria-hidden="true"></i><?= maple_e($accomodation['bedrooms']); ?> slaapkamers</span>
-                                        <span><i class="meta-icon meta-icon--area" aria-hidden="true"></i><?= maple_e($accomodation['area']); ?> m&sup2;</span>
+                    <?php if ($homeAccomodations !== []): ?>
+                        <div class="accommodation-grid">
+                            <?php foreach ($homeAccomodations as $index => $accomodation): ?>
+                                <?php
+                                $imageUrl = maple_accommodation_image_url($accomodation['Afbeelding'] ?? '', $assetBase);
+                                $fallbackImageUrl = maple_accommodation_image_fallback_url($assetBase);
+                                $allFacilityNames = maple_accommodation_facility_names($accomodation, 99);
+                                $facilityNames = array_slice($allFacilityNames, 0, 3);
+                                $facilityDisplay = $allFacilityNames !== [] ? implode(', ', $allFacilityNames) : 'No facilities listed';
+                                $description = maple_accommodation_excerpt((string) ($accomodation['Omschrijving'] ?? ''));
+                                $detailUrl = maple_accommodation_detail_url($accomodation, $basePath);
+                                ?>
+                                <article class="accommodation-card" data-accommodation-card data-huis-id="<?= (int) $accomodation['Huis_id']; ?>" data-huis-name="<?= maple_e($accomodation['Huis_naam']); ?>" data-location="<?= maple_e($accomodation['Locatie']); ?>" data-price="<?= maple_e(maple_home_price($accomodation['PPN'])); ?>" data-facilities="<?= maple_e($facilityDisplay); ?>" data-max="<?= (int) $accomodation['Max']; ?>" data-description="<?= maple_e($accomodation['Omschrijving']); ?>" data-image-src="<?= maple_e($imageUrl); ?>" data-detail-url="<?= maple_e($detailUrl); ?>">
+                                    <a class="accommodation-card__image" href="<?= maple_e($detailUrl); ?>" aria-label="Bekijk accommodatie" data-accommodation-open>
+                                        <img class="accommodation-card__photo" src="<?= maple_e($imageUrl); ?>" alt="<?= maple_e($accomodation['Huis_naam']); ?>" data-fallback-src="<?= maple_e($fallbackImageUrl); ?>" onerror="if (this.dataset.fallbackApplied !== '1' && this.dataset.fallbackSrc) { this.dataset.fallbackApplied = '1'; this.src = this.dataset.fallbackSrc; }">
+                                        <?php if ($index === 0 && $homeAccommodationSelection === 'reservations' && (int) ($accomodation['booking_count'] ?? 0) > 0): ?>
+                                            <span class="popular-badge">Populair</span>
+                                        <?php endif; ?>
+                                    </a>
+                                    <div class="accommodation-card__body">
+                                        <h3 data-no-translate><?= maple_e($accomodation['Huis_naam']); ?></h3>
+                                        <?php if (trim((string) ($accomodation['Locatie'] ?? '')) !== ''): ?>
+                                            <p class="accommodation-location" data-no-translate><?= maple_e($accomodation['Locatie']); ?></p>
+                                        <?php endif; ?>
+                                        <div class="accommodation-meta" aria-label="Kenmerken">
+                                            <span><i class="meta-icon meta-icon--guest" aria-hidden="true"></i><span data-no-translate><?= (int) $accomodation['Max']; ?></span> <span>guests</span></span>
+                                        </div>
+                                        <?php if ($description !== ''): ?>
+                                            <p data-no-translate><?= maple_e($description); ?></p>
+                                        <?php endif; ?>
+                                        <?php if ($facilityNames !== []): ?>
+                                            <ul class="accommodation-facilities" aria-label="Faciliteiten">
+                                                <?php foreach ($facilityNames as $facilityName): ?>
+                                                    <li><?= maple_e($facilityName); ?></li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        <?php endif; ?>
+                                        <div class="price-block">
+                                            <span>Vanaf</span>
+                                            <strong>&euro; <?= maple_e(maple_home_price($accomodation['PPN'])); ?> <em>per nacht</em></strong>
+                                        </div>
+                                        <a class="card-button" href="<?= maple_e($detailUrl); ?>" data-accommodation-open>Bekijk accommodatie</a>
                                     </div>
-                                    <p><?= maple_e($accomodation['description']); ?></p>
-                                    <div class="price-block">
-                                        <span>Vanaf</span>
-                                        <strong>&euro; <?= maple_e(maple_home_price($accomodation['price'])); ?> <em>per nacht</em></strong>
-                                    </div>
-                                    <a class="card-button" href="Pages/Accomodatie.php">Bekijk beschikbaarheid</a>
-                                </div>
-                            </article>
-                        <?php endforeach; ?>
-                    </div>
+                                </article>
+                            <?php endforeach; ?>
+                        </div>
+                        <div class="accommodation-section-footer">
+                            <a class="outline-button" href="Pages/Accomodatie.php">Bekijk alle accommodaties <span class="button-arrow" aria-hidden="true"></span></a>
+                        </div>
+                    <?php else: ?>
+                        <p class="accommodation-empty">Er zijn momenteel geen accommodaties beschikbaar.</p>
+                    <?php endif; ?>
                 </div>
             </section>
 
@@ -290,6 +293,28 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
                 </section>
             <?php endif; ?>
         </main>
+
+        <div class="accommodation-modal" id="accommodation-modal" hidden aria-hidden="true">
+            <div class="accommodation-modal__overlay" data-modal-close="true"></div>
+            <section class="accommodation-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="accommodation-modal-title" tabindex="-1">
+                <button class="accommodation-modal__close" type="button" aria-label="Close accommodation details" data-modal-close="true">&times;</button>
+                <div class="accommodation-modal__image" id="accommodation-modal-image" aria-hidden="true">
+                    <img id="accommodation-modal-photo" src="<?= maple_e(maple_accommodation_image_fallback_url($assetBase)); ?>" alt="" data-fallback-src="<?= maple_e(maple_accommodation_image_fallback_url($assetBase)); ?>">
+                </div>
+                <div class="accommodation-modal__content">
+                    <p class="section-label">ACCOMMODATION DETAILS</p>
+                    <h2 id="accommodation-modal-title"></h2>
+                    <dl class="accommodation-modal__details">
+                        <div><dt>Location</dt><dd id="accommodation-modal-location"></dd></div>
+                        <div><dt>Price per night</dt><dd id="accommodation-modal-price"></dd></div>
+                        <div><dt>Maximum guests</dt><dd id="accommodation-modal-max"></dd></div>
+                        <div><dt>Facilities</dt><dd id="accommodation-modal-facilities"></dd></div>
+                        <div><dt>Description</dt><dd id="accommodation-modal-description"></dd></div>
+                    </dl>
+                    <button class="booking-button" id="book-now-button" type="button">BOOK NOW</button>
+                </div>
+            </section>
+        </div>
 
         <?php include __DIR__ . '/Includes/Footer.php'; ?>
     </div>

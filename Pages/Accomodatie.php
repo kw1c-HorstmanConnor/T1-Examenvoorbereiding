@@ -6,8 +6,7 @@ $currentPage = 'accommodaties';
 
 require_once __DIR__ . '/../Includes/DataBase.php';
 require_once __DIR__ . '/../Functions/Helpers/Session.php';
-require_once __DIR__ . '/../Functions/Accommodations/AccommodationImages.php';
-require_once __DIR__ . '/../Functions/Facilities/Facilities.php';
+require_once __DIR__ . '/../Functions/Accommodations/Accommodations.php';
 
 $bookingError = '';
 if (empty($_SESSION['booking_csrf'])) {
@@ -72,28 +71,20 @@ $filterDeparture = trim((string) ($_GET['departure'] ?? ''));
 $filterGuests = filter_var($_GET['guests'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
 $accommodations = [];
-$accommodationStatement = $conn->prepare(
-    'SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, Omschr, Afbeelding FROM accomodaties ORDER BY Huis_id'
-);
 
-if ($accommodationStatement) {
-    $accommodationStatement->execute();
-    $accommodationResult = $accommodationStatement->get_result();
-
-    if ($accommodationResult) {
-        while ($accommodation = $accommodationResult->fetch_assoc()) {
-            $matchesGuests = $filterGuests === false || $filterGuests === null || (int) $accommodation['Max'] >= $filterGuests;
-            $matchesAvailability = true;
-            if (maple_booking_date($filterArrival) !== null && maple_booking_date($filterDeparture) !== null && $filterDeparture > $filterArrival) {
-                $matchesAvailability = maple_booking_is_available($conn, (int) $accommodation['Huis_id'], $filterArrival, $filterDeparture) === true;
-            }
-            if ($matchesGuests && $matchesAvailability) {
-                $accommodations[] = $accommodation;
-            }
+try {
+    foreach (maple_accommodations_load_all() as $accommodation) {
+        $matchesGuests = $filterGuests === false || $filterGuests === null || (int) $accommodation['Max'] >= $filterGuests;
+        $matchesAvailability = true;
+        if (maple_booking_date($filterArrival) !== null && maple_booking_date($filterDeparture) !== null && $filterDeparture > $filterArrival) {
+            $matchesAvailability = maple_booking_is_available($conn, (int) $accommodation['Huis_id'], $filterArrival, $filterDeparture) === true;
+        }
+        if ($matchesGuests && $matchesAvailability) {
+            $accommodations[] = $accommodation;
         }
     }
-
-    $accommodationStatement->close();
+} catch (Throwable $exception) {
+    error_log('Accommodations lookup failed: ' . $exception->getMessage());
 }
 
 $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
@@ -153,7 +144,7 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
                         $imageUrl = maple_accommodation_image_url($accommodation['Afbeelding'] ?? '', $assetBase);
                         $fallbackImageUrl = maple_accommodation_image_fallback_url($assetBase);
                         ?>
-                        <article id="huis-<?= (int) $accommodation['Huis_id']; ?>" class="accommodation-card accommodation-card--listing" data-huis-id="<?= (int) $accommodation['Huis_id']; ?>" data-huis-name="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-location="<?= htmlspecialchars($accommodation['Locatie'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?>" data-facilities="<?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?>" data-max="<?= (int) $accommodation['Max']; ?>" data-description="<?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?>" data-image-src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" data-type="bungalow" data-guests="<?= (int) $accommodation['Max']; ?>" data-available-from="2026-01-01" data-available-to="2026-12-31" tabindex="0" role="button" aria-label="View details for <?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <article id="huis-<?= (int) $accommodation['Huis_id']; ?>" class="accommodation-card accommodation-card--listing" data-accommodation-card data-huis-id="<?= (int) $accommodation['Huis_id']; ?>" data-huis-name="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-location="<?= htmlspecialchars($accommodation['Locatie'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?>" data-facilities="<?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?>" data-max="<?= (int) $accommodation['Max']; ?>" data-description="<?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?>" data-image-src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" data-detail-url="Accomodatie.php#huis-<?= (int) $accommodation['Huis_id']; ?>" data-type="bungalow" data-guests="<?= (int) $accommodation['Max']; ?>" data-available-from="2026-01-01" data-available-to="2026-12-31" tabindex="0" role="button" aria-label="View details for <?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>">
                             <div class="accommodation-card__image accommodation-card__image--<?= $imageClass; ?>">
                                 <img class="accommodation-card__photo" src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-fallback-src="<?= htmlspecialchars($fallbackImageUrl, ENT_QUOTES, 'UTF-8'); ?>">
                                 <?php if ($index === 0): ?><span class="popular-badge">Popular</span><?php endif; ?>

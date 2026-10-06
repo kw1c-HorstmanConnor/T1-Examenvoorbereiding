@@ -842,6 +842,7 @@ select.language-select {
 
 .accommodation-card__image {
     position: relative;
+    display: block;
     min-height: 166px;
     overflow: hidden;
     background-color: #efe9dc;
@@ -899,6 +900,14 @@ select.language-select {
     font-size: 21px;
     font-weight: 600;
     line-height: 1.1;
+}
+
+.accommodation-card .accommodation-location {
+    margin: -6px 0 12px;
+    color: #626960;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
 .accommodation-meta {
@@ -1002,6 +1011,30 @@ select.language-select {
     line-height: 1.55;
 }
 
+.accommodation-facilities {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 13px 0 0;
+    padding: 0;
+    color: #4f574f;
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1.3;
+    list-style: none;
+}
+
+.accommodation-facilities li {
+    display: inline-flex;
+    align-items: center;
+}
+
+.accommodation-facilities li:not(:last-child)::after {
+    margin-left: 6px;
+    color: #9a9f97;
+    content: "\00b7";
+}
+
 .price-block {
     margin-top: auto;
     padding-top: 19px;
@@ -1044,6 +1077,24 @@ select.language-select {
 
 .card-button:hover {
     background: var(--green-button-light);
+}
+
+.accommodation-section-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+}
+
+.accommodation-empty {
+    margin: 0;
+    padding: 21px;
+    color: #4a5149;
+    text-align: center;
+    background: #fff;
+    border: 1px solid rgba(222, 218, 209, 0.92);
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 700;
 }
 
 /* Events */
