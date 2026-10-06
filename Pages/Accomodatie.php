@@ -42,14 +42,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['booking_action'
             $available = maple_booking_is_available($conn, (int) $huisId, $startDate, $endDate);
             if ($available !== true) {
                 $bookingError = $available === false
-                    ? 'This accommodation is no longer available for the selected dates.'
-                    : 'Availability could not be verified. Please try again later.';
+                        ? 'This accommodation is no longer available for the selected dates.'
+                        : 'Availability could not be verified. Please try again later.';
             } else {
                 $_SESSION['pending_booking'] = [
-                    'huis_id' => (int) $huisId,
-                    'start_date' => $startDate,
-                    'end_date' => $endDate,
-                    'people' => (int) $people,
+                        'huis_id' => (int) $huisId,
+                        'start_date' => $startDate,
+                        'end_date' => $endDate,
+                        'people' => (int) $people,
                 ];
                 // A confirmation token may only authorize the pending booking that created it.
                 unset($_SESSION['booking_submission_token']);
@@ -104,115 +104,142 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
     <?php include __DIR__ . '/../Includes/LanguagesScripts.php'; ?>
 </head>
 <body class="accommodations-page">
-    <section class="accommodations-hero" aria-labelledby="accommodations-heading">
-        <?php include __DIR__ . '/../Includes/Header.php'; ?>
-        <div class="accommodations-hero__content page-container">
-            <h1 id="accommodations-heading">Accommodations</h1>
-            <p>Unique stays in the Canadian wilderness</p>
+<section class="accommodations-hero" aria-labelledby="accommodations-heading">
+    <?php include __DIR__ . '/../Includes/Header.php'; ?>
+    <div class="accommodations-hero__content page-container">
+        <h1 id="accommodations-heading">Accommodations</h1>
+        <p>Unique stays in the Canadian wilderness</p>
+    </div>
+</section>
+
+<main>
+    <section class="accommodations-overview" aria-labelledby="overview-heading">
+        <div class="page-container">
+            <div class="accommodations-overview__header">
+                <div>
+                    <p class="section-label">OUR COTTAGES</p>
+                    <h2 class="section-title" id="overview-heading">Find your perfect stay</h2>
+                    <p>Each bungalow sits among the trees and is fully equipped for a relaxed escape in the Canadian wilderness.</p>
+                </div>
+                <a class="outline-button" href="../Index.php?view=home#booking">Check availability <span class="button-arrow" aria-hidden="true"></span></a>
+            </div>
+
+            <form class="cottage-search" id="cottage-search" action="#overview-heading" method="get" aria-label="Search cottages">
+                <label><span>Guests</span><select id="guests" name="guests"><option value="">Any number</option><?php foreach ([1, 2, 3, 4, 5, 6] as $guestOption): ?><option value="<?= $guestOption; ?>"<?= $filterGuests === $guestOption ? ' selected' : ''; ?>><?= $guestOption; ?> guests</option><?php endforeach; ?></select></label>
+                <label><span>Arrival</span><input id="arrival" type="date" name="arrival" value="<?= htmlspecialchars($filterArrival, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Arrival date"></label>
+                <label><span>Departure</span><input id="departure" type="date" name="departure" value="<?= htmlspecialchars($filterDeparture, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Departure date"></label>
+                <button type="submit">Search cottages</button>
+            </form>
+            <div class="cottage-toolbar" aria-label="Cottage overview controls">
+                <p><strong><?= count($accommodations); ?> cottages available</strong><span>Choose the comfort level that suits your stay.</span></p>
+                <div class="cottage-filter-row"><label>Sort by <select aria-label="Sort cottages"><option>Recommended</option><option>Price: low to high</option><option>Most spacious</option></select></label><button type="button">Filters</button><button type="button">Bedrooms</button><button type="button">Facilities</button></div>
+            </div>
+            <div class="accommodations-list">
+                <?php foreach ($accommodations as $index => $accommodation): ?>
+                    <?php
+                    $imageClass = $accommodationImageClasses[$index % count($accommodationImageClasses)];
+                    $facilityNames = maple_facility_names_from_keys(maple_facility_parse_values((string) ($accommodation['Voorzieningen'] ?? '')));
+                    $facilityDisplay = $facilityNames !== [] ? implode(', ', $facilityNames) : 'No facilities listed';
+                    $description = (string) ($accommodation['Omschrijving'] ?? '');
+                    $galleryImages = maple_accommodation_gallery_images((int) ($accommodation['Huis_id'] ?? 0), '', $assetBase, (string) ($accommodation['Huis_naam'] ?? ''));
+                    $galleryJson = json_encode($galleryImages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                    $galleryJson = is_string($galleryJson) ? $galleryJson : '[]';
+                    $firstGalleryImage = $galleryImages[0] ?? [];
+                    $imageUrl = (string) ($firstGalleryImage['src'] ?? maple_accommodation_image_fallback_url($assetBase));
+                    $fallbackImageUrl = maple_accommodation_image_fallback_url($assetBase);
+                    $imageIsPlaceholder = !empty($firstGalleryImage['placeholder']);
+                    ?>
+                    <article id="huis-<?= (int) $accommodation['Huis_id']; ?>" class="accommodation-card accommodation-card--listing" data-accommodation-card data-huis-id="<?= (int) $accommodation['Huis_id']; ?>" data-huis-name="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-location="<?= htmlspecialchars($accommodation['Locatie'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?>" data-facilities="<?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?>" data-max="<?= (int) $accommodation['Max']; ?>" data-description="<?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?>" data-image-src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" data-image-placeholder="<?= $imageIsPlaceholder ? '1' : '0'; ?>" data-gallery="<?= htmlspecialchars($galleryJson, ENT_QUOTES, 'UTF-8'); ?>" data-detail-url="Accomodatie.php#huis-<?= (int) $accommodation['Huis_id']; ?>" data-type="bungalow" data-guests="<?= (int) $accommodation['Max']; ?>" data-available-from="2026-01-01" data-available-to="2026-12-31" tabindex="0" role="button" aria-label="View details for <?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <div class="accommodation-card__image accommodation-card__image--<?= $imageClass; ?><?= $imageIsPlaceholder ? ' is-placeholder' : ''; ?>">
+                            <img class="accommodation-card__photo" src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-fallback-src="<?= htmlspecialchars($fallbackImageUrl, ENT_QUOTES, 'UTF-8'); ?>">
+                            <?php if ($index === 0): ?><span class="popular-badge">Popular</span><?php endif; ?>
+                        </div>
+                        <div class="accommodation-card__body">
+                            <h3><?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                            <div class="accommodation-meta" aria-label="Features"><span><i class="meta-icon meta-icon--guest" aria-hidden="true"></i><?= (int) $accommodation['Max']; ?> guests</span></div>
+                            <p><?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?></p>
+                            <ul class="accommodation-highlights"><li><?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?></li></ul>
+                            <div class="price-block"><span>From</span><strong>&euro; <?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?> <em>per night</em></strong></div>
+                        </div>
+                    </article>
+                <?php endforeach; ?>
+                <div class="cottage-options-divider" id="cottage-options-divider" hidden><span>Overige opties</span></div>
+            </div>
+            <p class="cottage-no-results" id="cottage-no-results" hidden>No exact matches. See the other options below.</p>
+            <?php if ($bookingError !== ''): ?>
+                <p class="booking-error" role="alert"><?= htmlspecialchars($bookingError, ENT_QUOTES, 'UTF-8'); ?></p>
+            <?php endif; ?>
         </div>
     </section>
-
-    <main>
-        <section class="accommodations-overview" aria-labelledby="overview-heading">
-            <div class="page-container">
-                <div class="accommodations-overview__header">
-                    <div>
-                        <p class="section-label">OUR COTTAGES</p>
-                        <h2 class="section-title" id="overview-heading">Find your perfect stay</h2>
-                        <p>Each bungalow sits among the trees and is fully equipped for a relaxed escape in the Canadian wilderness.</p>
-                    </div>
-                    <a class="outline-button" href="../Index.php?view=home#booking">Check availability <span class="button-arrow" aria-hidden="true"></span></a>
-                </div>
-
-                <form class="cottage-search" id="cottage-search" action="#overview-heading" method="get" aria-label="Search cottages">
-                    <label><span>Guests</span><select id="guests" name="guests"><option value="">Any number</option><?php foreach ([1, 2, 3, 4, 5, 6] as $guestOption): ?><option value="<?= $guestOption; ?>"<?= $filterGuests === $guestOption ? ' selected' : ''; ?>><?= $guestOption; ?> guests</option><?php endforeach; ?></select></label>
-                    <label><span>Arrival</span><input id="arrival" type="date" name="arrival" value="<?= htmlspecialchars($filterArrival, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Arrival date"></label>
-                    <label><span>Departure</span><input id="departure" type="date" name="departure" value="<?= htmlspecialchars($filterDeparture, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Departure date"></label>
-                    <button type="submit">Search cottages</button>
-                </form>
-                <div class="cottage-toolbar" aria-label="Cottage overview controls">
-                    <p><strong><?= count($accommodations); ?> cottages available</strong><span>Choose the comfort level that suits your stay.</span></p>
-                    <div class="cottage-filter-row"><label>Sort by <select aria-label="Sort cottages"><option>Recommended</option><option>Price: low to high</option><option>Most spacious</option></select></label><button type="button">Filters</button><button type="button">Bedrooms</button><button type="button">Facilities</button></div>
-                </div>
-                <div class="accommodations-list">
-                    <?php foreach ($accommodations as $index => $accommodation): ?>
-                        <?php
-                        $imageClass = $accommodationImageClasses[$index % count($accommodationImageClasses)];
-                        $facilityNames = maple_facility_names_from_keys(maple_facility_parse_values((string) ($accommodation['Voorzieningen'] ?? '')));
-                        $facilityDisplay = $facilityNames !== [] ? implode(', ', $facilityNames) : 'No facilities listed';
-                        $description = (string) ($accommodation['Omschrijving'] ?? '');
-                        $imageUrl = maple_accommodation_image_url($accommodation['Afbeelding'] ?? '', $assetBase);
-                        $fallbackImageUrl = maple_accommodation_image_fallback_url($assetBase);
-                        ?>
-                        <article id="huis-<?= (int) $accommodation['Huis_id']; ?>" class="accommodation-card accommodation-card--listing" data-accommodation-card data-huis-id="<?= (int) $accommodation['Huis_id']; ?>" data-huis-name="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-location="<?= htmlspecialchars($accommodation['Locatie'], ENT_QUOTES, 'UTF-8'); ?>" data-price="<?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?>" data-facilities="<?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?>" data-max="<?= (int) $accommodation['Max']; ?>" data-description="<?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?>" data-image-src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" data-detail-url="Accomodatie.php#huis-<?= (int) $accommodation['Huis_id']; ?>" data-type="bungalow" data-guests="<?= (int) $accommodation['Max']; ?>" data-available-from="2026-01-01" data-available-to="2026-12-31" tabindex="0" role="button" aria-label="View details for <?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>">
-                            <div class="accommodation-card__image accommodation-card__image--<?= $imageClass; ?>">
-                                <img class="accommodation-card__photo" src="<?= htmlspecialchars($imageUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?>" data-fallback-src="<?= htmlspecialchars($fallbackImageUrl, ENT_QUOTES, 'UTF-8'); ?>">
-                                <?php if ($index === 0): ?><span class="popular-badge">Popular</span><?php endif; ?>
-                            </div>
-                            <div class="accommodation-card__body">
-                                <h3><?= htmlspecialchars($accommodation['Huis_naam'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                                <div class="accommodation-meta" aria-label="Features"><span><i class="meta-icon meta-icon--guest" aria-hidden="true"></i><?= (int) $accommodation['Max']; ?> guests</span></div>
-                                <p><?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8'); ?></p>
-                                <ul class="accommodation-highlights"><li><?= htmlspecialchars($facilityDisplay, ENT_QUOTES, 'UTF-8'); ?></li></ul>
-                                <div class="price-block"><span>From</span><strong>&euro; <?= htmlspecialchars($accommodation['PPN'], ENT_QUOTES, 'UTF-8'); ?> <em>per night</em></strong></div>
-                            </div>
-                        </article>
-                    <?php endforeach; ?>
-                    <div class="cottage-options-divider" id="cottage-options-divider" hidden><span>Overige opties</span></div>
-                </div>
-                <p class="cottage-no-results" id="cottage-no-results" hidden>No exact matches. See the other options below.</p>
-                <?php if ($bookingError !== ''): ?>
-                    <p class="booking-error" role="alert"><?= htmlspecialchars($bookingError, ENT_QUOTES, 'UTF-8'); ?></p>
-                <?php endif; ?>
+    <section class="accommodations-note">
+        <div class="page-container accommodations-note__inner">
+            <div><p class="section-label">GOOD TO KNOW</p><h2>Everything for an effortless stay</h2></div>
+            <p>Every bungalow has a fully equipped kitchen, comfortable beds, a private terrace and complimentary Wi-Fi. Have a question about your stay? We are happy to help.</p>
+            <a class="text-link" href="mailto:info@maplecamp.ca">Get in touch <span class="text-link__arrow" aria-hidden="true"></span></a>
+        </div>
+    </section>
+</main>
+<div class="accommodation-modal" id="accommodation-modal" hidden aria-hidden="true">
+    <div class="accommodation-modal__overlay" data-modal-close="true"></div>
+    <section class="accommodation-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="accommodation-modal-title" tabindex="-1">
+        <button class="accommodation-modal__close" type="button" aria-label="Close accommodation details" data-modal-close="true">&times;</button>
+        <div class="accommodation-modal__gallery is-placeholder" id="accommodation-modal-image">
+            <div class="accommodation-modal__stage" id="accommodation-modal-stage">
+                <img id="accommodation-modal-photo" src="<?= htmlspecialchars(maple_accommodation_image_fallback_url($assetBase), ENT_QUOTES, 'UTF-8'); ?>" alt="<?= htmlspecialchars(maple_accommodation_image_placeholder_text(), ENT_QUOTES, 'UTF-8'); ?>" data-fallback-src="<?= htmlspecialchars(maple_accommodation_image_fallback_url($assetBase), ENT_QUOTES, 'UTF-8'); ?>">
+                <p class="accommodation-modal__placeholder-text" id="accommodation-modal-placeholder">No image available yet</p>
+                <button class="accommodation-modal__nav accommodation-modal__nav--prev" type="button" aria-label="Previous image" data-gallery-prev hidden>&lsaquo;</button>
+                <button class="accommodation-modal__nav accommodation-modal__nav--next" type="button" aria-label="Next image" data-gallery-next hidden>&rsaquo;</button>
+                <div class="accommodation-modal__counter" id="accommodation-modal-counter" hidden>1 / 1</div>
             </div>
-        </section>
-        <section class="accommodations-note">
-            <div class="page-container accommodations-note__inner">
-                <div><p class="section-label">GOOD TO KNOW</p><h2>Everything for an effortless stay</h2></div>
-                <p>Every bungalow has a fully equipped kitchen, comfortable beds, a private terrace and complimentary Wi-Fi. Have a question about your stay? We are happy to help.</p>
-                <a class="text-link" href="mailto:info@maplecamp.ca">Get in touch <span class="text-link__arrow" aria-hidden="true"></span></a>
-            </div>
-        </section>
-    </main>
-    <div class="accommodation-modal" id="accommodation-modal" hidden aria-hidden="true">
-        <div class="accommodation-modal__overlay" data-modal-close="true"></div>
-        <section class="accommodation-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="accommodation-modal-title" tabindex="-1">
-            <button class="accommodation-modal__close" type="button" aria-label="Close accommodation details" data-modal-close="true">&times;</button>
-            <div class="accommodation-modal__image" id="accommodation-modal-image" aria-hidden="true">
-                <img id="accommodation-modal-photo" src="<?= htmlspecialchars(maple_accommodation_image_fallback_url($assetBase), ENT_QUOTES, 'UTF-8'); ?>" alt="" data-fallback-src="<?= htmlspecialchars(maple_accommodation_image_fallback_url($assetBase), ENT_QUOTES, 'UTF-8'); ?>">
-            </div>
-            <div class="accommodation-modal__content">
+            <div class="accommodation-modal__thumbs" id="accommodation-modal-thumbnails" aria-label="Accommodation images" hidden></div>
+        </div>
+        <div class="accommodation-modal__content">
+            <div class="accommodation-modal__details-scroll">
                 <p class="section-label">ACCOMMODATION DETAILS</p>
                 <h2 id="accommodation-modal-title"></h2>
                 <dl class="accommodation-modal__details">
                     <div><dt>Location</dt><dd id="accommodation-modal-location"></dd></div>
                     <div><dt>Price per night</dt><dd id="accommodation-modal-price"></dd></div>
                     <div><dt>Maximum guests</dt><dd id="accommodation-modal-max"></dd></div>
-                    <div><dt>Facilities</dt><dd id="accommodation-modal-facilities"></dd></div>
-                    <div><dt>Description</dt><dd id="accommodation-modal-description"></dd></div>
                 </dl>
+                <section class="accommodation-modal__section" id="accommodation-modal-facilities-section">
+                    <h3>Facilities</h3>
+                    <div class="accommodation-modal__chips" id="accommodation-modal-facilities"></div>
+                    <button class="accommodation-modal__show-more" id="accommodation-modal-facilities-toggle" type="button" hidden>Show more</button>
+                </section>
+                <section class="accommodation-modal__section" id="accommodation-modal-description-section">
+                    <h3>Description</h3>
+                    <p id="accommodation-modal-description"></p>
+                </section>
+            </div>
+            <div class="accommodation-modal__booking-bar">
+                <div>
+                    <span>Price per night</span>
+                    <strong id="accommodation-modal-booking-price"></strong>
+                </div>
                 <button class="booking-button" id="book-now-button" type="button">BOOK NOW</button>
             </div>
-        </section>
-    </div>
-    <div class="booking-modal" id="booking-modal" hidden aria-hidden="true">
-        <div class="booking-modal__overlay" data-booking-modal-close="true"></div>
-        <section class="booking-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title" tabindex="-1">
-            <button class="accommodation-modal__close" type="button" aria-label="Close booking confirmation" data-booking-modal-close="true">&times;</button>
-            <p class="section-label">CONFIRM YOUR STAY</p>
-            <h2 id="booking-modal-title">Complete your booking</h2>
-            <p id="booking-accommodation-name"></p>
-            <form method="post" action="Accomodatie.php" id="booking-confirmation-form">
-                <input type="hidden" name="booking_action" value="continue">
-                <input type="hidden" name="csrf" value="<?= htmlspecialchars((string) $_SESSION['booking_csrf'], ENT_QUOTES, 'UTF-8'); ?>">
-                <input type="hidden" name="huis_id" id="booking-huis-id" value="">
-                <label>Arrival<input type="date" name="start_date" id="booking-start-date" required></label>
-                <label>Departure<input type="date" name="end_date" id="booking-end-date" required></label>
-                <label>Number of people<input type="number" name="people" id="booking-people" min="1" step="1" required></label>
-                <button class="booking-button" type="submit">CONTINUE BOOKING</button>
-            </form>
-        </section>
-    </div>
-    <?php include __DIR__ . '/../Includes/Footer.php'; ?>
+        </div>
+    </section>
+</div>
+<div class="booking-modal" id="booking-modal" hidden aria-hidden="true">
+    <div class="booking-modal__overlay" data-booking-modal-close="true"></div>
+    <section class="booking-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title" tabindex="-1">
+        <button class="accommodation-modal__close" type="button" aria-label="Close booking confirmation" data-booking-modal-close="true">&times;</button>
+        <p class="section-label">CONFIRM YOUR STAY</p>
+        <h2 id="booking-modal-title">Complete your booking</h2>
+        <p id="booking-accommodation-name"></p>
+        <form method="post" action="Accomodatie.php" id="booking-confirmation-form">
+            <input type="hidden" name="booking_action" value="continue">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars((string) $_SESSION['booking_csrf'], ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="huis_id" id="booking-huis-id" value="">
+            <label>Arrival<input type="date" name="start_date" id="booking-start-date" required></label>
+            <label>Departure<input type="date" name="end_date" id="booking-end-date" required></label>
+            <label>Number of people<input type="number" name="people" id="booking-people" min="1" step="1" required></label>
+            <button class="booking-button" type="submit">CONTINUE BOOKING</button>
+        </form>
+    </section>
+</div>
+<?php include __DIR__ . '/../Includes/Footer.php'; ?>
 </body>
 </html>

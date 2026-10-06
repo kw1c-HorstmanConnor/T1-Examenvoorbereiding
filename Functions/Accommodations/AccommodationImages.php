@@ -1,16 +1,27 @@
 <?php
 declare(strict_types=1);
 
-const MAPLE_ACCOMMODATION_IMAGE_MAX_BYTES = 5242880;
+require_once __DIR__ . '/../Helpers/Database.php';
+require_once __DIR__ . '/AccommodationTypes.php';
 
 function maple_accommodation_image_upload_directory(): string
 {
     return dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'Images' . DIRECTORY_SEPARATOR . 'Accommodations';
 }
 
+function maple_accommodation_image_fallback_path(): string
+{
+    return maple_accommodation_image_upload_directory() . DIRECTORY_SEPARATOR . 'no-image-placeholder.png';
+}
+
 function maple_accommodation_image_fallback_url(string $assetBase = ''): string
 {
-    return $assetBase . 'Images/background.png';
+    return $assetBase . 'Images/Accommodations/no-image-placeholder.png';
+}
+
+function maple_accommodation_image_placeholder_text(): string
+{
+    return 'No image available yet';
 }
 
 function maple_accommodation_image_filename($value): string
@@ -31,10 +42,7 @@ function maple_accommodation_image_filename($value): string
     return $filename;
 }
 
-/**
- * @return string|null
- */
-function maple_accommodation_image_path($value)
+function maple_accommodation_image_path($value): ?string
 {
     $filename = maple_accommodation_image_filename($value);
 
@@ -52,6 +60,11 @@ function maple_accommodation_image_exists($value): bool
     return $path !== null && is_file($path);
 }
 
+function maple_accommodation_image_is_placeholder($value): bool
+{
+    return !maple_accommodation_image_exists($value);
+}
+
 function maple_accommodation_image_url($value, string $assetBase = ''): string
 {
     $filename = maple_accommodation_image_filename($value);
@@ -63,161 +76,199 @@ function maple_accommodation_image_url($value, string $assetBase = ''): string
     return maple_accommodation_image_fallback_url($assetBase);
 }
 
-function maple_accommodation_uploaded_file_present($file): bool
+function maple_accommodation_gallery_directory(int $imageSourceId): string
 {
-    return is_array($file)
-        && isset($file['error'])
-        && (int) $file['error'] !== UPLOAD_ERR_NO_FILE;
+    return maple_accommodation_image_upload_directory() . DIRECTORY_SEPARATOR . $imageSourceId;
 }
 
-function maple_accommodation_ensure_upload_directory()
+function maple_accommodation_gallery_file_type(string $filename): string
 {
-    $directory = maple_accommodation_image_upload_directory();
-
-    if (is_dir($directory)) {
-        return;
-    }
-
-    if (!mkdir($directory, 0755, true) && !is_dir($directory)) {
-        throw new RuntimeException('The accommodation image directory could not be created.');
-    }
+    return preg_match('/(?:floorplan|floor-plan|floor_plan|floor|plattegrond|map|plan)/i', $filename)
+        ? 'floorplan'
+        : 'photo';
 }
 
-function maple_accommodation_image_slug(string $name): string
+function maple_accommodation_gallery_label(string $filename): string
 {
-    $slug = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $name) ?? '', '-'));
+    $label = preg_replace('/\.[^.]+$/', '', $filename) ?? '';
+    $label = preg_replace('/^\d+\s*[-_. ]*/', '', $label) ?? '';
+    $label = trim(str_replace(['-', '_'], ' ', $label));
 
-    return $slug !== '' ? $slug : 'accommodation';
+    return $label === '' ? 'Image' : ucwords(strtolower($label));
 }
 
-function maple_accommodation_store_uploaded_image(array $file, string $accommodationName): string
-{
-    $error = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
-
-    if ($error === UPLOAD_ERR_NO_FILE) {
-        return '';
-    }
-
-    if ($error !== UPLOAD_ERR_OK) {
-        throw new RuntimeException('The image upload failed. Please choose another JPG, PNG or WebP image.');
-    }
-
-    $temporaryPath = (string) ($file['tmp_name'] ?? '');
-
-    if ($temporaryPath === '' || !is_uploaded_file($temporaryPath)) {
-        throw new RuntimeException('The uploaded image could not be verified.');
-    }
-
-    $size = filesize($temporaryPath);
-
-    if ($size === false || $size > MAPLE_ACCOMMODATION_IMAGE_MAX_BYTES) {
-        throw new RuntimeException('Accommodation images may not be larger than 5 MB.');
-    }
-
-    $finfo = new finfo(FILEINFO_MIME_TYPE);
-    $mimeType = $finfo->file($temporaryPath);
-    $allowedTypes = [
-        'image/jpeg' => 'jpg',
-        'image/png' => 'png',
-        'image/webp' => 'webp',
+function maple_accommodation_gallery_slide(
+    string $src,
+    string $filename,
+    string $type = 'photo',
+    bool $placeholder = false
+): array {
+    return [
+        'src' => $src,
+        'type' => $type === 'floorplan' ? 'floorplan' : 'photo',
+        'label' => maple_accommodation_gallery_label($filename),
+        'placeholder' => $placeholder,
     ];
-
-    if (!is_string($mimeType) || !isset($allowedTypes[$mimeType])) {
-        throw new RuntimeException('Only JPG, PNG or WebP accommodation images are allowed.');
-    }
-
-    $imageInfo = @getimagesize($temporaryPath);
-
-    if ($imageInfo === false || !isset($allowedTypes[(string) ($imageInfo['mime'] ?? '')])) {
-        throw new RuntimeException('The selected file is not a valid JPG, PNG or WebP image.');
-    }
-
-    maple_accommodation_ensure_upload_directory();
-
-    $extension = $allowedTypes[$mimeType];
-    $directory = maple_accommodation_image_upload_directory();
-
-    do {
-        $filename = sprintf(
-            '%s-%d-%s.%s',
-            maple_accommodation_image_slug($accommodationName),
-            time(),
-            bin2hex(random_bytes(4)),
-            $extension
-        );
-        $destination = $directory . DIRECTORY_SEPARATOR . $filename;
-    } while (is_file($destination));
-
-    if (!move_uploaded_file($temporaryPath, $destination)) {
-        throw new RuntimeException('The accommodation image could not be saved.');
-    }
-
-    return $filename;
 }
 
-/**
- * @return string|null
- */
-function maple_accommodation_current_image(PDO $pdo, int $huisId)
+function maple_accommodation_path_is_inside(string $path, string $directory): bool
 {
+    $realDirectory = realpath($directory);
+    $realPath = realpath($path);
+
+    if ($realDirectory === false || $realPath === false) {
+        return false;
+    }
+
+    $realDirectory = rtrim($realDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+    return strncmp($realPath, $realDirectory, strlen($realDirectory)) === 0;
+}
+
+function maple_accommodation_gallery_file_url(int $imageSourceId, string $filename, string $assetBase = ''): string
+{
+    return $assetBase . 'Images/Accommodations/' . rawurlencode((string) $imageSourceId) . '/' . rawurlencode($filename);
+}
+
+function maple_accommodation_gallery_files(int $imageSourceId): array
+{
+    if (!in_array($imageSourceId, [1, 2, 3], true)) {
+        return [];
+    }
+
+    $directory = maple_accommodation_gallery_directory($imageSourceId);
+
+    if (!is_dir($directory)) {
+        return [];
+    }
+
+    $rootDirectory = realpath(maple_accommodation_image_upload_directory());
+    $realDirectory = realpath($directory);
+
+    if ($rootDirectory === false || $realDirectory === false) {
+        return [];
+    }
+
+    $rootDirectory = rtrim($rootDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    $realDirectoryWithSeparator = rtrim($realDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+
+    if (strncmp($realDirectoryWithSeparator, $rootDirectory, strlen($rootDirectory)) !== 0) {
+        return [];
+    }
+
+    $files = scandir($realDirectory);
+
+    if ($files === false) {
+        return [];
+    }
+
+    $images = [];
+
+    foreach ($files as $file) {
+        if (!is_string($file) || $file === '.' || $file === '..') {
+            continue;
+        }
+
+        if (basename($file) !== $file || !preg_match('/^[a-zA-Z0-9][a-zA-Z0-9._-]*\.(?:jpe?g|png|webp)$/i', $file)) {
+            continue;
+        }
+
+        $path = $realDirectory . DIRECTORY_SEPARATOR . $file;
+
+        if (!is_file($path) || !maple_accommodation_path_is_inside($path, $realDirectory)) {
+            continue;
+        }
+
+        $images[] = $file;
+    }
+
+    natcasesort($images);
+
+    return array_values($images);
+}
+
+function maple_accommodation_fixed_gallery_images(int $imageSourceId, string $assetBase = ''): array
+{
+    $slides = [];
+
+    foreach (maple_accommodation_gallery_files($imageSourceId) as $filename) {
+        $slides[] = maple_accommodation_gallery_slide(
+            maple_accommodation_gallery_file_url($imageSourceId, $filename, $assetBase),
+            $filename,
+            maple_accommodation_gallery_file_type($filename)
+        );
+    }
+
+    if ($slides === []) {
+        $slides[] = maple_accommodation_gallery_slide(
+            maple_accommodation_image_fallback_url($assetBase),
+            'no-image-placeholder.png',
+            'photo',
+            true
+        );
+    }
+
+    return $slides;
+}
+
+function maple_accommodation_type_for_huis_id(PDO $pdo, int $huisId): ?string
+{
+    if ($huisId <= 0) {
+        return null;
+    }
+
     $statement = $pdo->prepare('
-        SELECT Afbeelding
-        FROM accomodaties
-        WHERE Huis_id = :huis_id
+        SELECT `Huis_naam`
+        FROM `accomodaties`
+        WHERE `Huis_id` = :huis_id
         LIMIT 1
     ');
     $statement->execute(['huis_id' => $huisId]);
-    $image = $statement->fetchColumn();
+    $type = $statement->fetchColumn();
 
-    return is_string($image) && trim($image) !== '' ? $image : null;
+    return is_string($type) && trim($type) !== '' ? trim($type) : null;
 }
 
-function maple_accommodation_delete_file(string $image)
-{
-    $path = maple_accommodation_image_path($image);
+function maple_accommodation_gallery_images(
+    int $huisId,
+        $coverImage = '',
+    string $assetBase = '',
+    ?string $huisNaam = null
+): array {
+    $pdo = maple_pdo();
+    $type = trim((string) ($huisNaam ?? ''));
 
-    if ($path === null || !is_file($path)) {
-        return;
+    if ($type === '') {
+        $type = (string) (maple_accommodation_type_for_huis_id($pdo, $huisId) ?? '');
     }
 
-    $directory = realpath(maple_accommodation_image_upload_directory());
-    $target = realpath($path);
+    $imageSourceId = maple_accommodation_type_image_id($pdo, $type);
 
-    if ($directory === false || $target === false) {
-        return;
+    if ($imageSourceId === null) {
+        return [
+            maple_accommodation_gallery_slide(
+                maple_accommodation_image_fallback_url($assetBase),
+                'no-image-placeholder.png',
+                'photo',
+                true
+            ),
+        ];
     }
 
-    $directory = rtrim($directory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-
-    if (strncmp($target, $directory, strlen($directory)) === 0) {
-        @unlink($target);
-    }
+    return maple_accommodation_fixed_gallery_images($imageSourceId, $assetBase);
 }
 
-/**
- * @param string|null $image
- */
-function maple_accommodation_delete_file_if_unused(PDO $pdo, $image)
+function maple_accommodation_gallery_json(array $accommodation, string $assetBase = ''): string
 {
-    $filename = maple_accommodation_image_filename($image);
+    $json = json_encode(
+        maple_accommodation_gallery_images(
+            (int) ($accommodation['Huis_id'] ?? 0),
+            '',
+            $assetBase,
+            (string) ($accommodation['Huis_naam'] ?? '')
+        ),
+        JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+    );
 
-    if ($filename === '') {
-        return;
-    }
-
-    $pathValue = 'Images/Accommodations/' . $filename;
-    $statement = $pdo->prepare('
-        SELECT COUNT(*)
-        FROM accomodaties
-        WHERE Afbeelding = :filename
-            OR Afbeelding = :path_value
-    ');
-    $statement->execute([
-        'filename' => $filename,
-        'path_value' => $pathValue,
-    ]);
-
-    if ((int) $statement->fetchColumn() === 0) {
-        maple_accommodation_delete_file($filename);
-    }
+    return is_string($json) ? $json : '[]';
 }

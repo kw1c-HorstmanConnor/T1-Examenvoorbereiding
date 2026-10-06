@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Helpers/Database.php';
 require_once __DIR__ . '/../Facilities/Facilities.php';
+require_once __DIR__ . '/AccommodationImages.php';
 
 function maple_accommodations_columns(PDO $pdo): array
 {

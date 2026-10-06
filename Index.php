@@ -120,16 +120,21 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
                         <div class="accommodation-grid">
                             <?php foreach ($homeAccomodations as $index => $accomodation): ?>
                                 <?php
-                                $imageUrl = maple_accommodation_image_url($accomodation['Afbeelding'] ?? '', $assetBase);
+                                $galleryImages = maple_accommodation_gallery_images((int) ($accomodation['Huis_id'] ?? 0), $accomodation['Afbeelding'] ?? '', $assetBase);
+                                $galleryJson = json_encode($galleryImages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                                $galleryJson = is_string($galleryJson) ? $galleryJson : '[]';
+                                $firstGalleryImage = $galleryImages[0] ?? [];
+                                $imageUrl = (string) ($firstGalleryImage['src'] ?? maple_accommodation_image_fallback_url($assetBase));
                                 $fallbackImageUrl = maple_accommodation_image_fallback_url($assetBase);
+                                $imageIsPlaceholder = !empty($firstGalleryImage['placeholder']);
                                 $allFacilityNames = maple_accommodation_facility_names($accomodation, 99);
                                 $facilityNames = array_slice($allFacilityNames, 0, 3);
                                 $facilityDisplay = $allFacilityNames !== [] ? implode(', ', $allFacilityNames) : 'No facilities listed';
                                 $description = maple_accommodation_excerpt((string) ($accomodation['Omschrijving'] ?? ''));
                                 $detailUrl = maple_accommodation_detail_url($accomodation, $basePath);
                                 ?>
-                                <article class="accommodation-card" data-accommodation-card data-huis-id="<?= (int) $accomodation['Huis_id']; ?>" data-huis-name="<?= maple_e($accomodation['Huis_naam']); ?>" data-location="<?= maple_e($accomodation['Locatie']); ?>" data-price="<?= maple_e(maple_home_price($accomodation['PPN'])); ?>" data-facilities="<?= maple_e($facilityDisplay); ?>" data-max="<?= (int) $accomodation['Max']; ?>" data-description="<?= maple_e($accomodation['Omschrijving']); ?>" data-image-src="<?= maple_e($imageUrl); ?>" data-detail-url="<?= maple_e($detailUrl); ?>">
-                                    <a class="accommodation-card__image" href="<?= maple_e($detailUrl); ?>" aria-label="Bekijk accommodatie" data-accommodation-open>
+                                <article class="accommodation-card" data-accommodation-card data-huis-id="<?= (int) $accomodation['Huis_id']; ?>" data-huis-name="<?= maple_e($accomodation['Huis_naam']); ?>" data-location="<?= maple_e($accomodation['Locatie']); ?>" data-price="<?= maple_e(maple_home_price($accomodation['PPN'])); ?>" data-facilities="<?= maple_e($facilityDisplay); ?>" data-max="<?= (int) $accomodation['Max']; ?>" data-description="<?= maple_e($accomodation['Omschrijving']); ?>" data-image-src="<?= maple_e($imageUrl); ?>" data-image-placeholder="<?= $imageIsPlaceholder ? '1' : '0'; ?>" data-gallery="<?= maple_e($galleryJson); ?>" data-detail-url="<?= maple_e($detailUrl); ?>">
+                                    <a class="accommodation-card__image<?= $imageIsPlaceholder ? ' is-placeholder' : ''; ?>" href="<?= maple_e($detailUrl); ?>" aria-label="Bekijk accommodatie" data-accommodation-open>
                                         <img class="accommodation-card__photo" src="<?= maple_e($imageUrl); ?>" alt="<?= maple_e($accomodation['Huis_naam']); ?>" data-fallback-src="<?= maple_e($fallbackImageUrl); ?>" onerror="if (this.dataset.fallbackApplied !== '1' && this.dataset.fallbackSrc) { this.dataset.fallbackApplied = '1'; this.src = this.dataset.fallbackSrc; }">
                                         <?php if ($index === 0 && $homeAccommodationSelection === 'reservations' && (int) ($accomodation['booking_count'] ?? 0) > 0): ?>
                                             <span class="popular-badge">Populair</span>
@@ -298,20 +303,42 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
             <div class="accommodation-modal__overlay" data-modal-close="true"></div>
             <section class="accommodation-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="accommodation-modal-title" tabindex="-1">
                 <button class="accommodation-modal__close" type="button" aria-label="Close accommodation details" data-modal-close="true">&times;</button>
-                <div class="accommodation-modal__image" id="accommodation-modal-image" aria-hidden="true">
-                    <img id="accommodation-modal-photo" src="<?= maple_e(maple_accommodation_image_fallback_url($assetBase)); ?>" alt="" data-fallback-src="<?= maple_e(maple_accommodation_image_fallback_url($assetBase)); ?>">
+                <div class="accommodation-modal__gallery is-placeholder" id="accommodation-modal-image">
+                    <div class="accommodation-modal__stage" id="accommodation-modal-stage">
+                        <img id="accommodation-modal-photo" src="<?= maple_e(maple_accommodation_image_fallback_url($assetBase)); ?>" alt="<?= maple_e(maple_accommodation_image_placeholder_text()); ?>" data-fallback-src="<?= maple_e(maple_accommodation_image_fallback_url($assetBase)); ?>">
+                        <p class="accommodation-modal__placeholder-text" id="accommodation-modal-placeholder">No image available yet</p>
+                        <button class="accommodation-modal__nav accommodation-modal__nav--prev" type="button" aria-label="Previous image" data-gallery-prev hidden>&lsaquo;</button>
+                        <button class="accommodation-modal__nav accommodation-modal__nav--next" type="button" aria-label="Next image" data-gallery-next hidden>&rsaquo;</button>
+                        <div class="accommodation-modal__counter" id="accommodation-modal-counter" hidden>1 / 1</div>
+                    </div>
+                    <div class="accommodation-modal__thumbs" id="accommodation-modal-thumbnails" aria-label="Accommodation images" hidden></div>
                 </div>
                 <div class="accommodation-modal__content">
-                    <p class="section-label">ACCOMMODATION DETAILS</p>
-                    <h2 id="accommodation-modal-title"></h2>
-                    <dl class="accommodation-modal__details">
-                        <div><dt>Location</dt><dd id="accommodation-modal-location"></dd></div>
-                        <div><dt>Price per night</dt><dd id="accommodation-modal-price"></dd></div>
-                        <div><dt>Maximum guests</dt><dd id="accommodation-modal-max"></dd></div>
-                        <div><dt>Facilities</dt><dd id="accommodation-modal-facilities"></dd></div>
-                        <div><dt>Description</dt><dd id="accommodation-modal-description"></dd></div>
-                    </dl>
-                    <button class="booking-button" id="book-now-button" type="button">BOOK NOW</button>
+                    <div class="accommodation-modal__details-scroll">
+                        <p class="section-label">ACCOMMODATION DETAILS</p>
+                        <h2 id="accommodation-modal-title"></h2>
+                        <dl class="accommodation-modal__details">
+                            <div><dt>Location</dt><dd id="accommodation-modal-location"></dd></div>
+                            <div><dt>Price per night</dt><dd id="accommodation-modal-price"></dd></div>
+                            <div><dt>Maximum guests</dt><dd id="accommodation-modal-max"></dd></div>
+                        </dl>
+                        <section class="accommodation-modal__section" id="accommodation-modal-facilities-section">
+                            <h3>Facilities</h3>
+                            <div class="accommodation-modal__chips" id="accommodation-modal-facilities"></div>
+                            <button class="accommodation-modal__show-more" id="accommodation-modal-facilities-toggle" type="button" hidden>Show more</button>
+                        </section>
+                        <section class="accommodation-modal__section" id="accommodation-modal-description-section">
+                            <h3>Description</h3>
+                            <p id="accommodation-modal-description"></p>
+                        </section>
+                    </div>
+                    <div class="accommodation-modal__booking-bar">
+                        <div>
+                            <span>Price per night</span>
+                            <strong id="accommodation-modal-booking-price"></strong>
+                        </div>
+                        <button class="booking-button" id="book-now-button" type="button">BOOK NOW</button>
+                    </div>
                 </div>
             </section>
         </div>

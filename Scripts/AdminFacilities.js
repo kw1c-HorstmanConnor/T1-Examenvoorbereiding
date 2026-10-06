@@ -1,5 +1,6 @@
 (() => {
     const picker = document.querySelector('[data-admin-facility-picker]');
+    const typeSelect = document.querySelector('[data-admin-cottage-type]');
 
     if (!picker) {
         return;
@@ -12,12 +13,9 @@
     const selectedPreview = picker.querySelector('[data-admin-selected-preview]');
     const selectedCount = picker.querySelector('[data-admin-selected-count]');
     const clearButton = picker.querySelector('[data-admin-facility-clear]');
-    const resetButton = picker.querySelector('[data-admin-preset-reset]');
-    const presetButtons = Array.from(picker.querySelectorAll('[data-admin-preset]'));
+    const resetButton = picker.querySelector('[data-admin-type-preset-reset]');
     const selectCategoryButtons = Array.from(picker.querySelectorAll('[data-admin-select-category]'));
     let activeCategory = 'all';
-    let activePreset = presetButtons.find((button) => button.classList.contains('is-selected'))?.dataset.adminPreset || 'custom';
-    let lastPreset = activePreset !== 'custom' ? activePreset : '';
 
     function checkedInputs() {
         return tags
@@ -25,32 +23,39 @@
             .filter((input) => input && input.checked);
     }
 
-    function selectedValues() {
-        return checkedInputs()
-            .map((input) => input.value)
-            .sort();
+    function selectedTypeOption() {
+        if (!typeSelect || typeSelect.selectedIndex < 0) {
+            return null;
+        }
+
+        const option = typeSelect.options[typeSelect.selectedIndex];
+        return option && option.value ? option : null;
     }
 
-    function presetValues(button) {
-        return String(button.dataset.adminPresetFacilities || '')
+    function selectedTypeFacilities() {
+        const option = selectedTypeOption();
+
+        if (!option) {
+            return [];
+        }
+
+        return String(option.dataset.presetFacilities || '')
             .split(',')
             .map((value) => value.trim())
-            .filter((value) => value !== '')
-            .sort();
+            .filter((value) => value !== '');
     }
 
-    function sameValues(left, right) {
-        return left.length === right.length && left.every((value, index) => value === right[index]);
-    }
+    function applyTypePreset() {
+        const values = new Set(selectedTypeFacilities());
 
-    function detectPreset() {
-        const selected = selectedValues();
-        const matchingPreset = presetButtons.find((button) => {
-            const preset = button.dataset.adminPreset || 'custom';
-            return preset !== 'custom' && sameValues(selected, presetValues(button));
+        tags.forEach((tag) => {
+            const input = tag.querySelector('input[type="checkbox"]');
+            if (input) {
+                input.checked = values.has(input.value);
+            }
         });
 
-        return matchingPreset ? matchingPreset.dataset.adminPreset : 'custom';
+        updateAll();
     }
 
     function tagName(tag) {
@@ -58,11 +63,7 @@
     }
 
     function matchesSearch(tag) {
-        if (!searchInput) {
-            return true;
-        }
-
-        const search = searchInput.value.trim().toLowerCase();
+        const search = searchInput ? searchInput.value.trim().toLowerCase() : '';
         return search === '' || tagName(tag).includes(search);
     }
 
@@ -102,6 +103,7 @@
             const chip = document.createElement('button');
             const text = document.createElement('span');
             const removeIcon = document.createElement('strong');
+
             chip.type = 'button';
             chip.className = 'admin-selected-chip';
             chip.dataset.removeFacilityId = input.value;
@@ -112,29 +114,6 @@
             chip.setAttribute('aria-label', `Remove ${label ? label.textContent : 'facility'}`);
             selectedPreview.appendChild(chip);
         });
-    }
-
-    function updatePresetState(nextPreset = detectPreset()) {
-        activePreset = nextPreset || 'custom';
-
-        if (activePreset !== 'custom') {
-            lastPreset = activePreset;
-        }
-
-        presetButtons.forEach((button) => {
-            const isSelected = button.dataset.adminPreset === activePreset;
-            const status = button.querySelector('em');
-            button.classList.toggle('is-selected', isSelected);
-            button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-
-            if (status) {
-                status.textContent = isSelected ? 'Selected' : '';
-            }
-        });
-
-        if (resetButton) {
-            resetButton.disabled = !lastPreset;
-        }
     }
 
     function applyFilters() {
@@ -155,53 +134,29 @@
         });
     }
 
-    function updateAll(options = {}) {
+    function updateResetState() {
+        if (resetButton) {
+            resetButton.disabled = selectedTypeOption() === null;
+        }
+    }
+
+    function updateAll() {
         tags.forEach(updateTagState);
         updateSelectedPreview();
         applyFilters();
-        updatePresetState(options.preset || detectPreset(), options.rememberPreset !== false);
-    }
-
-    function applyPreset(button) {
-        const preset = button.dataset.adminPreset || 'custom';
-
-        if (preset !== 'custom') {
-            const values = new Set(presetValues(button));
-            tags.forEach((tag) => {
-                const input = tag.querySelector('input[type="checkbox"]');
-                if (input) {
-                    input.checked = values.has(input.value);
-                }
-            });
-            lastPreset = preset;
-        }
-
-        updateAll({
-            preset,
-            rememberPreset: preset !== 'custom',
-        });
-    }
-
-    function resetToPreset() {
-        if (!lastPreset) {
-            return;
-        }
-
-        const button = presetButtons.find((presetButton) => presetButton.dataset.adminPreset === lastPreset);
-        if (button) {
-            applyPreset(button);
-        }
+        updateResetState();
     }
 
     tags.forEach((tag) => {
         const input = tag.querySelector('input[type="checkbox"]');
-
-        if (!input) {
-            return;
+        if (input) {
+            input.addEventListener('change', updateAll);
         }
-
-        input.addEventListener('change', () => updateAll({ rememberPreset: false }));
     });
+
+    if (typeSelect) {
+        typeSelect.addEventListener('change', applyTypePreset);
+    }
 
     if (searchInput) {
         searchInput.addEventListener('input', applyFilters);
@@ -220,21 +175,18 @@
             checkedInputs().forEach((input) => {
                 input.checked = false;
             });
-            updateAll({ preset: 'custom', rememberPreset: false });
+            updateAll();
         });
     }
 
     if (resetButton) {
-        resetButton.addEventListener('click', resetToPreset);
+        resetButton.addEventListener('click', applyTypePreset);
     }
-
-    presetButtons.forEach((button) => {
-        button.addEventListener('click', () => applyPreset(button));
-    });
 
     selectCategoryButtons.forEach((button) => {
         button.addEventListener('click', () => {
             const category = button.dataset.adminSelectCategory || '';
+
             tags
                 .filter((tag) => tag.dataset.category === category)
                 .forEach((tag) => {
@@ -243,7 +195,8 @@
                         input.checked = true;
                     }
                 });
-            updateAll({ rememberPreset: false });
+
+            updateAll();
         });
     });
 
@@ -260,7 +213,7 @@
 
             if (input) {
                 input.checked = false;
-                updateAll({ rememberPreset: false });
+                updateAll();
             }
         });
     }
@@ -269,92 +222,79 @@
 })();
 
 (() => {
-    const uploader = document.querySelector('[data-admin-image-uploader]');
+    const preview = document.querySelector('[data-admin-gallery-preview]');
+    const typeSelect = document.querySelector('[data-admin-cottage-type]');
 
-    if (!uploader) {
+    if (!preview || !typeSelect) {
         return;
     }
 
-    const input = uploader.querySelector('[data-admin-image-input]');
-    const removeInput = uploader.querySelector('[data-admin-image-remove]');
-    const preview = uploader.querySelector('[data-admin-image-preview]');
-    const previewWrap = uploader.querySelector('[data-admin-image-preview-wrap]');
-    const placeholder = uploader.querySelector('[data-admin-image-placeholder]');
-    const currentSrc = uploader.dataset.currentSrc || '';
-    const fallbackSrc = uploader.dataset.fallbackSrc || currentSrc;
-    let objectUrl = '';
+    const grid = preview.querySelector('[data-admin-gallery-grid]');
+    const source = preview.querySelector('[data-admin-gallery-source]');
+    let galleries = {};
 
-    function setPlaceholder(text, src = fallbackSrc) {
-        if (preview) {
-            preview.src = src;
-            preview.alt = text;
-        }
-
-        if (placeholder) {
-            placeholder.textContent = text;
-        }
-
-        if (previewWrap) {
-            previewWrap.classList.add('is-placeholder');
-        }
+    try {
+        galleries = JSON.parse(preview.dataset.galleryMap || '{}');
+    } catch (error) {
+        galleries = {};
     }
 
-    function setPreview(src, altText) {
-        if (preview) {
-            preview.src = src;
-            preview.alt = altText;
+    function selectedOption() {
+        if (typeSelect.selectedIndex < 0) {
+            return null;
         }
 
-        if (previewWrap) {
-            previewWrap.classList.remove('is-placeholder');
-        }
+        const option = typeSelect.options[typeSelect.selectedIndex];
+        return option && option.value ? option : null;
     }
 
-    function revokeObjectUrl() {
-        if (objectUrl !== '') {
-            URL.revokeObjectURL(objectUrl);
-            objectUrl = '';
+    function renderGallery() {
+        const option = selectedOption();
+
+        if (grid) {
+            grid.replaceChildren();
         }
-    }
 
-    if (input) {
-        input.addEventListener('change', () => {
-            revokeObjectUrl();
-            const file = input.files && input.files.length > 0 ? input.files[0] : null;
+        if (!option) {
+            if (source) {
+                source.textContent = 'Select a cottage type';
+            }
+            return;
+        }
 
-            if (!file) {
-                if (removeInput && removeInput.checked) {
-                    setPlaceholder('Image will be removed');
-                } else {
-                    setPreview(currentSrc || fallbackSrc, 'Current accommodation image');
-                }
-                return;
+        const imageSourceId = option.dataset.imageSourceId || '';
+        const slides = Array.isArray(galleries[option.value]) ? galleries[option.value] : [];
+
+        if (source) {
+            source.textContent = imageSourceId ? `Images/Accommodations/${imageSourceId}/` : '';
+        }
+
+        if (!grid) {
+            return;
+        }
+
+        slides.forEach((slide) => {
+            const figure = document.createElement('figure');
+            const image = document.createElement('img');
+            const caption = document.createElement('figcaption');
+
+            figure.className = 'admin-gallery-preview__item';
+            if (slide.placeholder) {
+                figure.classList.add('is-placeholder');
             }
 
-            objectUrl = URL.createObjectURL(file);
-            setPreview(objectUrl, file.name || 'Selected accommodation image');
-
-            if (removeInput) {
-                removeInput.checked = false;
+            image.src = slide.src;
+            image.alt = slide.label || option.value;
+            if (slide.type === 'floorplan') {
+                image.classList.add('is-floorplan');
             }
+
+            caption.textContent = slide.placeholder ? 'No images found' : (slide.label || 'Image');
+            figure.append(image, caption);
+            grid.appendChild(figure);
         });
     }
 
-    if (removeInput) {
-        removeInput.addEventListener('change', () => {
-            revokeObjectUrl();
-
-            if (removeInput.checked) {
-                if (input) {
-                    input.value = '';
-                }
-                setPlaceholder('Image will be removed');
-                return;
-            }
-
-            setPreview(currentSrc || fallbackSrc, 'Current accommodation image');
-        });
-    }
-
-    window.addEventListener('beforeunload', revokeObjectUrl);
+    typeSelect.addEventListener('change', renderGallery);
+    renderGallery();
 })();
