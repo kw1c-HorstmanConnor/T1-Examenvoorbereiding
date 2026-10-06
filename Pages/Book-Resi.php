@@ -25,7 +25,6 @@ $start = null;
 $end = null;
 $nights = 0;
 $total = 0.0;
-$activeReservationCountForDisplay = null;
 
 if (!is_array($booking)) {
     $bookingError = 'There is no pending booking to display.';
@@ -65,10 +64,6 @@ if (!is_array($booking)) {
     }
 }
 
-if ($bookingError === '' && !empty($_SESSION['user_id'])) {
-    $activeReservationCountForDisplay = maple_booking_active_reservation_count($conn, (int) $_SESSION['user_id']);
-}
-
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['booking_action'] ?? '') === 'pay') {
     $submittedCsrf = (string) ($_POST['csrf'] ?? '');
     $submittedToken = (string) ($_POST['submission_token'] ?? '');
@@ -93,7 +88,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['booking_action'
         }
 
         $userId = (int) $_SESSION['user_id'];
-        $userStatement = $conn->prepare('SELECT `User_id` FROM `User` WHERE `User_id` = ? LIMIT 1 FOR UPDATE');
+        $userStatement = $conn->prepare('SELECT `User_id` FROM `User` WHERE `User_id` = ? LIMIT 1');
         if (!$userStatement) {
             throw new RuntimeException('User lookup failed.');
         }
@@ -103,18 +98,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && ($_POST['booking_action'
             throw new RuntimeException('User lookup failed.');
         }
         $userResult = $userStatement->get_result();
-        $lockedUser = $userResult ? $userResult->fetch_assoc() : null;
+        $verifiedUser = $userResult ? $userResult->fetch_assoc() : null;
         $userStatement->close();
-        if (!$lockedUser) {
+        if (!$verifiedUser) {
             throw new DomainException('Your account could not be verified. Please log in again.');
-        }
-
-        $activeReservationCount = maple_booking_active_reservation_count($conn, $userId);
-        if ($activeReservationCount === null) {
-            throw new RuntimeException('Reservation limit check failed.');
-        }
-        if ($activeReservationCount >= 2) {
-            throw new DomainException('You can have a maximum of two active reservations per account.');
         }
 
         $lockedHuisId = (int) $huisId;
@@ -227,18 +214,12 @@ $submissionToken = (string) ($_SESSION['booking_submission_token'] ?? '');
             <div class="booking-summary__total"><dt>Total price</dt><dd>&euro; <?= number_format($total, 2, '.', ''); ?></dd></div>
         </dl>
         <p>Payment confirms this reservation immediately. Availability, capacity and the total price are checked again when you continue.</p>
-        <?php if ($activeReservationCountForDisplay !== null && $activeReservationCountForDisplay >= 2): ?>
-            <p class="booking-summary__error" role="alert">You already have two active reservations. An account can have a maximum of two active reservations.</p>
-        <?php elseif ($activeReservationCountForDisplay === null): ?>
-            <p class="booking-summary__error" role="alert">Your reservation limit could not be checked. Please try again later.</p>
-        <?php else: ?>
-            <form method="post" action="Book-Resi.php">
-                <input type="hidden" name="booking_action" value="pay">
-                <input type="hidden" name="csrf" value="<?= htmlspecialchars((string) $_SESSION['booking_csrf'], ENT_QUOTES, 'UTF-8'); ?>">
-                <input type="hidden" name="submission_token" value="<?= htmlspecialchars($submissionToken, ENT_QUOTES, 'UTF-8'); ?>">
-                <button class="booking-summary__button booking-summary__button--pay" type="submit">BETALEN</button>
-            </form>
-        <?php endif; ?>
+        <form method="post" action="Book-Resi.php">
+            <input type="hidden" name="booking_action" value="pay">
+            <input type="hidden" name="csrf" value="<?= htmlspecialchars((string) $_SESSION['booking_csrf'], ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="submission_token" value="<?= htmlspecialchars($submissionToken, ENT_QUOTES, 'UTF-8'); ?>">
+            <button class="booking-summary__button booking-summary__button--pay" type="submit">BETALEN</button>
+        </form>
     <?php endif; ?>
 </main>
 <?php include __DIR__ . '/../Includes/Footer.php'; ?>

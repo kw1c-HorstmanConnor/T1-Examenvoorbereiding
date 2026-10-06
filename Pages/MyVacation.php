@@ -208,7 +208,6 @@ if (empty($_SESSION['cancel_submission_token'])) {
     $_SESSION['cancel_submission_token'] = bin2hex(random_bytes(32));
 }
 $cancelSubmissionToken = (string) $_SESSION['cancel_submission_token'];
-$activeReservationCount = maple_booking_active_reservation_count($conn, $userId);
 $reservations = [];
 
 try {
@@ -285,9 +284,6 @@ $categories = ['Upcoming vacations', 'Current vacation', 'Past vacations', 'Expi
     <p class="my-vacation__intro">View and manage your Maple Camp reservations.</p>
     <?php if (is_array($notice)): ?>
         <p class="my-vacation__notice my-vacation__notice--<?= ($notice['type'] ?? '') === 'success' ? 'success' : 'error'; ?>" role="<?= ($notice['type'] ?? '') === 'success' ? 'status' : 'alert'; ?>"><?= htmlspecialchars((string) ($notice['message'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></p>
-    <?php endif; ?>
-    <?php if ($activeReservationCount !== null && $activeReservationCount >= 2): ?>
-        <p class="my-vacation__notice my-vacation__notice--info" role="status">You have reached the maximum of two active reservations for this account.</p>
     <?php endif; ?>
     <?php if ($reservations === []): ?>
         <section class="my-vacation__empty"><h2>No vacations booked yet</h2><p>You don't have any vacations booked yet.</p><a class="outline-button" href="Accomodatie.php">View accommodations <span class="button-arrow" aria-hidden="true"></span></a></section>

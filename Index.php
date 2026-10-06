@@ -248,9 +248,7 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
             <section class="adventure-cta" id="omgeving" aria-labelledby="cta-title">
                 <div class="page-container adventure-cta__inner">
                     <div>
-                        <p class="section-label section-label--light">JOUW AVONTUUR WACHT</p>
                         <h2 class="adventure-cta__title" id="cta-title">Boek vandaag nog jouw<br>onvergetelijke ervaring</h2>
-                        <p>Beperkte beschikbaarheid - boek op tijd!</p>
                     </div>
                     <a class="cta-button" href="#booking">Bekijk beschikbaarheid <span class="booking-field__icon booking-field__icon--calendar" aria-hidden="true"></span></a>
                 </div>
