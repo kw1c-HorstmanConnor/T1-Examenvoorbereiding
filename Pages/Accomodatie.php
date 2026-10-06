@@ -71,13 +71,36 @@ $filterDeparture = trim((string) ($_GET['departure'] ?? ''));
 $filterGuests = filter_var($_GET['guests'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
 $accommodations = [];
+$searchError = '';
+$searchNotice = '';
+$unavailableAccommodationCount = 0;
+$hasDateFilter = $filterArrival !== '' || $filterDeparture !== '';
+if ($hasDateFilter) {
+    $filterStart = maple_booking_date($filterArrival);
+    $filterEnd = maple_booking_date($filterDeparture);
+    if ($filterStart === null || $filterEnd === null) {
+        $searchError = 'Please enter valid arrival and departure dates.';
+    } elseif ($filterStart < new DateTimeImmutable('today')) {
+        $searchError = 'Arrival cannot be in the past.';
+    } elseif ($filterEnd <= $filterStart) {
+        $searchError = 'Departure must be later than arrival.';
+    }
+}
 
 try {
-    foreach (maple_accommodations_load_all() as $accommodation) {
+    $candidateAccommodations = $searchError === '' ? maple_accommodations_load_all() : [];
+    foreach ($candidateAccommodations as $accommodation) {
         $matchesGuests = $filterGuests === false || $filterGuests === null || (int) $accommodation['Max'] >= $filterGuests;
         $matchesAvailability = true;
-        if (maple_booking_date($filterArrival) !== null && maple_booking_date($filterDeparture) !== null && $filterDeparture > $filterArrival) {
-            $matchesAvailability = maple_booking_is_available($conn, (int) $accommodation['Huis_id'], $filterArrival, $filterDeparture) === true;
+        if ($hasDateFilter && $matchesGuests) {
+            $available = maple_booking_is_available($conn, (int) $accommodation['Huis_id'], $filterArrival, $filterDeparture);
+            if ($available === null) {
+                throw new RuntimeException('Availability could not be verified.');
+            }
+            $matchesAvailability = $available === true;
+            if (!$matchesAvailability) {
+                $unavailableAccommodationCount++;
+            }
         }
         if ($matchesGuests && $matchesAvailability) {
             $accommodations[] = $accommodation;
@@ -85,6 +108,16 @@ try {
     }
 } catch (Throwable $exception) {
     error_log('Accommodations lookup failed: ' . $exception->getMessage());
+    $accommodations = [];
+    $searchError = 'Availability could not be verified. Please try again later.';
+}
+
+if ($hasDateFilter && $searchError === '') {
+    if ($accommodations === []) {
+        $searchNotice = 'No accommodations are available for the selected dates and number of guests. Please choose other dates or change the number of guests.';
+    } elseif ($unavailableAccommodationCount > 0) {
+        $searchNotice = 'Some accommodations are already booked or blocked for the selected dates and are not shown. Only available accommodations are listed below.';
+    }
 }
 
 $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
@@ -130,6 +163,11 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
                     <label><span>Departure</span><input id="departure" type="date" name="departure" value="<?= htmlspecialchars($filterDeparture, ENT_QUOTES, 'UTF-8'); ?>" aria-label="Departure date"></label>
                     <button type="submit">Search cottages</button>
                 </form>
+                <?php if ($searchError !== ''): ?>
+                    <p class="booking-error" role="alert"><?= htmlspecialchars($searchError, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php elseif ($searchNotice !== ''): ?>
+                    <p class="booking-error" role="status"><?= htmlspecialchars($searchNotice, ENT_QUOTES, 'UTF-8'); ?></p>
+                <?php endif; ?>
                 <div class="cottage-toolbar" aria-label="Cottage overview controls">
                     <p><strong><?= count($accommodations); ?> cottages available</strong><span>Choose the comfort level that suits your stay.</span></p>
                     <div class="cottage-filter-row"><label>Sort by <select aria-label="Sort cottages"><option>Recommended</option><option>Price: low to high</option><option>Most spacious</option></select></label><button type="button">Filters</button><button type="button">Bedrooms</button><button type="button">Facilities</button></div>
