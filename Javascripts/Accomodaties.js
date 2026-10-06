@@ -364,9 +364,6 @@ function markAccommodationImagePlaceholder(image) {
 
     if (card) {
         card.dataset.imagePlaceholder = '1';
-        if (image.dataset.fallbackSrc) {
-            card.dataset.imageSrc = image.dataset.fallbackSrc;
-        }
     }
 
     image.alt = translateAccommodationText('No image available yet');
@@ -390,11 +387,6 @@ if (modalPhoto) {
     modalPhoto.addEventListener('error', function () {
         if (modalPhoto.dataset.fallbackSrc && modalPhoto.dataset.fallbackApplied !== '1') {
             modalPhoto.dataset.fallbackApplied = '1';
-            if (activeGallery[activeGalleryIndex]) {
-                activeGallery[activeGalleryIndex].src = modalPhoto.dataset.fallbackSrc;
-                activeGallery[activeGalleryIndex].placeholder = true;
-                activeGallery[activeGalleryIndex].type = 'photo';
-            }
             modalPhoto.src = modalPhoto.dataset.fallbackSrc;
         }
         modalPhoto.classList.remove('is-loading');
