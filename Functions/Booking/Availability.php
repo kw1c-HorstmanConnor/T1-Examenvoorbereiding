@@ -61,7 +61,7 @@ function maple_home_event_cards(array $dbRows, array $fallbackEvents): array
         $events[] = [
             'title' => $row['Titel'] ?? $fallback['title'],
             'datetime' => $row['Start_time'] ?? $fallback['datetime'],
-            'description' => $row['Omschrijving'] ?? $fallback['description'],
+            'description' => $row['Omschr'] ?? $fallback['description'],
             'location' => $row['Locatie'] ?? '',
             'image_class' => $imageClasses[$index],
         ];
