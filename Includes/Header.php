@@ -61,7 +61,11 @@ if ($currentPage === 'reviews') {
             </label>
         </div>
     <?php else: ?>
-        <nav class="site-nav" aria-label="Primaire navigatie">
+        <button class="site-menu-toggle" type="button" aria-expanded="false" aria-controls="site-primary-nav site-header-actions">
+            <span class="site-menu-toggle__icon" aria-hidden="true"></span>
+            <span class="site-menu-toggle__label">Menu</span>
+        </button>
+        <nav class="site-nav" id="site-primary-nav" aria-label="Primaire navigatie">
             <?php foreach ($navItems as $key => $item): ?>
                 <a class="site-nav__link<?= $currentPage === $key ? ' site-nav__link--active' : ''; ?>" href="<?= htmlspecialchars($item['href'], ENT_QUOTES, 'UTF-8'); ?>">
                     <?= htmlspecialchars($item['label'], ENT_QUOTES, 'UTF-8'); ?>
@@ -69,7 +73,7 @@ if ($currentPage === 'reviews') {
             <?php endforeach; ?>
         </nav>
 
-        <div class="site-header__actions">
+        <div class="site-header__actions" id="site-header-actions">
             <select class="language-select" data-language-select aria-label="Language">
                 <option value="en">EN</option>
                 <option value="es">ES</option>
@@ -77,7 +81,10 @@ if ($currentPage === 'reviews') {
                 <option value="de">DE</option>
             </select>
             <?php if ($loggedInVoornaam !== ''): ?>
-                <a class="header-account" href="<?= htmlspecialchars($basePath . 'Pages/MyVacation.php', ENT_QUOTES, 'UTF-8'); ?>">My vacation<?= $loggedInVoornaam !== '' ? ': ' . htmlspecialchars($loggedInVoornaam, ENT_QUOTES, 'UTF-8') : ''; ?></a>
+                <a class="header-account" href="<?= htmlspecialchars($basePath . 'Pages/MyVacation.php', ENT_QUOTES, 'UTF-8'); ?>">
+                    <span class="header-account__label">My vacation</span>
+                    <span class="header-account__name" data-no-translate><?= htmlspecialchars($loggedInVoornaam, ENT_QUOTES, 'UTF-8'); ?></span>
+                </a>
                 <?php if ($loggedInRoleName === 'admin'): ?>
                     <a class="header-login" href="<?= htmlspecialchars($basePath . 'Pages/AdminPanel.php', ENT_QUOTES, 'UTF-8'); ?>">Admin</a>
                 <?php endif; ?>
@@ -88,3 +95,47 @@ if ($currentPage === 'reviews') {
         </div>
     <?php endif; ?>
 </header>
+<?php if (!$isAuthPage): ?>
+<script>
+    (function () {
+        'use strict';
+
+        var header = document.currentScript.previousElementSibling;
+        var toggle = header ? header.querySelector('.site-menu-toggle') : null;
+        var menuLinks = header ? header.querySelectorAll('.site-nav a, .site-header__actions a') : [];
+
+        if (!header || !toggle) {
+            return;
+        }
+
+        function setMenuOpen(isOpen) {
+            header.classList.toggle('site-header--menu-open', isOpen);
+            toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        header.classList.add('site-header--menu-ready');
+        toggle.addEventListener('click', function () {
+            setMenuOpen(!header.classList.contains('site-header--menu-open'));
+        });
+
+        Array.prototype.forEach.call(menuLinks, function (link) {
+            link.addEventListener('click', function () {
+                setMenuOpen(false);
+            });
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && header.classList.contains('site-header--menu-open')) {
+                setMenuOpen(false);
+                toggle.focus();
+            }
+        });
+
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 820) {
+                setMenuOpen(false);
+            }
+        });
+    }());
+</script>
+<?php endif; ?>

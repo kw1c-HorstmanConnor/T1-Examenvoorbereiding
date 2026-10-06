@@ -303,6 +303,7 @@ body.calendar-dialog-open {
     max-height: min(80vh, 760px);
     max-width: min(92vw, 620px);
     overflow: hidden;
+    overscroll-behavior: contain;
     padding: 0;
     position: fixed;
     width: 100%;
@@ -513,17 +514,25 @@ body.calendar-dialog-open {
         padding: 0.18rem 0.22rem;
     }
 
+    .event-calendar__more-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+    }
+
     .calendar-day-dialog {
         border-radius: 6px;
-        max-height: 86vh;
+        max-height: calc(100vh - 1rem);
+        max-height: calc(100dvh - 1rem);
         max-width: calc(100vw - 1rem);
     }
 
     .calendar-day-dialog__close {
-        height: 2.45rem;
+        height: 2.75rem;
         right: 0.75rem;
         top: 0.75rem;
-        width: 2.45rem;
+        width: 2.75rem;
     }
 
     .calendar-day-dialog__header {

@@ -7,7 +7,6 @@
     --surroundings-wood: #8a5f35;
     --surroundings-lake: #2f7884;
     --surroundings-ink: #18231d;
-    overflow: hidden;
     color: var(--surroundings-ink);
     background: var(--surroundings-ivory);
     font-family: 'Inter', Arial, sans-serif;
@@ -760,6 +759,8 @@
     .surroundings-gallery__arrow {
         top: auto;
         bottom: 4rem;
+        width: 44px;
+        height: 44px;
         transform: none;
     }
 
@@ -782,6 +783,34 @@
         justify-content: center;
     }
 
+    .surroundings-gallery__dot {
+        position: relative;
+        width: 2rem;
+        height: 44px;
+        background: transparent;
+    }
+
+    .surroundings-gallery__dot::before {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        left: 0;
+        height: 4px;
+        content: "";
+        background: rgba(255, 250, 240, 0.4);
+        border-radius: 999px;
+        transform: translateY(-50%);
+    }
+
+    .surroundings-gallery__dot.is-active {
+        width: 3rem;
+        background: transparent;
+    }
+
+    .surroundings-gallery__dot.is-active::before {
+        background: #fffaf0;
+    }
+
     .lake-playground__image {
         height: 430px;
     }
@@ -800,11 +829,11 @@
 
     .surroundings-map__frame {
         min-height: 430px;
-        margin-right: -20px;
-        margin-left: -20px;
-        border-right: 0;
-        border-left: 0;
-        border-radius: 0;
+        margin-right: 0;
+        margin-left: 0;
+        border-right: 1px solid rgba(22, 39, 31, 0.16);
+        border-left: 1px solid rgba(22, 39, 31, 0.16);
+        border-radius: 8px;
     }
 
     .maple-map-marker {
@@ -856,11 +885,11 @@
     }
 
     .surroundings-gallery__dot {
-        width: 1.35rem;
+        width: 1.75rem;
     }
 
     .surroundings-gallery__dot.is-active {
-        width: 2.15rem;
+        width: 2.5rem;
     }
 }
 

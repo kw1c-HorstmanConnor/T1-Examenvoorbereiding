@@ -14,10 +14,6 @@
         linear-gradient(0deg, rgba(7, 12, 9, .48), transparent 64%);
 }
 
-.accommodations-page .site-header {
-    grid-template-columns: 150px 1fr auto;
-}
-
 .accommodations-page .accommodations-hero__content {
     padding-top: clamp(3rem, 7vw, 6.5rem);
 }
@@ -62,7 +58,10 @@
 }
 
 .cottage-tabs__item {
+    display: inline-flex;
+    align-items: center;
     flex: 0 0 auto;
+    min-height: 44px;
     padding: .8rem 1.1rem;
     color: #61645f;
     font-size: .72rem;
@@ -123,12 +122,13 @@
 
 .accommodations-page .accommodations-list {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     gap: clamp(.8rem, 2vw, 1.5rem);
 }
 
 .accommodations-page .accommodation-card--listing {
     display: flex;
+    min-width: 0;
     min-height: 0;
     cursor: pointer;
     border: 1px solid #ece9e2;
@@ -142,6 +142,7 @@
 
 .accommodations-page .accommodation-card--listing .accommodation-card__body {
     display: block;
+    min-width: 0;
     padding: clamp(.85rem, 1.8vw, 1.3rem);
 }
 
@@ -236,6 +237,7 @@
     width: min(100%, 800px);
     max-height: min(760px, calc(100vh - 3rem));
     overflow: auto;
+    overscroll-behavior: contain;
     background: #f8f7f3;
     border-radius: .35rem;
     box-shadow: 0 18px 52px rgba(0, 0, 0, .35);
@@ -259,6 +261,7 @@
 }
 
 .accommodation-modal__content {
+    min-width: 0;
     padding: clamp(1.5rem, 4vw, 2.75rem);
 }
 
@@ -307,8 +310,8 @@
     z-index: 2;
     top: .7rem;
     right: .7rem;
-    width: 2.25rem;
-    height: 2.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
     padding: 0;
     color: #294438;
     font-size: 2rem;
@@ -381,6 +384,7 @@
     width: min(100%, 480px);
     max-height: calc(100vh - 3rem);
     overflow: auto;
+    overscroll-behavior: contain;
     padding: clamp(1.5rem, 4vw, 2.5rem);
     background: #f8f7f3;
     border-radius: .35rem;
@@ -413,6 +417,7 @@
 
 .booking-modal__dialog input {
     width: 100%;
+    min-height: 3rem;
     padding: .75rem;
     color: #30352f;
     font: inherit;
@@ -427,8 +432,8 @@ body.accommodation-modal-open {
 
 .accommodations-page .listing-actions .card-button {
     display: block;
-    min-width: 0;
-    min-height: 0;
+    min-width: 44px;
+    min-height: 44px;
     margin: 0;
     padding: .3rem;
     color: #4c514a;
@@ -453,19 +458,13 @@ body.accommodation-modal-open {
     }
 
     .accommodations-page .site-header {
-        display: block;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
         padding-top: .65rem;
     }
 
-    .accommodations-page .site-nav,
-    .accommodations-page .site-header__actions {
-        display: none;
-    }
-
     .accommodations-page .site-logo {
-        width: 92px;
-        transform: scale(.62);
-        transform-origin: left top;
+        width: 104px;
     }
 
     .accommodations-page .accommodations-hero__content {
@@ -487,7 +486,7 @@ body.accommodation-modal-open {
 
     .cottage-tabs__item {
         padding: .72rem .78rem;
-        font-size: .58rem;
+        font-size: .72rem;
     }
 
     .accommodations-page .accommodations-list {
@@ -495,11 +494,11 @@ body.accommodation-modal-open {
     }
 
     .accommodations-page .accommodation-card--listing .accommodation-card__image {
-        min-height: 98px;
+        min-height: 180px;
     }
 
     .accommodations-page .accommodation-card--listing .accommodation-card__body {
-        min-height: 108px;
+        min-height: 0;
         padding: .72rem;
     }
 
@@ -523,5 +522,27 @@ body.accommodation-modal-open {
 
     .accommodation-modal__image {
         min-height: 175px;
+    }
+
+    .accommodation-modal__content,
+    .booking-modal__dialog {
+        padding: 1.25rem;
+    }
+
+    .booking-button {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .cottage-search input,
+    .cottage-search select,
+    .booking-modal__dialog input {
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 48rem) {
+    .accommodations-page .accommodations-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }

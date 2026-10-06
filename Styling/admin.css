@@ -858,3 +858,26 @@ body .admin-empty-state { font-size: .875rem; }
     .admin-section-grid {
         grid-template-columns: 1fr;
     }}
+
+@media (max-width: 47.99rem) {
+    .admin-form input:not([type="checkbox"]):not([type="radio"]),
+    .admin-form select,
+    .admin-form textarea {
+        max-width: 100%;
+        font-size: 16px;
+    }
+
+    .admin-tabs {
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+        scrollbar-width: thin;
+    }
+
+    .admin-tabs a,
+    .admin-form button,
+    .admin-form__actions a,
+    .admin-record__actions a,
+    .admin-record__actions button {
+        min-height: 44px;
+    }
+}
