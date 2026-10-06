@@ -2,6 +2,7 @@
 const searchForm = document.querySelector('#cottage-search');
 const cottageList = document.querySelector('.accommodations-list');
 const cottages = document.querySelectorAll('.accommodation-card--listing');
+const accommodationCards = Array.from(document.querySelectorAll('[data-accommodation-card], .accommodation-card--listing'));
 const tabs = document.querySelectorAll('.cottage-tabs__item');
 const noResults = document.querySelector('#cottage-no-results');
 const otherOptionsDivider = document.querySelector('#cottage-options-divider');
@@ -10,9 +11,16 @@ let chosenType = 'all';
 
 // Show only cottages that match the chosen guests, dates and category.
 function showMatchingCottages() {
-    const guests = Number(document.querySelector('#guests').value);
-    const arrival = document.querySelector('#arrival').value;
-    const departure = document.querySelector('#departure').value;
+    if (!cottageList || !noResults || !otherOptionsDivider) {
+        return;
+    }
+
+    const guestsField = document.querySelector('#guests');
+    const arrivalField = document.querySelector('#arrival');
+    const departureField = document.querySelector('#departure');
+    const guests = guestsField ? Number(guestsField.value) : 0;
+    const arrival = arrivalField ? arrivalField.value : '';
+    const departure = departureField ? departureField.value : '';
     const matchingCottages = [];
     const otherCottages = [];
 
@@ -30,18 +38,15 @@ function showMatchingCottages() {
         }
     });
 
-    // Put the matching cottages first.
     matchingCottages.forEach(function (cottage) {
         cottageList.appendChild(cottage);
     });
 
-    // Put a line before cottages that do not match.
     otherOptionsDivider.hidden = otherCottages.length === 0;
     if (otherCottages.length > 0) {
         cottageList.appendChild(otherOptionsDivider);
     }
 
-    // Keep the other cottages visible below that line.
     otherCottages.forEach(function (cottage) {
         cottageList.appendChild(cottage);
     });
@@ -51,7 +56,6 @@ function showMatchingCottages() {
 
 // Date availability is confirmed by the server; this form intentionally submits normally.
 
-// A category button chooses a type and then filters straight away.
 tabs.forEach(function (tab) {
     tab.addEventListener('click', function (event) {
         event.preventDefault();
@@ -96,7 +100,7 @@ function translateAccommodationText(value) {
 }
 
 function updateAccommodationModal(card) {
-    if (!card) {
+    if (!card || !modalDescription) {
         return;
     }
 
@@ -122,21 +126,40 @@ if (modalPhoto) {
 }
 
 function openAccommodationModal(card) {
+    if (!card || !accommodationModal || !modalDialog) {
+        return;
+    }
+
     previouslyFocusedElement = document.activeElement;
-    modalTitle.textContent = card.dataset.huisName;
-    modalLocation.textContent = card.dataset.location;
-    modalPrice.textContent = '€' + card.dataset.price;
-    modalMax.textContent = card.dataset.max + ' guests';
-    modalFacilities.textContent = card.dataset.facilities;
+
+    if (modalTitle) {
+        modalTitle.textContent = card.dataset.huisName || '';
+    }
+    if (modalLocation) {
+        modalLocation.textContent = card.dataset.location || '';
+    }
+    if (modalPrice) {
+        modalPrice.textContent = '\u20ac' + (card.dataset.price || '0');
+    }
+    if (modalMax) {
+        modalMax.textContent = (card.dataset.max || '0') + ' guests';
+    }
+    if (modalFacilities) {
+        modalFacilities.textContent = card.dataset.facilities || '';
+    }
+
     updateAccommodationModal(card);
     activeAccommodationCard = card;
     activeAccommodation = {
         huisId: card.dataset.huisId,
         name: card.dataset.huisName,
-        max: card.dataset.max
+        max: card.dataset.max,
+        detailUrl: card.dataset.detailUrl
     };
 
-    modalImage.className = 'accommodation-modal__image';
+    if (modalImage) {
+        modalImage.className = 'accommodation-modal__image';
+    }
     if (modalPhoto) {
         modalPhoto.dataset.fallbackApplied = '0';
         modalPhoto.src = card.dataset.imageSrc || modalPhoto.src;
@@ -150,7 +173,7 @@ function openAccommodationModal(card) {
 }
 
 window.addEventListener('maple:languagechange', function () {
-    if (activeAccommodationCard && !accommodationModal.hidden) {
+    if (activeAccommodationCard && accommodationModal && !accommodationModal.hidden) {
         updateAccommodationModal(activeAccommodationCard);
     }
 });
@@ -160,11 +183,22 @@ function openBookingModal() {
         return;
     }
 
+    if (!bookingModal || !bookingDialog || !bookingHuisId || !bookingAccommodationName || !bookingStartDate || !bookingEndDate || !bookingPeople) {
+        if (activeAccommodation.detailUrl) {
+            window.location.href = activeAccommodation.detailUrl;
+        }
+        return;
+    }
+
+    const arrivalField = document.querySelector('#arrival');
+    const departureField = document.querySelector('#departure');
+    const guestsField = document.querySelector('#guests');
+
     bookingHuisId.value = activeAccommodation.huisId;
     bookingAccommodationName.textContent = activeAccommodation.name;
-    bookingStartDate.value = document.querySelector('#arrival').value;
-    bookingEndDate.value = document.querySelector('#departure').value;
-    bookingPeople.value = document.querySelector('#guests').value;
+    bookingStartDate.value = arrivalField ? arrivalField.value : '';
+    bookingEndDate.value = departureField ? departureField.value : '';
+    bookingPeople.value = guestsField ? guestsField.value : '';
     bookingPeople.max = activeAccommodation.max;
     bookingModal.hidden = false;
     bookingModal.setAttribute('aria-hidden', 'false');
@@ -172,7 +206,7 @@ function openBookingModal() {
 }
 
 function closeBookingModal() {
-    if (bookingModal.hidden) {
+    if (!bookingModal || bookingModal.hidden) {
         return;
     }
 
@@ -184,7 +218,7 @@ function closeBookingModal() {
 }
 
 function closeAccommodationModal() {
-    if (accommodationModal.hidden) {
+    if (!accommodationModal || accommodationModal.hidden) {
         return;
     }
 
@@ -197,13 +231,21 @@ function closeAccommodationModal() {
     }
 }
 
-cottages.forEach(function (card) {
+accommodationCards.forEach(function (card) {
     card.addEventListener('click', function (event) {
+        if (event.target.closest('[data-accommodation-open]')) {
+            event.preventDefault();
+            openAccommodationModal(card);
+            return;
+        }
+
         if (event.target.closest('a, button, input, select, textarea')) {
             return;
         }
 
-        openAccommodationModal(card);
+        if (card.classList.contains('accommodation-card--listing')) {
+            openAccommodationModal(card);
+        }
     });
 
     card.addEventListener('keydown', function (event) {
@@ -214,25 +256,49 @@ cottages.forEach(function (card) {
     });
 });
 
-accommodationModal.addEventListener('click', function (event) {
-    if (event.target.closest('[data-modal-close="true"]')) {
-        closeAccommodationModal();
-    }
-});
+function openAccommodationFromHash() {
+    const hash = window.location.hash ? window.location.hash.slice(1) : '';
 
-bookNowButton.addEventListener('click', openBookingModal);
-
-bookingModal.addEventListener('click', function (event) {
-    if (event.target.closest('[data-booking-modal-close="true"]')) {
-        closeBookingModal();
+    if (hash === '') {
+        return;
     }
-});
+
+    const card = document.getElementById(hash);
+    if (card && accommodationCards.includes(card)) {
+        window.setTimeout(function () {
+            openAccommodationModal(card);
+        }, 0);
+    }
+}
+
+if (accommodationModal) {
+    accommodationModal.addEventListener('click', function (event) {
+        if (event.target.closest('[data-modal-close="true"]')) {
+            closeAccommodationModal();
+        }
+    });
+}
+
+if (bookNowButton) {
+    bookNowButton.addEventListener('click', openBookingModal);
+}
+
+if (bookingModal) {
+    bookingModal.addEventListener('click', function (event) {
+        if (event.target.closest('[data-booking-modal-close="true"]')) {
+            closeBookingModal();
+        }
+    });
+}
+
+openAccommodationFromHash();
+window.addEventListener('hashchange', openAccommodationFromHash);
 
 document.addEventListener('keydown', function (event) {
     if (event.key === 'Escape') {
-        if (!bookingModal.hidden) {
+        if (bookingModal && !bookingModal.hidden) {
             closeBookingModal();
-        } else if (!accommodationModal.hidden) {
+        } else if (accommodationModal && !accommodationModal.hidden) {
             closeAccommodationModal();
         }
     }
