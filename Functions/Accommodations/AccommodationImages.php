@@ -6,12 +6,18 @@ require_once __DIR__ . '/AccommodationTypes.php';
 
 function maple_accommodation_image_upload_directory(): string
 {
-    return dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'Images' . DIRECTORY_SEPARATOR . 'Accommodations';
+    return dirname(__DIR__, 2)
+        . DIRECTORY_SEPARATOR
+        . 'Images'
+        . DIRECTORY_SEPARATOR
+        . 'Accommodations';
 }
 
 function maple_accommodation_image_fallback_path(): string
 {
-    return maple_accommodation_image_upload_directory() . DIRECTORY_SEPARATOR . 'no-image-placeholder.png';
+    return maple_accommodation_image_upload_directory()
+        . DIRECTORY_SEPARATOR
+        . 'no-image-placeholder.png';
 }
 
 function maple_accommodation_image_fallback_url(string $assetBase = ''): string
@@ -50,7 +56,9 @@ function maple_accommodation_image_path($value): ?string
         return null;
     }
 
-    return maple_accommodation_image_upload_directory() . DIRECTORY_SEPARATOR . $filename;
+    return maple_accommodation_image_upload_directory()
+        . DIRECTORY_SEPARATOR
+        . $filename;
 }
 
 function maple_accommodation_image_exists($value): bool
@@ -70,7 +78,9 @@ function maple_accommodation_image_url($value, string $assetBase = ''): string
     $filename = maple_accommodation_image_filename($value);
 
     if ($filename !== '' && maple_accommodation_image_exists($filename)) {
-        return $assetBase . 'Images/Accommodations/' . rawurlencode($filename);
+        return $assetBase
+            . 'Images/Accommodations/'
+            . rawurlencode($filename);
     }
 
     return maple_accommodation_image_fallback_url($assetBase);
@@ -78,12 +88,17 @@ function maple_accommodation_image_url($value, string $assetBase = ''): string
 
 function maple_accommodation_gallery_directory(int $imageSourceId): string
 {
-    return maple_accommodation_image_upload_directory() . DIRECTORY_SEPARATOR . $imageSourceId;
+    return maple_accommodation_image_upload_directory()
+        . DIRECTORY_SEPARATOR
+        . $imageSourceId;
 }
 
 function maple_accommodation_gallery_file_type(string $filename): string
 {
-    return preg_match('/(?:floorplan|floor-plan|floor_plan|floor|plattegrond|map|plan)/i', $filename)
+    return preg_match(
+        '/(?:floorplan|floor-plan|floor_plan|foorplan|floor|plattegrond|map|plan)/i',
+        $filename
+    )
         ? 'floorplan'
         : 'photo';
 }
@@ -94,7 +109,9 @@ function maple_accommodation_gallery_label(string $filename): string
     $label = preg_replace('/^\d+\s*[-_. ]*/', '', $label) ?? '';
     $label = trim(str_replace(['-', '_'], ' ', $label));
 
-    return $label === '' ? 'Image' : ucwords(strtolower($label));
+    return $label === ''
+        ? 'Image'
+        : ucwords(strtolower($label));
 }
 
 function maple_accommodation_gallery_slide(
@@ -111,8 +128,10 @@ function maple_accommodation_gallery_slide(
     ];
 }
 
-function maple_accommodation_path_is_inside(string $path, string $directory): bool
-{
+function maple_accommodation_path_is_inside(
+    string $path,
+    string $directory
+): bool {
     $realDirectory = realpath($directory);
     $realPath = realpath($path);
 
@@ -120,14 +139,28 @@ function maple_accommodation_path_is_inside(string $path, string $directory): bo
         return false;
     }
 
-    $realDirectory = rtrim($realDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    $realDirectory = rtrim(
+            $realDirectory,
+            DIRECTORY_SEPARATOR
+        ) . DIRECTORY_SEPARATOR;
 
-    return strncmp($realPath, $realDirectory, strlen($realDirectory)) === 0;
+    return strncmp(
+            $realPath,
+            $realDirectory,
+            strlen($realDirectory)
+        ) === 0;
 }
 
-function maple_accommodation_gallery_file_url(int $imageSourceId, string $filename, string $assetBase = ''): string
-{
-    return $assetBase . 'Images/Accommodations/' . rawurlencode((string) $imageSourceId) . '/' . rawurlencode($filename);
+function maple_accommodation_gallery_file_url(
+    int $imageSourceId,
+    string $filename,
+    string $assetBase = ''
+): string {
+    return $assetBase
+        . 'Images/Accommodations/'
+        . rawurlencode((string) $imageSourceId)
+        . '/'
+        . rawurlencode($filename);
 }
 
 function maple_accommodation_gallery_files(int $imageSourceId): array
@@ -142,17 +175,32 @@ function maple_accommodation_gallery_files(int $imageSourceId): array
         return [];
     }
 
-    $rootDirectory = realpath(maple_accommodation_image_upload_directory());
+    $rootDirectory = realpath(
+        maple_accommodation_image_upload_directory()
+    );
     $realDirectory = realpath($directory);
 
     if ($rootDirectory === false || $realDirectory === false) {
         return [];
     }
 
-    $rootDirectory = rtrim($rootDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
-    $realDirectoryWithSeparator = rtrim($realDirectory, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
+    $rootDirectory = rtrim(
+            $rootDirectory,
+            DIRECTORY_SEPARATOR
+        ) . DIRECTORY_SEPARATOR;
 
-    if (strncmp($realDirectoryWithSeparator, $rootDirectory, strlen($rootDirectory)) !== 0) {
+    $realDirectoryWithSeparator = rtrim(
+            $realDirectory,
+            DIRECTORY_SEPARATOR
+        ) . DIRECTORY_SEPARATOR;
+
+    if (
+        strncmp(
+            $realDirectoryWithSeparator,
+            $rootDirectory,
+            strlen($rootDirectory)
+        ) !== 0
+    ) {
         return [];
     }
 
@@ -165,17 +213,35 @@ function maple_accommodation_gallery_files(int $imageSourceId): array
     $images = [];
 
     foreach ($files as $file) {
-        if (!is_string($file) || $file === '.' || $file === '..') {
+        if (
+            !is_string($file)
+            || $file === '.'
+            || $file === '..'
+        ) {
             continue;
         }
 
-        if (basename($file) !== $file || !preg_match('/^[a-zA-Z0-9][a-zA-Z0-9._-]*\.(?:jpe?g|png|webp)$/i', $file)) {
+        if (
+            basename($file) !== $file
+            || !preg_match(
+                '/^[a-zA-Z0-9][a-zA-Z0-9._-]*\.(?:jpe?g|png|webp)$/i',
+                $file
+            )
+        ) {
             continue;
         }
 
-        $path = $realDirectory . DIRECTORY_SEPARATOR . $file;
+        $path = $realDirectory
+            . DIRECTORY_SEPARATOR
+            . $file;
 
-        if (!is_file($path) || !maple_accommodation_path_is_inside($path, $realDirectory)) {
+        if (
+            !is_file($path)
+            || !maple_accommodation_path_is_inside(
+                $path,
+                $realDirectory
+            )
+        ) {
             continue;
         }
 
@@ -187,13 +253,22 @@ function maple_accommodation_gallery_files(int $imageSourceId): array
     return array_values($images);
 }
 
-function maple_accommodation_fixed_gallery_images(int $imageSourceId, string $assetBase = ''): array
-{
+function maple_accommodation_fixed_gallery_images(
+    int $imageSourceId,
+    string $assetBase = ''
+): array {
     $slides = [];
 
-    foreach (maple_accommodation_gallery_files($imageSourceId) as $filename) {
+    foreach (
+        maple_accommodation_gallery_files($imageSourceId)
+        as $filename
+    ) {
         $slides[] = maple_accommodation_gallery_slide(
-            maple_accommodation_gallery_file_url($imageSourceId, $filename, $assetBase),
+            maple_accommodation_gallery_file_url(
+                $imageSourceId,
+                $filename,
+                $assetBase
+            ),
             $filename,
             maple_accommodation_gallery_file_type($filename)
         );
@@ -211,8 +286,10 @@ function maple_accommodation_fixed_gallery_images(int $imageSourceId, string $as
     return $slides;
 }
 
-function maple_accommodation_type_for_huis_id(PDO $pdo, int $huisId): ?string
-{
+function maple_accommodation_type_for_huis_id(
+    PDO $pdo,
+    int $huisId
+): ?string {
     if ($huisId <= 0) {
         return null;
     }
@@ -223,31 +300,54 @@ function maple_accommodation_type_for_huis_id(PDO $pdo, int $huisId): ?string
         WHERE `Huis_id` = :huis_id
         LIMIT 1
     ');
-    $statement->execute(['huis_id' => $huisId]);
+
+    $statement->execute([
+        'huis_id' => $huisId,
+    ]);
+
     $type = $statement->fetchColumn();
 
-    return is_string($type) && trim($type) !== '' ? trim($type) : null;
+    return is_string($type) && trim($type) !== ''
+        ? trim($type)
+        : null;
 }
 
 function maple_accommodation_gallery_images(
     int $huisId,
-        $coverImage = '',
+    $coverImage = '',
     string $assetBase = '',
     ?string $huisNaam = null
 ): array {
-    $pdo = maple_pdo();
     $type = trim((string) ($huisNaam ?? ''));
 
     if ($type === '') {
-        $type = (string) (maple_accommodation_type_for_huis_id($pdo, $huisId) ?? '');
+        try {
+            $type = (string) (
+                maple_accommodation_type_for_huis_id(
+                    maple_pdo(),
+                    $huisId
+                ) ?? ''
+            );
+        } catch (Throwable $exception) {
+            error_log(
+                'Accommodation gallery type lookup failed: '
+                . $exception->getMessage()
+            );
+            $type = '';
+        }
     }
 
-    $imageSourceId = maple_accommodation_type_image_id($pdo, $type);
+    $imageSourceId = maple_accommodation_type_image_id(
+        null,
+        $type
+    );
 
     if ($imageSourceId === null) {
         return [
             maple_accommodation_gallery_slide(
-                maple_accommodation_image_fallback_url($assetBase),
+                maple_accommodation_image_fallback_url(
+                    $assetBase
+                ),
                 'no-image-placeholder.png',
                 'photo',
                 true
@@ -255,11 +355,16 @@ function maple_accommodation_gallery_images(
         ];
     }
 
-    return maple_accommodation_fixed_gallery_images($imageSourceId, $assetBase);
+    return maple_accommodation_fixed_gallery_images(
+        $imageSourceId,
+        $assetBase
+    );
 }
 
-function maple_accommodation_gallery_json(array $accommodation, string $assetBase = ''): string
-{
+function maple_accommodation_gallery_json(
+    array $accommodation,
+    string $assetBase = ''
+): string {
     $json = json_encode(
         maple_accommodation_gallery_images(
             (int) ($accommodation['Huis_id'] ?? 0),
@@ -270,5 +375,7 @@ function maple_accommodation_gallery_json(array $accommodation, string $assetBas
         JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
     );
 
-    return is_string($json) ? $json : '[]';
+    return is_string($json)
+        ? $json
+        : '[]';
 }

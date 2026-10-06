@@ -4,13 +4,13 @@ declare(strict_types=1);
 function maple_accommodation_allowed_types(): array
 {
     return [
-        'Normal Cottage',
         'Premium Cottage',
+        'Normal Cottage',
         'Wild Cottage',
     ];
 }
 
-function maple_accommodation_type_mapping(PDO $pdo): array
+function maple_accommodation_type_mapping(?PDO $pdo = null): array
 {
     return [
         'Premium Cottage' => 1,
@@ -19,9 +19,30 @@ function maple_accommodation_type_mapping(PDO $pdo): array
     ];
 }
 
+function maple_accommodation_type_key(string $type): string
+{
+    $type = strtolower(trim($type));
+    $type = preg_replace('/\s+/', ' ', $type) ?? '';
+
+    return $type;
+}
+
+function maple_accommodation_type_canonical_name(string $type): string
+{
+    $typeKey = maple_accommodation_type_key($type);
+
+    foreach (maple_accommodation_type_mapping() as $name => $id) {
+        if (maple_accommodation_type_key($name) === $typeKey) {
+            return $name;
+        }
+    }
+
+    return '';
+}
+
 function maple_accommodation_type_preset_key(string $type): string
 {
-    return match (trim($type)) {
+    return match (maple_accommodation_type_canonical_name($type)) {
         'Normal Cottage' => 'normal',
         'Premium Cottage' => 'premium',
         'Wild Cottage' => 'wild',
@@ -30,10 +51,14 @@ function maple_accommodation_type_preset_key(string $type): string
 }
 
 function maple_accommodation_type_image_id(
-    PDO $pdo,
+    ?PDO $pdo,
     string $type
 ): ?int {
-    $type = trim($type);
+    $type = maple_accommodation_type_canonical_name($type);
+
+    if ($type === '') {
+        return null;
+    }
 
     $mapping = maple_accommodation_type_mapping($pdo);
 
@@ -41,7 +66,7 @@ function maple_accommodation_type_image_id(
 }
 
 function maple_accommodation_type_name_for_id(
-    PDO $pdo,
+    ?PDO $pdo,
     int $imageSourceId
 ): ?string {
     foreach (
@@ -57,16 +82,13 @@ function maple_accommodation_type_name_for_id(
 }
 
 function maple_accommodation_type_is_valid(
-    PDO $pdo,
+    ?PDO $pdo,
     string $type
 ): bool {
-    return array_key_exists(
-        trim($type),
-        maple_accommodation_type_mapping($pdo)
-    );
+    return maple_accommodation_type_canonical_name($type) !== '';
 }
 
-function maple_accommodation_type_rows(PDO $pdo): array
+function maple_accommodation_type_rows(?PDO $pdo = null): array
 {
     $rows = [];
 
@@ -84,7 +106,7 @@ function maple_accommodation_type_rows(PDO $pdo): array
     return $rows;
 }
 
-function maple_accommodation_type_options(PDO $pdo): array
+function maple_accommodation_type_options(?PDO $pdo = null): array
 {
     return maple_accommodation_type_rows($pdo);
 }
