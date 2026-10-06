@@ -23,27 +23,27 @@ $departureLabel = $requestedDeparture !== '' ? $requestedDeparture : 'Kies een d
 $homepageReviews = $isHomeView ? array_slice(maple_published_reviews(), 0, 4) : [];
 
 $homeAccommodationResult = $isHomeView
-    ? maple_home_accommodations(3)
-    : ['selection' => 'unavailable', 'items' => []];
+        ? maple_home_accommodations(3)
+        : ['selection' => 'unavailable', 'items' => []];
 $homeAccomodations = $homeAccommodationResult['items'];
 $homeAccommodationSelection = $homeAccommodationResult['selection'];
 
 $fallbackEvents = [
-    [
-        'title' => 'Kampvuur avond',
-        'datetime' => '2026-05-24 20:00:00',
-        'description' => 'test data as a fallback.',
-    ],
-    [
-        'title' => 'Wandeltocht Rockies',
-        'datetime' => '2026-05-26 09:00:00',
-        'description' => 'test data as a fallback.',
-    ],
-    [
-        'title' => 'Canoe Experience',
-        'datetime' => '2026-05-28 10:00:00',
-        'description' => 'test data as a fallback.',
-    ],
+        [
+                'title' => 'Kampvuur avond',
+                'datetime' => '2026-05-24 20:00:00',
+                'description' => 'test data as a fallback.',
+        ],
+        [
+                'title' => 'Wandeltocht Rockies',
+                'datetime' => '2026-05-26 09:00:00',
+                'description' => 'test data as a fallback.',
+        ],
+        [
+                'title' => 'Canoe Experience',
+                'datetime' => '2026-05-28 10:00:00',
+                'description' => 'test data as a fallback.',
+        ],
 ];
 
 $dbEvents = [];
@@ -70,10 +70,10 @@ $eventImageClasses = ['campfire', 'rockies', 'canoe'];
 $homeEvents = [];
 foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
     $homeEvents[] = [
-        'title' => (string) ($event['Titel'] ?? $event['title'] ?? ''),
-        'datetime' => (string) ($event['Start_time'] ?? $event['datetime'] ?? ''),
-        'description' => (string) ($event['Omschrijving'] ?? $event['description'] ?? ''),
-        'image_class' => $eventImageClasses[$index % count($eventImageClasses)],
+            'title' => (string) ($event['Titel'] ?? $event['title'] ?? ''),
+            'datetime' => (string) ($event['Start_time'] ?? $event['datetime'] ?? ''),
+            'description' => (string) ($event['Omschrijving'] ?? $event['description'] ?? ''),
+            'image_class' => $eventImageClasses[$index % count($eventImageClasses)],
     ];
 }
 ?>
@@ -120,7 +120,12 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
                         <div class="accommodation-grid">
                             <?php foreach ($homeAccomodations as $index => $accomodation): ?>
                                 <?php
-                                $galleryImages = maple_accommodation_gallery_images((int) ($accomodation['Huis_id'] ?? 0), $accomodation['Afbeelding'] ?? '', $assetBase);
+                                $galleryImages = maple_accommodation_gallery_images(
+                                        (int) ($accomodation['Huis_id'] ?? 0),
+                                        '',
+                                        $assetBase,
+                                        (string) ($accomodation['Huis_naam'] ?? '')
+                                );
                                 $galleryJson = json_encode($galleryImages, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
                                 $galleryJson = is_string($galleryJson) ? $galleryJson : '[]';
                                 $firstGalleryImage = $galleryImages[0] ?? [];
