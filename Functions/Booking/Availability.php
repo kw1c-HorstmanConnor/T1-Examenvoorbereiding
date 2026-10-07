@@ -39,7 +39,7 @@ function maple_home_accomodation_cards(array $dbRows, array $fallbackCards): arr
             'guests' => isset($row['Max']) ? (int) $row['Max'] : $fallback['guests'],
             'bedrooms' => maple_feature_value($voorzieningen, '/(\d+)\s*slaapkamers?/i', (string) $fallback['bedrooms']),
             'area' => maple_feature_value($voorzieningen, '/(\d+)\s*(?:m2|m\^2|m²|vierkante meter)/i', (string) $fallback['area']),
-            'description' => $row['Omschr'] ?? $fallback['description'],
+            'description' => $row['Omschrijving'] ?? $fallback['description'],
             'price' => $row['PPN'] ?? $fallback['price'],
             'image_class' => $imageClasses[$index],
             'badge' => $index === 0 ? 'Populair' : '',
@@ -61,7 +61,7 @@ function maple_home_event_cards(array $dbRows, array $fallbackEvents): array
         $events[] = [
             'title' => $row['Titel'] ?? $fallback['title'],
             'datetime' => $row['Start_time'] ?? $fallback['datetime'],
-            'description' => $row['Omschr'] ?? $fallback['description'],
+            'description' => $row['Omschrijving'] ?? $fallback['description'],
             'location' => $row['Locatie'] ?? '',
             'image_class' => $imageClasses[$index],
         ];

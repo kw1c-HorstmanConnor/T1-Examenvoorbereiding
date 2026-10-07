@@ -127,7 +127,7 @@ $events = $accommodations = $news = [];
 try {
     $db = maple_db();
     $result = $db->query('SELECT evenementen_id, Titel, Omschrijving, Start_time, Locatie FROM evenementen ORDER BY Start_time DESC'); $events = $result ? $result->fetch_all(MYSQLI_ASSOC) : []; $result?->free();
-    $result = $db->query('SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, omschr, Afbeelding FROM accomodaties ORDER BY Huis_id DESC'); $accommodations = $result ? $result->fetch_all(MYSQLI_ASSOC) : []; $result?->free();
+    $result = $db->query('SELECT Huis_id, Huis_naam, Locatie, PPN, Voorzieningen, `Max`, omschrijving, Afbeelding FROM accomodaties ORDER BY Huis_id DESC'); $accommodations = $result ? $result->fetch_all(MYSQLI_ASSOC) : []; $result?->free();
     $result = $db->query('SELECT Nieuws_id, Inhoud, Aangemaakt, Gepubliceerd FROM nieuws ORDER BY Aangemaakt DESC'); $news = $result ? $result->fetch_all(MYSQLI_ASSOC) : []; $result?->free();
 } catch (Throwable $exception) {
     error_log((string) $exception);

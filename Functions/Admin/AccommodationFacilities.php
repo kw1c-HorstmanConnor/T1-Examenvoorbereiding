@@ -41,7 +41,7 @@ function maple_admin_save_accommodation_with_facilities(PDO $pdo, $huisId, array
                     PPN = :price,
                     Voorzieningen = :facilities,
                     `Max` = :maximum,
-                    Omschr = :description,
+                    Omschrijving = :description,
                     Afbeelding = :image
                 WHERE Huis_id = :huis_id
             ');
