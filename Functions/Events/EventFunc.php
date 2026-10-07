@@ -8,7 +8,7 @@ require_once __DIR__ . '/../Helpers/Database.php';
 // -------------------------------------------------------------------------
 
 // Returns the requested month, defaulting to the current month for invalid input.
-function maple_events_calendar_month($requestedMonth): DateTimeImmutable
+function maple_events_calendar_month(?string $requestedMonth): DateTimeImmutable
 {
     $requestedMonth = trim((string) $requestedMonth);
     $month = DateTimeImmutable::createFromFormat('!Y-m', $requestedMonth);
@@ -24,10 +24,30 @@ function maple_events_calendar_month($requestedMonth): DateTimeImmutable
 // Calendar events
 // -------------------------------------------------------------------------
 
+function maple_events_normalize_row(array $event): ?array
+{
+    $datetime = trim((string) ($event['Start_time'] ?? ''));
+
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}/', $datetime)) {
+        return null;
+    }
+
+    return [
+        'id' => (int) ($event['evenementen_id'] ?? 0),
+        'title' => (string) ($event['Titel'] ?? ''),
+        'description' => trim((string) ($event['Omschrijving'] ?? '')),
+        'datetime' => $datetime,
+        'dateKey' => substr($datetime, 0, 10),
+        'startLabel' => strlen($datetime) >= 16 ? substr($datetime, 11, 5) : '',
+        'location' => trim((string) ($event['Locatie'] ?? '')),
+    ];
+}
+
 // Loads the events scheduled within the selected month and groups them by date.
 function maple_events_by_date(DateTimeImmutable $month): array
 {
     $eventsByDate = [];
+    $statement = null;
 
     try {
         $database = maple_db();
@@ -41,25 +61,35 @@ function maple_events_by_date(DateTimeImmutable $month): array
         ');
 
         if (!$statement) {
-            return $eventsByDate;
+            throw new RuntimeException('Event query prepare failed: ' . $database->error);
         }
 
         $statement->bind_param('ss', $monthStart, $nextMonthStart);
-        $statement->execute();
-        $result = $statement->get_result();
-
-        if ($result instanceof mysqli_result) {
-            foreach ($result->fetch_all(MYSQLI_ASSOC) as $event) {
-                $eventDate = substr((string) $event['Start_time'], 0, 10);
-                $eventsByDate[$eventDate][] = $event;
-            }
-
-            $result->free();
+        if (!$statement->execute()) {
+            throw new RuntimeException('Event query execute failed: ' . $statement->error);
         }
 
-        $statement->close();
+        $result = $statement->get_result();
+
+        if (!$result instanceof mysqli_result) {
+            throw new RuntimeException('Event query returned no result set.');
+        }
+
+        foreach ($result->fetch_all(MYSQLI_ASSOC) as $event) {
+            $normalizedEvent = maple_events_normalize_row($event);
+
+            if ($normalizedEvent !== null) {
+                $eventsByDate[$normalizedEvent['dateKey']][] = $normalizedEvent;
+            }
+        }
+
+        $result->free();
     } catch (Throwable $exception) {
-        // Keep the calendar visible when the database is unavailable.
+        error_log('Event calendar events could not be loaded: ' . $exception->getMessage());
+    } finally {
+        if ($statement instanceof mysqli_stmt) {
+            $statement->close();
+        }
     }
 
     return $eventsByDate;
@@ -70,10 +100,9 @@ function maple_events_by_date(DateTimeImmutable $month): array
 // -------------------------------------------------------------------------
 
 // Builds the dates, labels, navigation values, and events used by the calendar.
-function maple_events_calendar_data($requestedMonth): array
+function maple_events_calendar_data(?string $requestedMonth): array
 {
     $month = maple_events_calendar_month($requestedMonth);
-    $currentMonth = new DateTimeImmutable('first day of this month midnight');
     $months = [
         1 => 'januari', 2 => 'februari', 3 => 'maart', 4 => 'april',
         5 => 'mei', 6 => 'juni', 7 => 'juli', 8 => 'augustus',
@@ -86,7 +115,7 @@ function maple_events_calendar_data($requestedMonth): array
         'first_weekday' => (int) $month->format('N'),
         'next_month' => $month->modify('+1 month')->format('Y-m'),
         'previous_month' => $month->modify('-1 month')->format('Y-m'),
-        'can_go_previous' => $month > $currentMonth,
+        'can_go_previous' => true,
         'month_label' => ucfirst($months[(int) $month->format('n')]) . ' ' . $month->format('Y'),
         'weekdays' => ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag'],
         'events_by_date' => maple_events_by_date($month),
