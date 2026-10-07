@@ -23,6 +23,12 @@
                 image.dataset.fallbackApplied = '1';
                 image.src = image.dataset.fallbackSrc;
             }
+
+            const imageContainer = image.closest('.facility-cottage__image');
+            if (imageContainer) {
+                imageContainer.classList.add('is-placeholder');
+            }
+            image.alt = translate('No image available yet');
         });
     });
 
