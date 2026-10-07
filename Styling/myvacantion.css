@@ -37,4 +37,83 @@
 .vacation-modal__details dt { color: #687067; font-size: 12px; font-weight: 700; text-transform: uppercase; }
 .vacation-modal__details dd { margin: 0; color: #263126; font-weight: 700; text-align: right; }
 .vacation-modal__warning { padding: 12px 14px; color: #8c3024 !important; background: #fff0ed; border-left: 3px solid #bd554c; }
-@media (max-width: 700px) { .my-vacation__grid { grid-template-columns: 1fr; }.vacation-card dl { gap: 12px; }.vacation-modal__dialog { padding: 26px 20px; }.vacation-modal__actions > * { width: 100%; text-align: center; }.header-account { display: none; } }
+@media (max-width: 700px) {
+    .my-vacation__grid { grid-template-columns: 1fr; }
+    .vacation-card dl { gap: 12px; }
+    .vacation-modal { padding: 1rem; }
+    .vacation-modal__dialog {
+        max-height: calc(100vh - 2rem);
+        max-height: calc(100dvh - 2rem);
+        padding: 26px 20px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+    .vacation-modal__actions > * { width: 100%; text-align: center; }
+}
+
+@media (max-width: 47.99rem) {
+    .my-vacation {
+        padding-top: 3rem;
+        padding-bottom: 4rem;
+    }
+
+    .my-vacation h1 {
+        font-size: clamp(2.7rem, 14vw, 4rem);
+    }
+
+    .my-vacation__notice,
+    .vacation-card,
+    .my-vacation__empty {
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    .vacation-card,
+    .my-vacation__empty {
+        padding: 1.25rem;
+    }
+
+    .vacation-card dl {
+        grid-template-columns: 1fr;
+    }
+
+    .vacation-card__status {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .vacation-card__pay,
+    .vacation-card__cancel {
+        width: 100%;
+        min-height: 48px;
+        margin-right: 0;
+        white-space: normal;
+    }
+
+    .vacation-modal__close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        top: 6px;
+        right: 6px;
+    }
+
+    .vacation-modal__dialog h2 {
+        margin-right: 2rem;
+        font-size: clamp(2rem, 11vw, 2.75rem);
+    }
+
+    .vacation-modal__details div {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .vacation-modal__details dd {
+        max-width: 100%;
+        text-align: left;
+        overflow-wrap: anywhere;
+    }
+}

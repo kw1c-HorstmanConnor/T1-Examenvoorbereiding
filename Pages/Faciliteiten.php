@@ -166,17 +166,25 @@ if (!is_string($facilitiesJson)) {
                     <h2 id="facility-filter-title">Select desired facilities</h2>
                     <p>Choose one or more facilities to show cottages that include all selected options.</p>
 
-                    <div class="facility-checkboxes">
-                        <?php foreach ($filterFacilities as $facility): ?>
-                            <label class="facility-checkbox">
-                                <input type="checkbox" value="<?= maple_e($facility['value']); ?>" data-facility-filter>
-                                <span class="facility-checkbox__box" aria-hidden="true"></span>
-                                <span data-filter-label data-facility-value="<?= maple_e($facility['value']); ?>" data-no-translate><?= maple_e($facility['name']); ?></span>
-                            </label>
-                        <?php endforeach; ?>
-                    </div>
+                    <details class="facility-filter-disclosure" data-facility-filter-disclosure open>
+                        <summary>
+                            <span>Facility filters</span>
+                            <span class="facility-filter-summary" data-filter-selection-count data-no-translate aria-live="polite">No facilities selected</span>
+                        </summary>
+                        <div class="facility-filter-options">
+                            <div class="facility-checkboxes">
+                                <?php foreach ($filterFacilities as $facility): ?>
+                                    <label class="facility-checkbox">
+                                        <input type="checkbox" value="<?= maple_e($facility['value']); ?>" data-facility-filter>
+                                        <span class="facility-checkbox__box" aria-hidden="true"></span>
+                                        <span data-filter-label data-facility-value="<?= maple_e($facility['value']); ?>" data-no-translate><?= maple_e($facility['name']); ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
 
-                    <button class="facility-clear" type="button" data-clear-facility-filters>Clear filters</button>
+                            <button class="facility-clear" type="button" data-clear-facility-filters>Clear filters</button>
+                        </div>
+                    </details>
                 </aside>
 
                 <div class="facility-results" aria-live="polite">

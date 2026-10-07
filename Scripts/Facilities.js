@@ -6,6 +6,8 @@
     const clearButton = document.querySelector('[data-clear-facility-filters]');
     const noResults = document.querySelector('[data-no-results]');
     const resultsCount = document.querySelector('[data-results-count]');
+    const filterDisclosure = document.querySelector('[data-facility-filter-disclosure]');
+    const filterSelectionCount = document.querySelector('[data-filter-selection-count]');
     const modal = document.querySelector('[data-facility-modal]');
     const modalDialog = document.querySelector('[data-facility-modal-dialog]');
     const modalIcon = document.querySelector('[data-modal-icon]');
@@ -189,6 +191,12 @@
     function applyFilters() {
         const selectedValues = selectedFacilityValues();
         let visibleCount = 0;
+
+        if (filterSelectionCount) {
+            filterSelectionCount.textContent = selectedValues.length > 0
+                ? `${selectedValues.length} ${translate('Selected facilities')}`
+                : translate('No facilities selected');
+        }
 
         cottageCards.forEach((card) => {
             const facilityValues = cottageFacilityValues(card);
@@ -402,6 +410,20 @@
     });
 
     window.addEventListener('maple:languagechange', updateFacilityText);
+
+    if (filterDisclosure && window.matchMedia) {
+        const compactFilterQuery = window.matchMedia('(max-width: 700px)');
+        const setInitialFilterState = () => {
+            filterDisclosure.open = !compactFilterQuery.matches;
+        };
+
+        setInitialFilterState();
+        if (typeof compactFilterQuery.addEventListener === 'function') {
+            compactFilterQuery.addEventListener('change', setInitialFilterState);
+        } else if (typeof compactFilterQuery.addListener === 'function') {
+            compactFilterQuery.addListener(setInitialFilterState);
+        }
+    }
 
     updateFacilityText();
 })();

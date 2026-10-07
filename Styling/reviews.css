@@ -522,3 +522,22 @@ body .review-submit { min-width: 0; width: 100%; }
     body .reviews-dashboard__grid { grid-template-columns: minmax(0, .78fr) minmax(0, 1.22fr); }
     body .reviews-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
+
+@media (max-width: 47.99rem) {
+    .review-field input,
+    .review-field textarea {
+        font-size: 16px;
+    }
+
+    .review-submit,
+    .review-login-button {
+        min-height: 48px;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .published-review,
+    .review-feedback {
+        overflow-wrap: anywhere;
+    }
+}

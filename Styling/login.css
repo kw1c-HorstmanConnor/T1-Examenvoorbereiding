@@ -375,3 +375,19 @@
     .auth-phone-wrap select { border-radius: 4px 0 0 4px; border-right: 0; }
     .auth-phone-wrap input { border-radius: 0 4px 4px 0; }
 }
+
+@media (max-width: 47.99rem) {
+    .login-field input,
+    .login-field select {
+        font-size: 16px;
+    }
+
+    .login-card h1 {
+        font-size: clamp(2.3rem, 12vw, 3rem);
+    }
+
+    .login-error,
+    .login-notice {
+        overflow-wrap: anywhere;
+    }
+}

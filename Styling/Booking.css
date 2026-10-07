@@ -32,3 +32,44 @@
 .booking-summary__button--pay { background: #5f9275; border-color: #5f9275; }
 .booking-summary__button--pay:hover, .booking-summary__button--pay:focus-visible { color: #47735a; background: transparent; }
 .booking-summary__error { padding: 1rem; color: #8a2e28; background: #fff0ed; border-left: 3px solid #bd554c; }
+
+@media (max-width: 47.99rem) {
+    .booking-summary {
+        padding-top: 3rem;
+        padding-bottom: 4rem;
+    }
+
+    .booking-summary h1 {
+        margin-bottom: 1.5rem;
+        font-size: clamp(2.35rem, 12vw, 3.5rem);
+    }
+
+    .booking-summary__details div {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: .35rem;
+        padding: 1rem;
+    }
+
+    .booking-summary__details dd {
+        max-width: 100%;
+        text-align: left;
+        overflow-wrap: anywhere;
+    }
+
+    .booking-summary form,
+    .booking-summary__button {
+        width: 100%;
+    }
+
+    .booking-summary__button {
+        align-items: center;
+        min-height: 48px;
+        white-space: normal;
+        text-align: center;
+    }
+
+    .booking-summary__error {
+        overflow-wrap: anywhere;
+    }
+}
