@@ -1073,6 +1073,12 @@
         position: static;
     }
 
+    .facility-category-nav a,
+    .facility-checkbox,
+    .facility-clear {
+        min-height: 44px;
+    }
+
     .facilities-cta__inner,
     .facility-results__header {
         align-items: flex-start;

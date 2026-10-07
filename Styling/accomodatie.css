@@ -718,19 +718,15 @@ body.accommodation-modal-open {
     }
 
     .accommodations-page .site-header {
-        display: block;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
         padding-top: .65rem;
     }
 
-    .accommodations-page .site-nav,
-    .accommodations-page .site-header__actions {
-        display: none;
-    }
-
     .accommodations-page .site-logo {
-        width: 92px;
-        transform: scale(.62);
-        transform-origin: left top;
+        width: 104px;
+        transform: none;
     }
 
     .accommodations-page .accommodations-hero__content {
@@ -756,11 +752,16 @@ body.accommodation-modal-open {
     }
 
     .accommodations-page .accommodations-list {
+        grid-template-columns: 1fr;
         gap: .85rem;
     }
 
+    .accommodations-page .accommodation-card--listing {
+        flex-direction: column;
+    }
+
     .accommodations-page .accommodation-card--listing .accommodation-card__image {
-        min-height: 98px;
+        min-height: clamp(150px, 48vw, 220px);
     }
 
     .accommodations-page .accommodation-card--listing .accommodation-card__body {
@@ -779,6 +780,11 @@ body.accommodation-modal-open {
 
     .accommodation-modal {
         padding: .75rem;
+    }
+
+    .accommodation-modal__close {
+        width: 2.75rem;
+        height: 2.75rem;
     }
 
     .accommodation-modal__dialog {
