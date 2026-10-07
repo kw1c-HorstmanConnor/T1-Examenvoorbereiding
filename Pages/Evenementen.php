@@ -19,13 +19,13 @@ $eventsForPopup = [];
 foreach ($eventsByDate as $eventDate => $events) {
     $eventsForPopup[$eventDate] = array_map(static function (array $event): array {
         $popupEvent = [
-            'id' => (int) $event['evenementen_id'],
-            'title' => (string) $event['Titel'],
-            'startTime' => (string) $event['Start_time'],
-            'startLabel' => substr((string) $event['Start_time'], 11, 5),
+            'id' => (int) $event['id'],
+            'title' => (string) $event['title'],
+            'datetime' => (string) $event['datetime'],
+            'startLabel' => (string) $event['startLabel'],
         ];
-        $description = trim((string) ($event['Omschrijving'] ?? ''));
-        $location = trim((string) ($event['Locatie'] ?? ''));
+        $description = trim((string) ($event['description'] ?? ''));
+        $location = trim((string) ($event['location'] ?? ''));
 
         if ($description !== '') {
             $popupEvent['description'] = $description;
@@ -41,10 +41,11 @@ foreach ($eventsByDate as $eventDate => $events) {
 
 $eventsForPopupJson = json_encode(
     $eventsForPopup,
-    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+    JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
 );
 
 if ($eventsForPopupJson === false) {
+    error_log('Event calendar JSON encoding failed: ' . json_last_error_msg());
     $eventsForPopupJson = '{}';
 }
 
@@ -133,10 +134,10 @@ $currentPage = 'events';
                                     <div class="event-calendar__events" aria-label="Events op <?= htmlspecialchars($date->format('d-m-Y'), ENT_QUOTES, 'UTF-8'); ?>">
                                         <?php foreach ($dayEvents as $eventIndex => $event): ?>
                                             <?php if ($eventIndex < $visibleEventLimit): ?>
-                                                <?php $eventStartTime = substr((string) $event['Start_time'], 11, 5); ?>
+                                                <?php $eventStartTime = (string) $event['startLabel']; ?>
                                                 <span class="event-calendar__event-tab" data-calendar-event-date="<?= htmlspecialchars($dateKey, ENT_QUOTES, 'UTF-8'); ?>">
                                                     <span class="event-calendar__event-time"><?= htmlspecialchars($eventStartTime, ENT_QUOTES, 'UTF-8'); ?></span>
-                                                    <span class="event-calendar__event-title"><?= htmlspecialchars((string) $event['Titel'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                                    <span class="event-calendar__event-title"><?= htmlspecialchars((string) $event['title'], ENT_QUOTES, 'UTF-8'); ?></span>
                                                 </span>
                                             <?php endif; ?>
                                         <?php endforeach; ?>
@@ -338,7 +339,7 @@ $currentPage = 'events';
         const openDayDialog = (calendarDay) => {
             const dateKey = calendarDay.dataset.calendarDate;
             const events = [...(calendarEventsByDate[dateKey] ?? [])].sort((firstEvent, secondEvent) => (
-                String(firstEvent.startTime ?? '').localeCompare(String(secondEvent.startTime ?? ''))
+                String(firstEvent.datetime ?? '').localeCompare(String(secondEvent.datetime ?? ''))
             ));
 
             activeCalendarDay = calendarDay;
@@ -430,7 +431,7 @@ $currentPage = 'events';
 
             const dateKey = activeCalendarDay.dataset.calendarDate;
             const events = [...(calendarEventsByDate[dateKey] ?? [])].sort((firstEvent, secondEvent) => (
-                String(firstEvent.startTime ?? '').localeCompare(String(secondEvent.startTime ?? ''))
+                String(firstEvent.datetime ?? '').localeCompare(String(secondEvent.datetime ?? ''))
             ));
 
             dayDialogTitle.textContent = formatCalendarDate(dateFromKey(dateKey));
