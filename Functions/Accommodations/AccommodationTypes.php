@@ -10,7 +10,7 @@ function maple_accommodation_allowed_types(): array
     ];
 }
 
-function maple_accommodation_type_mapping(?PDO $pdo = null): array
+function maple_accommodation_type_mapping($pdo = null): array
 {
     return [
         'Premium Cottage' => 1,
@@ -42,18 +42,22 @@ function maple_accommodation_type_canonical_name(string $type): string
 
 function maple_accommodation_type_preset_key(string $type): string
 {
-    return match (maple_accommodation_type_canonical_name($type)) {
-        'Normal Cottage' => 'normal',
-        'Premium Cottage' => 'premium',
-        'Wild Cottage' => 'wild',
-        default => '',
-    };
+    switch (maple_accommodation_type_canonical_name($type)) {
+        case 'Normal Cottage':
+            return 'normal';
+        case 'Premium Cottage':
+            return 'premium';
+        case 'Wild Cottage':
+            return 'wild';
+        default:
+            return '';
+    }
 }
 
 function maple_accommodation_type_image_id(
-    ?PDO $pdo,
+    $pdo,
     string $type
-): ?int {
+) {
     $type = maple_accommodation_type_canonical_name($type);
 
     if ($type === '') {
@@ -66,9 +70,9 @@ function maple_accommodation_type_image_id(
 }
 
 function maple_accommodation_type_name_for_id(
-    ?PDO $pdo,
+    $pdo,
     int $imageSourceId
-): ?string {
+) {
     foreach (
         maple_accommodation_type_mapping($pdo)
         as $type => $id
@@ -82,13 +86,13 @@ function maple_accommodation_type_name_for_id(
 }
 
 function maple_accommodation_type_is_valid(
-    ?PDO $pdo,
+    $pdo,
     string $type
 ): bool {
     return maple_accommodation_type_canonical_name($type) !== '';
 }
 
-function maple_accommodation_type_rows(?PDO $pdo = null): array
+function maple_accommodation_type_rows($pdo = null): array
 {
     $rows = [];
 
@@ -106,7 +110,7 @@ function maple_accommodation_type_rows(?PDO $pdo = null): array
     return $rows;
 }
 
-function maple_accommodation_type_options(?PDO $pdo = null): array
+function maple_accommodation_type_options($pdo = null): array
 {
     return maple_accommodation_type_rows($pdo);
 }

@@ -380,7 +380,9 @@ try {
             ? $result->fetch_all(MYSQLI_ASSOC)
             : [];
 
-    $result?->free();
+    if ($result) {
+        $result->free();
+    }
 
     $pdo = maple_pdo();
 
@@ -412,7 +414,9 @@ try {
             ? $result->fetch_all(MYSQLI_ASSOC)
             : [];
 
-    $result?->free();
+    if ($result) {
+        $result->free();
+    }
 } catch (Throwable $exception) {
     error_log((string) $exception);
 
@@ -618,6 +622,11 @@ if (!is_string($adminGalleryJson)) {
             href="../Styling/admin.css"
     >
 
+    <link
+            rel="stylesheet"
+            href="../Styling/accommodation-blocking.css"
+    >
+
     <?php
     include __DIR__
             . '/../Includes/LanguagesScripts.php';
@@ -625,6 +634,11 @@ if (!is_string($adminGalleryJson)) {
 
     <script
             src="../Scripts/AdminFacilities.js"
+            defer
+    ></script>
+
+    <script
+            src="../Javascripts/AccommodationBlocking.js"
             defer
     ></script>
 </head>
@@ -945,7 +959,14 @@ if (!is_string($adminGalleryJson)) {
 
         <?php elseif ($tab === 'accommodations'): ?>
 
-            <section class="admin-crud">
+            <?php
+            $blockAccommodations = $accommodations;
+            $blockAction = 'AdminBlockAccommodation.php';
+            $blockReturnTo = 'admin';
+            include __DIR__ . '/../Includes/AccommodationBlockModal.php';
+            ?>
+
+            <section class="admin-crud" id="accommodation-blocking">
 
                 <div class="admin-crud__form">
 
@@ -1431,6 +1452,14 @@ if (!is_string($adminGalleryJson)) {
                         All accommodations
                     </h2>
 
+                    <button
+                            class="block-house-button"
+                            type="button"
+                            data-block-house
+                    >
+                        ADD BLOCK
+                    </button>
+
                     <?php foreach ($accommodations as $a): ?>
 
                         <?php
@@ -1525,6 +1554,15 @@ if (!is_string($adminGalleryJson)) {
                             </div>
 
                             <div class="admin-record__actions">
+
+                                <button
+                                        class="block-house-button"
+                                        type="button"
+                                        data-block-house
+                                        data-block-house-id="<?= (int) $a['Huis_id']; ?>"
+                                >
+                                    Block house
+                                </button>
 
                                 <a
                                         href="AdminPanel.php?tab=accommodations&edit=<?= (int) $a['Huis_id']; ?>"

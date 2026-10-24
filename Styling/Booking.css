@@ -17,21 +17,23 @@
 .booking-page .language-select:focus-visible,
 .booking-page .header-login:focus-visible,
 .booking-page .header-account:focus-visible { outline-color: #151914; }
-.booking-summary { max-width: 760px; padding-top: 5rem; padding-bottom: 5rem; }
-.booking-summary h1 { margin: .3rem 0 2rem; color: #294438; font-family: "Cormorant Garamond", Georgia, serif; font-size: clamp(2.6rem, 6vw, 4.5rem); font-weight: 600; }
-.booking-summary__details { margin: 0; background: #fff; border: 1px solid #e2dfd7; border-radius: .35rem; box-shadow: 0 5px 14px rgba(46,44,35,.07); }
-.booking-summary__details div { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 1.25rem; border-bottom: 1px solid #e2dfd7; }
+.booking-summary { max-width: 780px; padding-top: clamp(3.5rem, 8vw, 6rem); padding-bottom: clamp(4rem, 8vw, 6rem); }
+.booking-summary h1 { margin: .35rem 0 .8rem; color: #294438; font-family: var(--font-heading); font-size: clamp(2.6rem, 6vw, 4.5rem); font-weight: 600; line-height: 1.05; }
+.booking-summary > p:not(.section-label):not(.booking-summary__error) { max-width: 650px; margin: 1.25rem 0 0; color: #5b625b; font-size: .95rem; line-height: 1.7; }
+.booking-summary__details { margin: 2rem 0 0; overflow: hidden; background: #fff; border: 1px solid #e2dfd7; border-radius: .65rem; box-shadow: 0 14px 38px rgba(46,44,35,.09); }
+.booking-summary__details div { display: grid; grid-template-columns: minmax(9rem, .8fr) minmax(0, 1.2fr); align-items: center; gap: 1.5rem; padding: 1.05rem 1.4rem; border-bottom: 1px solid #e2dfd7; }
 .booking-summary__details div:last-child { border-bottom: 0; }
 .booking-summary__details dt { color: #61645f; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.booking-summary__details dd { margin: 0; color: #30352f; font-weight: 600; text-align: right; }
+.booking-summary__details dd { margin: 0; color: #30352f; font-size: .95rem; font-weight: 600; text-align: right; }
 .booking-summary__details .booking-summary__total { color: #294438; background: #f3f1eb; }
-.booking-summary__button { display: inline-flex; justify-content: center; min-width: 11rem; margin-top: 1.5rem; padding: .85rem 1.2rem; color: #fff; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-decoration: none; cursor: pointer; background: #294438; border: 1px solid #294438; border-radius: .25rem; }
-.booking-summary__button:hover, .booking-summary__button:focus-visible { color: #294438; background: transparent; }
+.booking-summary__total dt, .booking-summary__total dd { color: #294438; font-size: 1rem; font-weight: 800; }
+.booking-summary__button { display: inline-flex; align-items: center; justify-content: center; min-width: 11rem; min-height: 48px; margin-top: 1.5rem; padding: .85rem 1.35rem; color: #fff; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-decoration: none; cursor: pointer; background: #294438; border: 1px solid #294438; border-radius: .3rem; transition: color 180ms ease-out, background 180ms ease-out, transform 180ms ease-out; }
+.booking-summary__button:hover, .booking-summary__button:focus-visible { color: #294438; background: transparent; transform: translateY(-1px); }
 .booking-summary__actions { display: flex; align-items: stretch; gap: .75rem; flex-wrap: wrap; }
 .booking-summary__actions form { margin: 0; }
 .booking-summary__button--pay { background: #5f9275; border-color: #5f9275; }
 .booking-summary__button--pay:hover, .booking-summary__button--pay:focus-visible { color: #47735a; background: transparent; }
-.booking-summary__error { padding: 1rem; color: #8a2e28; background: #fff0ed; border-left: 3px solid #bd554c; }
+.booking-summary__error { margin: 1.5rem 0 0; padding: 1rem 1.1rem; color: #8a2e28; background: #fff0ed; border: 1px solid #edc9c4; border-left: 4px solid #bd554c; border-radius: .35rem; line-height: 1.55; }
 
 @media (max-width: 47.99rem) {
     .booking-summary {
@@ -46,7 +48,7 @@
 
     .booking-summary__details div {
         align-items: flex-start;
-        flex-direction: column;
+        grid-template-columns: 1fr;
         gap: .35rem;
         padding: 1rem;
     }

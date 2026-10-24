@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/Functions/Helpers/Database.php';
 require_once __DIR__ . '/Functions/Helpers/Session.php';
+require_once __DIR__ . '/Functions/Auth/Authorization.php';
 require_once __DIR__ . '/Functions/Helpers/View.php';
 require_once __DIR__ . '/Functions/Accommodations/Accommodations.php';
 require_once __DIR__ . '/Functions/Reviews/Reviews.php';
@@ -14,6 +15,7 @@ $pageTitle = $isHomeView ? 'Maple Camp - Home' : 'Maple Camp';
 $basePath = '';
 $assetBase = '';
 $currentPage = 'home';
+$isAdmin = $isHomeView && maple_user_is_admin();
 
 $requestedArrival = trim((string) ($_GET['aankomst'] ?? ''));
 $requestedDeparture = trim((string) ($_GET['vertrek'] ?? ''));
@@ -89,7 +91,9 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
     <link rel="stylesheet" href="Styling/index.css">
     <?php if ($isHomeView): ?>
         <link rel="stylesheet" href="Styling/accomodatie.css">
+        <?php if ($isAdmin): ?><link rel="stylesheet" href="Styling/accommodation-blocking.css"><?php endif; ?>
         <script src="Javascripts/Accomodaties.js" defer></script>
+        <?php if ($isAdmin): ?><script src="Javascripts/AccommodationBlocking.js" defer></script><?php endif; ?>
     <?php endif; ?>
     <?php include __DIR__ . '/Includes/LanguagesScripts.php'; ?>
 </head>
@@ -340,11 +344,23 @@ foreach ($dbEvents !== [] ? $dbEvents : $fallbackEvents as $index => $event) {
                             <span>Price per night</span>
                             <strong id="accommodation-modal-booking-price"></strong>
                         </div>
+                        <?php if ($isAdmin): ?>
+                            <button class="block-house-button" type="button" data-block-house data-block-current-house>BLOCK HOUSE</button>
+                        <?php endif; ?>
                         <button class="booking-button" id="book-now-button" type="button">BOOK NOW</button>
                     </div>
                 </div>
             </section>
         </div>
+
+        <?php if ($isAdmin): ?>
+            <?php
+            $blockAccommodations = $homeAccomodations;
+            $blockAction = 'Pages/AdminBlockAccommodation.php';
+            $blockReturnTo = 'home';
+            include __DIR__ . '/Includes/AccommodationBlockModal.php';
+            ?>
+        <?php endif; ?>
 
         <?php include __DIR__ . '/Includes/Footer.php'; ?>
     </div>

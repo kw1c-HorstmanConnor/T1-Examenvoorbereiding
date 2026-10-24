@@ -27,8 +27,9 @@
     --footer-green: #16271f;
     --footer-green-deep: #102018;
     --container: 1180px;
-    --font-heading: "Cormorant Garamond", Georgia, serif;
-    --font-body: "Inter", Arial, sans-serif;
+    --font-heading: "BioRhyme", "Cormorant Garamond", Georgia, serif;
+    --font-body: "Inter", "Segoe UI", Arial, sans-serif;
+    --header-action-height: 38px;
 }
 
 * {
@@ -398,15 +399,17 @@ textarea {
     align-items: center;
     justify-content: center;
     gap: clamp(15px, 2.05vw, 31px);
-    padding-top: 26px;
+    padding-top: 14px;
 }
 
 .site-nav__link {
     position: relative;
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 5px;
-    padding: 0 0 7px;
+    height: var(--header-action-height);
+    padding: 0 8px;
     color: rgba(255, 255, 255, 0.92);
     font-size: 10.5px;
     font-weight: 700;
@@ -467,7 +470,7 @@ textarea {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 38px;
+    height: var(--header-action-height);
     border-radius: 4px;
     font-size: 10.5px;
     font-weight: 700;
@@ -477,7 +480,7 @@ textarea {
 
 .header-login,
 .header-account {
-    min-width: 62px;
+    min-width: 72px;
     padding: 0 12px;
     color: #fff;
     background: rgba(255, 255, 255, 0.07);
@@ -498,8 +501,6 @@ textarea {
     overflow: hidden;
     color: var(--color-cream);
     flex-direction: column;
-    min-height: 38px;
-    height: auto;
     line-height: 1.1;
 }
 
@@ -522,7 +523,6 @@ textarea {
 
 .language-select {
     gap: 8px;
-    min-width: 45px;
     padding: 0 8px;
     color: #fff;
     cursor: pointer;
@@ -543,7 +543,6 @@ select.language-select {
 
 .language-select--auth {
     gap: 8px;
-    min-width: 112px;
 }
 
 .language-select--auth i {
@@ -1880,6 +1879,7 @@ select.language-select {
 
     .site-nav__link {
         justify-content: flex-start;
+        height: 44px;
         min-height: 44px;
         padding: 0 12px;
         color: #fff;
@@ -1906,6 +1906,7 @@ select.language-select {
     .site-header__actions .header-login,
     .site-header__actions .header-account,
     .site-header__actions .header-booking {
+        height: 44px;
         min-height: 44px;
         color: #fff;
         background-color: rgba(255, 255, 255, 0.08);
@@ -2376,7 +2377,7 @@ select.language-select {
 }
 .language-select {
     min-width: 52px;
-    height: 29px;
+    height: var(--header-action-height);
     padding: 0 28px 0 10px;
     color: #f4ead3;
     font: inherit;

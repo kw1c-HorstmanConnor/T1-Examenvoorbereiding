@@ -6,7 +6,10 @@ $currentPage = 'accommodaties';
 
 require_once __DIR__ . '/../Includes/DataBase.php';
 require_once __DIR__ . '/../Functions/Helpers/Session.php';
+require_once __DIR__ . '/../Functions/Auth/Authorization.php';
 require_once __DIR__ . '/../Functions/Accommodations/Accommodations.php';
+
+$isAdmin = maple_user_is_admin();
 
 $bookingError = '';
 if (empty($_SESSION['booking_csrf'])) {
@@ -100,7 +103,9 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../Styling/index.css">
     <link rel="stylesheet" href="../Styling/accomodatie.css">
+    <?php if ($isAdmin): ?><link rel="stylesheet" href="../Styling/accommodation-blocking.css"><?php endif; ?>
     <script src="../Javascripts/Accomodaties.js" defer></script>
+    <?php if ($isAdmin): ?><script src="../Javascripts/AccommodationBlocking.js" defer></script><?php endif; ?>
     <?php include __DIR__ . '/../Includes/LanguagesScripts.php'; ?>
 </head>
 <body class="accommodations-page">
@@ -222,6 +227,9 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
                         <span>Price per night</span>
                         <strong id="accommodation-modal-booking-price"></strong>
                     </div>
+                    <?php if ($isAdmin): ?>
+                        <button class="block-house-button" type="button" data-block-house data-block-current-house>BLOCK HOUSE</button>
+                    <?php endif; ?>
                     <button class="booking-button" id="book-now-button" type="button">BOOK NOW</button>
                 </div>
             </div>
@@ -245,6 +253,14 @@ $accommodationImageClasses = ['comfort', 'luxe', 'premium'];
             </form>
         </section>
     </div>
+    <?php if ($isAdmin): ?>
+        <?php
+        $blockAccommodations = $accommodations;
+        $blockAction = 'AdminBlockAccommodation.php';
+        $blockReturnTo = 'accommodations';
+        include __DIR__ . '/../Includes/AccommodationBlockModal.php';
+        ?>
+    <?php endif; ?>
     <?php include __DIR__ . '/../Includes/Footer.php'; ?>
 </body>
 </html>

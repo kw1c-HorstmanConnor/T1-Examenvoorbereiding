@@ -48,7 +48,7 @@ function maple_accommodation_image_filename($value): string
     return $filename;
 }
 
-function maple_accommodation_image_path($value): ?string
+function maple_accommodation_image_path($value)
 {
     $filename = maple_accommodation_image_filename($value);
 
@@ -289,7 +289,7 @@ function maple_accommodation_fixed_gallery_images(
 function maple_accommodation_type_for_huis_id(
     PDO $pdo,
     int $huisId
-): ?string {
+) {
     if ($huisId <= 0) {
         return null;
     }
@@ -316,7 +316,7 @@ function maple_accommodation_gallery_images(
     int $huisId,
     $coverImage = '',
     string $assetBase = '',
-    ?string $huisNaam = null
+    $huisNaam = null
 ): array {
     $type = trim((string) ($huisNaam ?? ''));
 

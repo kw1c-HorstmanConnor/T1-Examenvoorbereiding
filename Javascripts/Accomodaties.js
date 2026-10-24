@@ -407,6 +407,9 @@ function openAccommodationModal(card) {
         max: card.dataset.max,
         detailUrl: card.dataset.detailUrl
     };
+    document.querySelectorAll('[data-block-current-house]').forEach(function (button) {
+        button.setAttribute('data-block-house-id', activeAccommodation.huisId || '');
+    });
     activeGallery = parseAccommodationGallery(card);
     activeGalleryIndex = 0;
     facilitiesExpanded = false;

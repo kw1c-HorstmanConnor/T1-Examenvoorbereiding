@@ -3,7 +3,7 @@
     min-height: 100vh;
     color: var(--color-white);
     background: var(--color-forest);
-    font-family: "Inter", sans-serif;
+    font-family: var(--font-body);
 }
 
 .login-hero {
@@ -29,8 +29,8 @@
 
 .login-main {
     display: flex;
-    justify-content: flex-end;
-    padding: clamp(54px, 11vh, 110px) 0 70px;
+    justify-content: center;
+    padding: clamp(48px, 9vh, 92px) 0 64px;
 }
 
 .register-main {
@@ -39,24 +39,22 @@
 }
 
 .login-card {
-    width: min(100%, 430px);
-    padding: 34px 36px 36px;
+    width: min(100%, 460px);
+    padding: clamp(28px, 4vw, 40px);
     background: rgba(22, 39, 31, 0.92);
     border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 6px;
+    border-radius: 10px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
 
 .register-card {
-    width: min(100%, 500px);
-    padding-top: 30px;
-    padding-bottom: 32px;
+    width: min(100%, 540px);
 }
 
 .login-card h1 {
     margin: 0;
     color: var(--color-warm-white);
-    font-family: "Cormorant Garamond", serif;
+    font-family: var(--font-heading);
     font-size: clamp(2.4rem, 4vw, 3.3rem);
     font-weight: 500;
     line-height: 1;
@@ -157,6 +155,7 @@
 .login-field input:focus,
 .login-field select:focus {
     border-color: rgba(244, 234, 211, 0.72);
+    box-shadow: 0 0 0 3px rgba(244, 234, 211, 0.12);
 }
 
 .auth-phone-wrap {
@@ -246,7 +245,7 @@
     gap: 15px;
     margin: 28px 0 26px;
     color: rgba(255, 255, 255, 0.52);
-    font-family: "Inter", sans-serif;
+    font-family: var(--font-body);
     font-size: 11px;
     font-weight: 500;
     letter-spacing: 0;
@@ -271,7 +270,7 @@
     gap: 5px;
     margin: 0;
     color: rgba(255, 255, 255, 0.66);
-    font-family: "Inter", sans-serif;
+    font-family: var(--font-body);
     font-size: 13px;
     line-height: 1.5;
     text-align: center;
@@ -308,7 +307,7 @@
     gap: 8px;
     min-width: 0;
     color: rgba(255, 255, 255, 0.66);
-    font-family: "Inter", sans-serif;
+    font-family: var(--font-body);
     text-align: center;
 }
 
@@ -337,9 +336,13 @@
 }
 
 @media (max-width: 640px) {
+    .login-view .page-container {
+        width: min(calc(100% - 32px), var(--container));
+    }
+
     .login-main {
         justify-content: center;
-        padding: 36px 0 48px;
+        padding: 28px 0 40px;
     }
 
     .login-card {
@@ -357,7 +360,7 @@
     }
 }
 
-.login-card { min-width: 0; padding: 1.5rem 1.25rem; }
+.login-card { min-width: 0; }
 .login-field input, .login-field select { min-height: 48px; }
 .login-card__copy, .login-error, .login-notice { font-size: .9375rem; }
 .login-field > span { font-size: .875rem; }
@@ -370,7 +373,6 @@
 .login-submit { height: auto; min-height: 48px; padding: .75rem; font-size: 1rem; }
 .login-create-account a { display: inline-flex; align-items: center; min-height: 44px; }
 @media (min-width: 48rem) {
-    .login-card { padding: 2rem; }
     .auth-phone-wrap { grid-template-columns: minmax(134px, .42fr) minmax(0, 1fr); gap: 0; }
     .auth-phone-wrap select { border-radius: 4px 0 0 4px; border-right: 0; }
     .auth-phone-wrap input { border-radius: 0 4px 4px 0; }

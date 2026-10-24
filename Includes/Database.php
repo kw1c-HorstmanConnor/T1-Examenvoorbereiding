@@ -171,7 +171,7 @@ function maple_booking_blocked_columns(mysqli $database)
         : null;
 }
 
-function maple_booking_is_available(mysqli $database, int $huisId, string $startDate, string $endDate, bool $lockRows = false)
+function maple_booking_has_block_overlap(mysqli $database, int $huisId, string $startDate, string $endDate, bool $lockRows = false)
 {
     $columns = maple_booking_blocked_columns($database);
     if ($columns === null) {
@@ -197,12 +197,14 @@ function maple_booking_is_available(mysqli $database, int $huisId, string $start
         $statement->close();
         return null;
     }
-    $isBlocked = $result && $result->num_rows > 0;
+    $isBlocked = $result->num_rows > 0;
     $statement->close();
-    if ($isBlocked) {
-        return false;
-    }
 
+    return $isBlocked;
+}
+
+function maple_booking_has_active_reservation_overlap(mysqli $database, int $huisId, string $startDate, string $endDate, bool $lockRows = false)
+{
     $reservationStatement = $database->prepare(
         'SELECT 1
          FROM `reservaties` r
@@ -234,10 +236,25 @@ function maple_booking_is_available(mysqli $database, int $huisId, string $start
         $reservationStatement->close();
         return null;
     }
-    $hasActiveReservation = $reservationResult && $reservationResult->num_rows > 0;
+    $hasActiveReservation = $reservationResult->num_rows > 0;
     $reservationStatement->close();
 
-    return !$hasActiveReservation;
+    return $hasActiveReservation;
+}
+
+function maple_booking_is_available(mysqli $database, int $huisId, string $startDate, string $endDate, bool $lockRows = false)
+{
+    $hasBlock = maple_booking_has_block_overlap($database, $huisId, $startDate, $endDate, $lockRows);
+    if ($hasBlock === null) {
+        return null;
+    }
+    if ($hasBlock) {
+        return false;
+    }
+
+    $hasReservation = maple_booking_has_active_reservation_overlap($database, $huisId, $startDate, $endDate, $lockRows);
+
+    return $hasReservation === null ? null : !$hasReservation;
 }
 
 $conn->set_charset($databaseConfig['charset']);
